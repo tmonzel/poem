@@ -20,7 +20,7 @@ class Story {
         $this->app->run();
     }
 
-    static function write(): self {
+    static function create(): self {
         $app = AppFactory::create();
         $app->addBodyParsingMiddleware();
         $app->addErrorMiddleware(true, true, true);
