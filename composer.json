@@ -1,0 +1,16 @@
+{
+    "require": {
+        "symfony/http-foundation": "^5.0",
+        "slim/slim": "4.*",
+        "slim/psr7": "^1.0",
+        "php-di/php-di": "^6.0"
+    },
+
+    "scripts": {
+        "serve": "php -S localhost:8080 -t ./public"
+    },
+
+    "config": {
+        "process-timeout": 0
+    }
+}
