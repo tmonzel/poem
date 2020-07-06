@@ -8,7 +8,7 @@ use Poem\Actor\Actions\FindAction;
 use Poem\Actor\Actions\PickAction;
 use Poem\Actor\Actions\UpdateAction;
 
-class ResourceBehavior implements Behavior {
+class ResourceBehavior extends Behavior {
     function prepareActions(ActionDispatcher $actions) {
         $actions->add(FindAction::class);
         $actions->add(DestroyAction::class);
