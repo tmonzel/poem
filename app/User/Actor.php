@@ -8,7 +8,7 @@ use Poem\Actor\ResourceBehavior;
 use Poem\Auth\Actions\LoginAction;
 
 class Actor extends \Poem\Actor {
-    static $Behaviors = [
+    const Behaviors = [
         ResourceBehavior::class
     ];
 

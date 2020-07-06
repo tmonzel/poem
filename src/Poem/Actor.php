@@ -6,7 +6,6 @@ use Poem\Actor\ActionDispatcher;
 use Slim\App;
 
 class Actor {
-    static $Behaviors = [];
     static $baseRoute;
 
     static function getNamespace(): string {
@@ -18,7 +17,7 @@ class Actor {
         return static::getNamespace() . '\\Model';
     }
 
-    public static function introduce(App $app) {
+    static function introduce(App $app) {
         $actor = new static();
         $actor->act($app);
     }
@@ -29,17 +28,24 @@ class Actor {
 
     function buildBehaviors(): array {
         $behaviors = [];
+        $calledClass = get_called_class();
 
-        foreach(static::$Behaviors as $k => $behaviorClass) {
+        if(!defined($calledClass . '::Behaviors')) {
+            return $behaviors;
+        }
+
+        foreach($calledClass::Behaviors as $k => $behaviorClass) {
             if(is_numeric($k)) {
                 $behaviors[] = new $behaviorClass();
-            }                
+            } else {
+                $behaviors[] = new $k($behaviorClass);
+            }
         }
 
         return $behaviors;
     }
 
-    public function act(App $app) {
+    function act(App $app) {
         $behaviors = $this->buildBehaviors();
         $subjectClass = static::getSubjectClass();
         $baseRoute =  static::$baseRoute ?? $subjectClass::type();

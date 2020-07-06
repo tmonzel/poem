@@ -6,7 +6,7 @@ namespace Product  {
     use Poem\Auth\Guard;
 
     class Actor extends \Poem\Actor {
-        static $Behaviors = [
+        const Behaviors = [
             ResourceBehavior::class,
             Guard::class => [
                 'role' => 'admin',

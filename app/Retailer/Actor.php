@@ -5,7 +5,7 @@ namespace Retailer  {
     use Poem\Actor\ResourceBehavior;
 
     class Actor extends \Poem\Actor {
-        static $Behaviors = [
+        const Behaviors = [
             ResourceBehavior::class
         ];
     }
