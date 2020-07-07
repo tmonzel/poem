@@ -7,16 +7,21 @@ use Slim\Factory\AppFactory;
 
 class Story {
     protected $app;
+    protected $actors = [];
 
     public function __construct(App $app) {
         $this->app = $app;
     }
 
     function about($actorClass) {
-        $actorClass::introduce($this->app);
+        $this->actors[] = $actorClass;
     }
 
     function tell() {
+        foreach($this->actors as $actorClass) {
+            $actorClass::introduce($this->app);
+        }
+
         $this->app->run();
     }
 
