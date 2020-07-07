@@ -6,15 +6,23 @@ trait AttributeAccessor {
     protected $attributes = [];
 
     function __get($name) {
-        return $this->attributes[$name];
+        return $this->readAttribute($name);
     }
 
     function __set($name, $value) {
-        $this->attributes[$name] = $value;
+        $this->writeAttribute($name, $value);
     }
 
     function __isset($name) {
         return isset($this->attributes[$name]);
+    }
+
+    function readAttribute($name) {
+        return $this->attributes[$name];
+    }
+
+    function writeAttribute($name, $value) {
+        $this->attributes[$name] = $value;
     }
 
     function writeAttributes(array $attributes) {
