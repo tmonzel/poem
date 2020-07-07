@@ -1,7 +1,11 @@
 <?php
 
 namespace Retailer {
+
     class Model extends \Poem\Model {
-        static $type = 'retailers';
+        const Type = 'retailers';
+        const HasMany = [
+            'markets' => Market\Model::class
+        ];
     }
 }

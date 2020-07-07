@@ -7,7 +7,7 @@ namespace Product {
     class Model extends \Poem\Model {
         use Validateable;
 
-        static $type = 'products';
+        const Type = 'products';
 
         static function validations(): array {
             return [
