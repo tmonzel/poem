@@ -6,10 +6,12 @@ use JsonSerializable;
 use Poem\Data\Client;
 use Poem\Data\Collection;
 use Poem\Model\AttributeAccessor;
+use Poem\Model\Relationships;
 use Poem\Model\Set;
 
 class Model implements JsonSerializable {
-    use AttributeAccessor;
+    use AttributeAccessor, 
+        Relationships;
 
     static $clientId;
     static $type;

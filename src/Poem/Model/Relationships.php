@@ -14,15 +14,15 @@ trait Relationships {
         'BelongsTo' => BelongsToRelationship::class
     ];
 
+    protected $relations = [];
+
     function buildRelationship($name) {
         $calledClass = get_called_class();
         $relationship = null;
 
         foreach(static::$relationshipTypes as $type => $relationshipClass) {
-            if(defined($calledClass . '::' + $type)) {
-                
-
-                $relationship = new $relationshipClass();
+            if(defined($calledClass . '::' . $type)) {
+                $relationship = new $relationshipClass($calledClass, $name);
                 break;
             }
         }
@@ -31,17 +31,34 @@ trait Relationships {
     }
 
     function getRelationship($name) {
-        if(isset(static::$relationships[$name])) {
-            return static::$relationships[$name];
+        $calledClass = get_called_class();
+    
+        if(isset(static::$relationships[$calledClass][$name])) {
+            return static::$relationships[$calledClass][$name];
         }
 
         // Create new relationship object
         $relationship = $this->buildRelationship($name);
-
+        
         if($relationship) {
-            return static::$relationships[$name] = $relationship;
+            return static::$relationships[$calledClass][$name] = $relationship;
         }
 
         return null;
+    }
+
+    function hasRelation($name) {
+        return isset($this->relations[$name]);
+    }
+
+    function setRelation($name, $relation) {
+        $this->relations[$name] = $relation;
+    }
+
+    function connectRelationship($name) {
+        $relationship = $this->getRelationship($name);
+
+        // setRelation in connect to query and set results
+        return $relationship->connect($this);
     }
 }

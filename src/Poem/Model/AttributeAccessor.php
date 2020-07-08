@@ -18,6 +18,15 @@ trait AttributeAccessor {
     }
 
     function readAttribute($name) {
+        if(isset($this->relations[$name])) {
+            return $this->relations[$name];
+        }
+
+        if($this->hasRelation($name)) {
+            // Connect
+            return $this->connectRelation($name);
+        }
+
         return $this->attributes[$name];
     }
 
