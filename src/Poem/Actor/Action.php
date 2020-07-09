@@ -37,8 +37,6 @@ abstract class Action {
                     ]
                 ]
             ];
-
-            continue;
         }
         catch(ActionException $e) {
             $response = $response->withStatus($e->getCode());
