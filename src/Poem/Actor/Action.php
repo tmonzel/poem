@@ -70,10 +70,6 @@ abstract class Action {
         return $response;
     }
 
-    function canActivate(): bool {
-        return true;
-    }
-
     function setSubject($subjectClass) {
         $this->subjectClass = $subjectClass;
     }
