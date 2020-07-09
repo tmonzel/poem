@@ -20,7 +20,15 @@ class Table extends Collection {
 
     function findMany($conditions = []): Set {
         $sql = "SELECT * FROM $this->name";
-        $stmt = $this->connection->query($sql);
+        
+        if(count($conditions) > 0) {
+            $where = $this->buildWhere($conditions);
+            $sql .= " WHERE $where";
+        }
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute($conditions);
+        
         return new ResultSet($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
