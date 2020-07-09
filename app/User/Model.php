@@ -2,7 +2,7 @@
 
 namespace User {
     class Model extends \Poem\Model {
-        static $type = 'users';
+        const Type = 'users';
 
         /**
          * User schema
