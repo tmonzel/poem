@@ -16,18 +16,27 @@ trait Relationships {
 
     protected $relations = [];
 
-    function buildRelationship($name) {
+    function initializeRelationships() {
         $calledClass = get_called_class();
-        $relationship = null;
 
-        foreach(static::$relationshipTypes as $type => $relationshipClass) {
-            if(defined($calledClass . '::' . $type)) {
-                $relationship = new $relationshipClass($calledClass, $name);
-                break;
-            }
+        // Do not initialize twice for this model
+        if(isset(static::$relationships[$calledClass])) {
+            return;
         }
 
-        return $relationship;
+        static::$relationships[$calledClass] = [];
+
+        foreach(static::$relationshipTypes as $type => $relationshipClass) {
+            $relationshipDef = $calledClass . '::' . $type;
+
+            if(defined($relationshipDef)) {
+                $relConfig = constant($relationshipDef);
+
+                foreach($relConfig as $name => $subject) {
+                    static::$relationships[$calledClass][$name] = new $relationshipClass($subject, $name);
+                }
+            }
+        }
     }
 
     function getRelationship($name) {
@@ -36,15 +45,6 @@ trait Relationships {
         if(isset(static::$relationships[$calledClass][$name])) {
             return static::$relationships[$calledClass][$name];
         }
-
-        // Create new relationship object
-        $relationship = $this->buildRelationship($name);
-        
-        if($relationship) {
-            return static::$relationships[$calledClass][$name] = $relationship;
-        }
-
-        return null;
     }
 
     function hasRelation($name) {
@@ -55,10 +55,9 @@ trait Relationships {
         $this->relations[$name] = $relation;
     }
 
-    function connectRelationship($name) {
-        $relationship = $this->getRelationship($name);
+    function toRelatedData() {
+        $calledClass = get_called_class();
 
-        // setRelation in connect to query and set results
-        return $relationship->connect($this);
+        return ['id' => (int)$this->id, 'type' => $calledClass::Type];
     }
 }

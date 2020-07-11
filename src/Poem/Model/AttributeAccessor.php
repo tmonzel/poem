@@ -18,16 +18,20 @@ trait AttributeAccessor {
     }
 
     function readAttribute($name) {
-        if(isset($this->relations[$name])) {
+        if($this->hasRelation($name)) {
             return $this->relations[$name];
         }
 
-        if($this->hasRelation($name)) {
+        $relationship = $this->getRelationship($name);
+
+        if($relationship) {
             // Connect
-            return $this->connectRelation($name);
+            return $relationship->connect($this);
         }
 
-        return $this->attributes[$name];
+        if(isset($this->attributes[$name])) {
+            return $this->attributes[$name];
+        }
     }
 
     function writeAttribute($name, $value) {

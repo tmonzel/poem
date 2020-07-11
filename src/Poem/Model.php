@@ -14,18 +14,51 @@ class Model implements JsonSerializable {
         Relationships;
 
     static $clientId;
-    static $type;
     static $serializable;
     static $primaryKey = 'id';
 
     function __construct(array $attributes = []) {
+        
+        // Initialize relationships if there are any (!once per class)
+        $this->initializeRelationships();
+
+        // Write initial attributes
         $this->writeAttributes($attributes);
     }
 
     function jsonSerialize() {
+        $subject = get_called_class();
+        $attributes = $this->serialize();
+        $id = (int)$this->attributes[static::$primaryKey];
+
+        if(isset($attributes[static::$primaryKey])) {
+            unset($attributes[static::$primaryKey]);
+        }
+        
+        $type = $subject::Type;
+        $data = [];
+
+        if(count(static::$relationships[$subject]) > 0) {
+            $data['relationships'] = [];
+
+            foreach(static::$relationships[$subject] as $name => $relClass) {
+                $result = $this->{$name};
+
+                if($result) {
+                    $data['relationships'][$name] = [
+                        'data' => $result->toRelatedData()
+                    ];
+                }
+            }
+        }
+
+        
+
+        return compact('type', 'id', 'attributes') + $data;
+    }
+
+    function serialize() {
         $attributes = $this->attributes;
-        $id = (int)$attributes[static::$primaryKey];
-        unset($attributes[static::$primaryKey]);
 
         if(static::$serializable) {
             $attributes = [];
@@ -34,9 +67,7 @@ class Model implements JsonSerializable {
             }
         }
 
-        $type = static::type();
-
-        return compact('type', 'id', 'attributes');
+        return $attributes;
     }
 
     function toArray(): array {
@@ -68,7 +99,7 @@ class Model implements JsonSerializable {
     }
 
     static function collection(): Collection {
-        return static::client()->getCollection(static::$type);
+        return static::client()->getCollection(get_called_class()::Type);
     }
 
     static function all(): Set {
@@ -115,7 +146,8 @@ class Model implements JsonSerializable {
         return $document->destroy();
     }
 
-    static function type(): string {
-        return static::$type;
+    static function foreignKey(): string {
+        $className = get_called_class();
+        return strtolower(substr($className, 0, strrpos($className, '\\'))) . "_" . static::$primaryKey;
     }
 }
