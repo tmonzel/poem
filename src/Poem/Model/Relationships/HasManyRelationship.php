@@ -9,8 +9,8 @@ use Poem\Model;
  */
 class HasManyRelationship extends Relationship {
     function connect(Model $model) {
-        $markets = $this->subject::find([$model->foreignKey() => (int)$model->id]);
-        $model->setRelation($this->relationName, $markets);
-        return $markets;
+        $result = $this->subject::find([$model->foreignKey() => (int)$model->id]);
+        $model->setRelation($this->relationName, $result);
+        return $result;
     }
 }
