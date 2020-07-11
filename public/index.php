@@ -10,7 +10,6 @@ $loader = require __DIR__ . '/../vendor/autoload.php';
 $loader->addPsr4('Poem\\', __DIR__ . '/../src/Poem');
 $loader->addPsr4(null, __DIR__ . '/../app');
 
-
 // A action based micro api framework
 // rest, json, generators
 
@@ -25,4 +24,6 @@ $clients->addClient(new MySqlClient([
 $story = Story::create();
 $story->about(Product\Actor::class);
 $story->about(User\Actor::class);
+$story->about(Retailer\Actor::class);
+$story->about(Market\Actor::class);
 $story->tell();

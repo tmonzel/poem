@@ -3,6 +3,9 @@
 namespace User {
     class Model extends \Poem\Model {
         const Type = 'users';
+        const BelongsTo = [
+            'role' => Role::class
+        ];
 
         /**
          * User schema

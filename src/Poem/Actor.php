@@ -48,7 +48,7 @@ class Actor {
     function act(App $app) {
         $behaviors = $this->buildBehaviors();
         $subjectClass = static::getSubjectClass();
-        $baseRoute =  static::$baseRoute ?? $subjectClass::type();
+        $baseRoute =  static::$baseRoute ?? $subjectClass::Type;
         $actions = new ActionDispatcher($baseRoute, $subjectClass);
         
         foreach($behaviors as $behavior) {
