@@ -59,10 +59,11 @@ class Model implements JsonSerializable {
 
     function serialize() {
         $attributes = $this->attributes;
+        $calledClass = get_called_class();
 
-        if(static::$serializable) {
+        if(defined($calledClass . '::Attributes')) {
             $attributes = [];
-            foreach(static::$serializable as $n) {
+            foreach($calledClass::Attributes as $n) {
                 $attributes[$n] = $this->attributes[$n];
             }
         }

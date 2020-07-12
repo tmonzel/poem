@@ -2,23 +2,20 @@
 
 namespace Poem\Actor;
 
-use Poem\Actor\Exceptions\ActionException;
-use Psr\Http\Message\ResponseInterface;
-use Slim\App;
+use Poem\Actor\Exceptions\BadRequestException;
+use Poem\Actor\Exceptions\NotFoundException;
 
 class ActionDispatcher {
-    private $baseRoute;
-    private $actions = [];
-    public $subjectClass;
-    private $listeners = [];
+    protected $actions = [];
+    protected $subjectClass;
+    protected $listeners = [];
 
-    function __construct($baseRoute = null, $subjectClass = null) {
-        $this->baseRoute = $baseRoute;
+    function __construct($subjectClass = null) {
         $this->subjectClass = $subjectClass;
     }
 
-    function add(string $actionClass, callable $configurator = null) {
-        $this->actions[$actionClass] = $configurator;
+    function add(string $actionClass, callable $initializer = null) {
+        $this->actions[$actionClass::getType()] = compact('actionClass', 'initializer');
     }
 
     function addListener($name, callable $hook) {
@@ -29,47 +26,35 @@ class ActionDispatcher {
         $this->listeners[$name][] = $hook;
     }
 
-    function dispatch(App $app) {
-        $dispatcher = $this;
-
-        foreach($this->actions as $actionClass => $configurator) {
-            $method = $actionClass::getMethod();
-            $route = $actionClass::getRoute();
-
-            $app->{$method}('/' . $this->baseRoute . $route, 
-                function($request, ResponseInterface $response, $args) use($actionClass, $configurator, $dispatcher) {
-                    /** @var Action $action */
-                    $action = new $actionClass();
-
-                    if($dispatcher->subjectClass) {
-                        $action->setSubject($dispatcher->subjectClass);
-                    }
-
-                    if(is_callable($configurator)) {
-                        $configurator($action);
-                    }
-
-                    try {
-
-                        if(isset($dispatcher->listeners['before'])) {
-                            foreach($dispatcher->listeners['before'] as $callback) {
-                                $callback($action, $request);
-                            }
-                        }
-
-                        // Before action hooks
-                        /** @var ResponseInterface $response */
-                        $response = call_user_func($action, $request, $response, $args);
-
-                        // After action hooks
-
-                    } catch(ActionException $e) {
-                        return $response->withStatus($e->getCode());
-                    }
-
-                    return $response;
-                }
-            );
+    function dispatch(array $query) 
+    {
+        if(!isset($query['type'])) {
+            throw new BadRequestException('No action type defined');
         }
+        
+        if(!isset($this->actions[$query['type']])) {
+            throw new NotFoundException($query['type'] . " is not registered on " . $this->subjectClass::Type);
+        }
+
+        extract($this->actions[$query['type']]);
+
+        $action = new $actionClass;
+        $action->setSubject($this->subjectClass);
+
+        if(isset($query['payload'])) {
+            $action->setPayload($query['payload']);
+        }
+
+        if(isset($this->listeners['before'])) {
+            foreach($this->listeners['before'] as $hook) {
+                call_user_func($hook, $action);
+            }
+        }
+
+        if(isset($initializer)) {
+            $initializer($action);
+        }
+        
+        return $action->dispatch();
     }
 }

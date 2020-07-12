@@ -2,23 +2,31 @@
 
 namespace Poem\Actor\Actions;
 
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Poem\Actor\Action;
 use Poem\Actor\AttributeMapper;
+use Poem\Actor\Exceptions\BadRequestException;
 use Poem\Model;
 
 class UpdateAction extends Action {
     use AttributeMapper;
 
-    static $method = 'patch';
-    static $route = '/{id}';
+    static $type = 'update';
 
-    function prepareData(Request $request) {
-        $id = $request->getAttribute('id');
-        $attributes = $request->getParsedBody();
+    function prepareData() 
+    {
+        if(!isset($this->payload['id'])) {
+            throw new BadRequestException('id must be provided in payload');
+        }
+
+        if(!isset($this->payload['data'])) {
+            throw new BadRequestException('data must be provided in payload');
+        }
+
+        $id = $this->payload['id'];
+        $attributes = $this->payload['data'];
         
         /** @var Model $document */
-        $document = $this->subjectClass::pick($id);
+        $document = $this->subject::pick($id);
         $document->writeAttributes($this->map($attributes));
         $document->save();
         

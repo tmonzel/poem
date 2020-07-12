@@ -1,33 +1,59 @@
 <?php
 
 namespace User {
+    use Poem\Model\Validateable;
+
     class Model extends \Poem\Model {
+        use Validateable;
+
+        /**
+         * Type definition
+         * 
+         * @var string
+         */
         const Type = 'users';
-        const BelongsTo = [
-            'role' => Role::class
+
+        /**
+         * Public attributes
+         * 
+         * @var array
+         */
+        const Attributes = [
+            'name'
         ];
 
         /**
          * User schema
          * 
-         * @static
          * @var array
          */
-        static $schema = [
+        const Schema = [
             'name' => 'string',
             'password' => 'string',
-            'role' => 'int'
+            'role' => Role::class
         ];
 
         /**
-         * Public attributes
+         * User belongs to one role
          * 
-         * @static
          * @var array
          */
-        static $serializable = [
-            'name',
-            'role'
-        ];
+       /* const BelongsTo = [
+            'role' => Role::class
+        ];*/
+
+        /**
+         * User validations
+         * 
+         * @static
+         * @return array
+         */
+        static function validations(): array
+        {
+            return [
+                'name' => 'required',
+                'password' => 'required'
+            ];
+        }
     }
 }

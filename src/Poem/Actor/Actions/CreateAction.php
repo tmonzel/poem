@@ -2,19 +2,21 @@
 
 namespace Poem\Actor\Actions;
 
+use Poem\Actor\Action;
 use Poem\Actor\AttributeMapper;
 use Poem\Actor\Exceptions\BadRequestException;
-use Psr\Http\Message\ServerRequestInterface as Request;
 
-class CreateAction extends PostAction {
+class CreateAction extends Action {
     use AttributeMapper;
 
-    function prepareData(Request $request) {
-        $attributes = $request->getParsedBody();
-        $document = new $this->subjectClass($this->map($attributes));
+    static $type = 'create';
+
+    function prepareData() 
+    {
+        $attributes = $this->payload;
+        $document = new $this->subject($this->map($attributes));
 
         if(method_exists($document, 'valid')) {
-
             if(!$document->valid()) {
                 throw new BadRequestException(
                     'Validation errors', 

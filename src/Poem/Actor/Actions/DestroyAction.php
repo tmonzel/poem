@@ -2,19 +2,24 @@
 
 namespace Poem\Actor\Actions;
 
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Poem\Actor\Action;
+use Poem\Actor\Exceptions\BadRequestException;
+use Poem\Actor\Exceptions\NotFoundException;
 
-class DestroyAction extends DeleteAction {
-    static $route = '/{id}';
+class DestroyAction extends Action {
+    static $type = 'destroy';
 
-    function prepareData(Request $request) {
-        $id = $request->getAttribute('id');
+    function prepareData() 
+    {
+        if(!isset($this->payload['id'])) {
+            throw new BadRequestException('id must be provided in payload');
+        }
 
-        $document = $this->subjectClass::pick($id);
+        $id = $this->payload['id'];
+        $document = $this->subject::pick($id);
 
         if(!$document) {
-            // Not found
-            return ['errors' => 'Document not found'];
+            throw new NotFoundException('Document not found');
         }
 
         $document->destroy();

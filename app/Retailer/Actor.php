@@ -1,8 +1,6 @@
 <?php
 
 namespace Retailer  {
-    use Poem\Actor\Actions\FindAction;
-    use Poem\Actor\Actions\PickAction;
     use Poem\Actor\ResourceBehavior;
     use Poem\Auth\Guard;
 
@@ -10,9 +8,10 @@ namespace Retailer  {
         const Behaviors = [
             ResourceBehavior::class,
             Guard::class => [
-                'allowActions' => [
-                    FindAction::class,
-                    PickAction::class
+                'except' => [
+                    'find', 
+                    'pick', 
+                    'create'
                 ]
             ]
         ];

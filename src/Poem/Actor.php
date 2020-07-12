@@ -3,10 +3,17 @@
 namespace Poem;
 
 use Poem\Actor\ActionDispatcher;
-use Slim\App;
+use Poem\Actor\Exceptions\BadRequestException;
+use Poem\Actor\Exceptions\NotFoundException;
 
 class Actor {
     static $baseRoute;
+    static $type;
+
+    static function getType(): string {
+        $subjectClass = static::getSubjectClass();
+        return class_exists($subjectClass) ? $subjectClass::Type : static::$type;
+    }
 
     static function getNamespace(): string {
         $className = get_called_class();
@@ -15,11 +22,6 @@ class Actor {
 
     static function getSubjectClass(): string {
         return static::getNamespace() . '\\Model';
-    }
-
-    static function introduce(App $app) {
-        $actor = new static();
-        $actor->act($app);
     }
 
     function prepareActions(ActionDispatcher $actions) {
@@ -45,17 +47,17 @@ class Actor {
         return $behaviors;
     }
 
-    function act(App $app) {
+    function act(array $query) {
         $behaviors = $this->buildBehaviors();
         $subjectClass = static::getSubjectClass();
-        $baseRoute =  static::$baseRoute ?? $subjectClass::Type;
-        $actions = new ActionDispatcher($baseRoute, $subjectClass);
+        $actions = new ActionDispatcher($subjectClass);
         
         foreach($behaviors as $behavior) {
             $behavior->prepareActions($actions);
         }
         
         $this->prepareActions($actions);
-        $actions->dispatch($app);
+
+        return $actions->dispatch($query);
     }
 }

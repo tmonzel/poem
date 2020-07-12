@@ -2,13 +2,13 @@
 
 namespace Poem\Actor\Actions;
 
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Poem\Actor\Action;
 
 class FindAction extends Action {
-    static $method = 'get';
+    static $type = 'find';
 
-    function prepareData(Request $request) {
-        return $this->subjectClass::find();
+    function prepareData() 
+    {
+        return $this->subject::find();
     }
 }

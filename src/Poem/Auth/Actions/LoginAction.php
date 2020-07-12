@@ -3,20 +3,18 @@
 namespace Poem\Auth\Actions;
 
 use Poem\Actor\Action;
-use Psr\Http\Message\ServerRequestInterface as Request;
 
 class LoginAction extends Action {
-    static $method = 'post';
-    static $route = '/login';
+    static $type = 'login';
     
-    function prepareData(Request $request) {
+    function prepareData() {
         // Test username and password against user model
         // Generate a jwt token for authorized users
         // Return 403 on error
 
-        $data = $request->getParsedBody();
+        $data = $this->payload;
 
-        $user = $this->subjectClass::find([
+        $user = $this->subject::find([
             'name' => $data['name'],
             'password' => $data['password']
         ]);

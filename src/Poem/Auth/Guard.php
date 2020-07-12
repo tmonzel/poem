@@ -2,6 +2,7 @@
 
 namespace Poem\Auth;
 
+use Poem\Actor\Action;
 use Poem\Actor\ActionDispatcher;
 use Poem\Actor\Behavior;
 use Poem\Actor\Exceptions\UnauthorizedException;
@@ -10,14 +11,13 @@ use Poem\Actor\Exceptions\UnauthorizedException;
  * Actor behavior trait
  */
 class Guard extends Behavior {
-    function beforeAction($action, $request) {
-        $actionClass = get_class($action);
-        $allowActions = [];
+    function beforeAction(Action $action) {
+        $except = [];
 
         extract($this->config);
 
-        if(array_search($actionClass, $allowActions) === false) {
-            throw new UnauthorizedException('');
+        if(array_search($action->getType(), $except) === false) {
+            throw new UnauthorizedException('Action not allowed');
         }
     }
 
