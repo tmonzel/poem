@@ -3,8 +3,6 @@
 namespace Poem;
 
 use Poem\Actor\ActionDispatcher;
-use Poem\Actor\Exceptions\BadRequestException;
-use Poem\Actor\Exceptions\NotFoundException;
 
 class Actor {
     static $baseRoute;
