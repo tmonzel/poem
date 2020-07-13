@@ -5,7 +5,6 @@ namespace Poem;
 use Poem\Actor\ActionDispatcher;
 
 class Actor {
-    static $baseRoute;
     static $type;
 
     static function getType(): string {
@@ -36,16 +35,16 @@ class Actor {
 
         foreach($calledClass::Behaviors as $k => $behaviorClass) {
             if(is_numeric($k)) {
-                $behaviors[] = new $behaviorClass();
+                $behaviors[] = new $behaviorClass($this);
             } else {
-                $behaviors[] = new $k($behaviorClass);
+                $behaviors[] = new $k($this, $behaviorClass);
             }
         }
 
         return $behaviors;
     }
 
-    function act(array $query) {
+    function getDispatcher(): ActionDispatcher {
         $behaviors = $this->buildBehaviors();
         $subjectClass = static::getSubjectClass();
         $actions = new ActionDispatcher($subjectClass);
@@ -56,6 +55,6 @@ class Actor {
         
         $this->prepareActions($actions);
 
-        return $actions->dispatch($query);
+        return $actions;
     }
 }

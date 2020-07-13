@@ -98,7 +98,8 @@ class Story
         }
 
         $actor = new $this->actors[$query['subject']];
-        return $actor->act($query);
+        $dispatcher = $actor->getDispatcher();
+        return $dispatcher->dispatch($query);
     }
 
     /**
