@@ -102,16 +102,16 @@ class Story
             throw new BadRequestException('No action type defined');
         }
 
+        /** @var Actor $actor */
         $actor = new $this->actors[$data['subject']];
-        $dispatcher = $actor->getDispatcher();
-        
+
         $query = new ActionQuery(
             $data['type'], 
             isset($data['payload']) ? $data['payload'] : [], 
             $request->headers->all()
         );
 
-        return $dispatcher->dispatch($query);
+        return $actor->invokeQuery($query);
     }
 
     /**
