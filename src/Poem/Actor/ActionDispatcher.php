@@ -2,7 +2,6 @@
 
 namespace Poem\Actor;
 
-use Poem\Actor\Exceptions\BadRequestException;
 use Poem\Actor\Exceptions\NotFoundException;
 
 class ActionDispatcher {
@@ -26,24 +25,17 @@ class ActionDispatcher {
         $this->listeners[$name][] = $hook;
     }
 
-    function dispatch(array $query) 
+    function dispatch(ActionQuery $query) 
     {
-        if(!isset($query['type'])) {
-            throw new BadRequestException('No action type defined');
-        }
-        
-        if(!isset($this->actions[$query['type']])) {
-            throw new NotFoundException($query['type'] . " is not registered on " . $this->subjectClass::Type);
+        if(!isset($this->actions[$query->getType()])) {
+            throw new NotFoundException($query->getType() . " is not registered on " . $this->subjectClass::Type);
         }
 
-        extract($this->actions[$query['type']]);
+        extract($this->actions[$query->getType()]);
 
         $action = new $actionClass;
         $action->setSubject($this->subjectClass);
-
-        if(isset($query['payload'])) {
-            $action->setPayload($query['payload']);
-        }
+        $action->setPayload($query->getPayload());
 
         if(isset($this->listeners['before'])) {
             foreach($this->listeners['before'] as $hook) {

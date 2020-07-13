@@ -2,6 +2,7 @@
 
 namespace Poem;
 
+use Poem\Actor\ActionQuery;
 use Poem\Actor\Exceptions\ActionException;
 use Poem\Actor\Exceptions\BadRequestException;
 use Poem\Actor\Exceptions\NotFoundException;
@@ -87,25 +88,36 @@ class Story
             throw new BadRequestException('Invalid method used');
         }
 
-        $query = $this->parseQuery($request);
+        $data = $this->parseQueryData($request);
 
-        if(!isset($query['subject'])) {
+        if(!isset($data['subject'])) {
             throw new BadRequestException('No subject defined');
         }
 
-        if(!isset($this->actors[$query['subject']])) {
+        if(!isset($this->actors[$data['subject']])) {
             throw new NotFoundException('Subject not registered');
         }
 
-        $actor = new $this->actors[$query['subject']];
+        if(!isset($data['type'])) {
+            throw new BadRequestException('No action type defined');
+        }
+
+        $actor = new $this->actors[$data['subject']];
         $dispatcher = $actor->getDispatcher();
+        
+        $query = new ActionQuery(
+            $data['type'], 
+            isset($data['payload']) ? $data['payload'] : [], 
+            $request->headers->all()
+        );
+
         return $dispatcher->dispatch($query);
     }
 
     /**
      * 
      */
-    private function parseQuery(Request $request)
+    private function parseQueryData(Request $request)
     {
         $rawBody = $request->getContent();
         return $rawBody ? json_decode($rawBody, true) : [];
