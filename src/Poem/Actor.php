@@ -2,14 +2,18 @@
 
 namespace Poem;
 
-use Poem\Actor\ActionDispatcher;
 use Poem\Actor\ActionQuery;
 use Poem\Actor\Exceptions\NotFoundException;
 
 class Actor {
     static $type;
 
+    protected $behaviors = [];
     protected $actions = [];
+
+    function __construct() {
+        $this->behaviors = $this->buildBehaviors();
+    }
 
     static function getType(): string {
         $subjectClass = static::getSubjectClass();
@@ -33,11 +37,7 @@ class Actor {
         return isset($this->actions[$type]);
     }
 
-    function prepareActions(ActionDispatcher $actions) {
-
-    }
-
-    function buildBehaviors(): array {
+    protected function buildBehaviors(): array {
         $behaviors = [];
         $calledClass = get_called_class();
 
@@ -60,6 +60,7 @@ class Actor {
         $this->initialize();
         $subject = static::getSubjectClass();
 
+
         if(!$this->hasAction($query->getType())) {
             throw new NotFoundException($query->getType() . " is not registered on " . $subject::Type);
         }
@@ -70,24 +71,18 @@ class Actor {
         $action->setSubject($subject);
         $action->setPayload($query->getPayload());
 
+        foreach($this->behaviors as $behavior) {
+            $behavior->prepareAction($action);
+        }
+
+        if(isset($initializer)) {
+            $initializer($action);
+        }
+
         return $action->dispatch();
     }
 
     function initialize() {
         // Override for initialization
     }
-
-    /*function getDispatcher(): ActionDispatcher {
-        $behaviors = $this->buildBehaviors();
-        $subjectClass = static::getSubjectClass();
-        $actions = new ActionDispatcher($subjectClass);
-        
-        foreach($behaviors as $behavior) {
-            $behavior->prepareActions($actions);
-        }
-        
-        $this->prepareActions($actions);
-
-        return $actions;
-    }*/
 }

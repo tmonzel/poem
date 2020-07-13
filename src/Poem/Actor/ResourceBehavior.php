@@ -9,11 +9,11 @@ use Poem\Actor\Actions\PickAction;
 use Poem\Actor\Actions\UpdateAction;
 
 class ResourceBehavior extends Behavior {
-    function prepareActions(ActionDispatcher $actions) {
-        $actions->add(FindAction::class);
-        $actions->add(DestroyAction::class);
-        $actions->add(UpdateAction::class);
-        $actions->add(PickAction::class);
-        $actions->add(CreateAction::class);
+    function initialize() {
+        $this->registerAction(FindAction::class);
+        $this->registerAction(DestroyAction::class);
+        $this->registerAction(UpdateAction::class);
+        $this->registerAction(PickAction::class);
+        $this->registerAction(CreateAction::class);
     }
 }

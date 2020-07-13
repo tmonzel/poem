@@ -21,14 +21,13 @@ class Actor extends \Poem\Actor {
     /**
      * Prepare or add additional actions
      * 
-     * @param ActionDispatcher $actions
      */
-    function prepareActions(ActionDispatcher $actions) 
+    function initialize() 
     {
-        $actions->add(LoginAction::class);
+        $this->addAction(LoginAction::class);
 
         // Create user action
-        $actions->add(CreateAction::class, function(CreateAction $create) {
+        $this->addAction(CreateAction::class, function(CreateAction $create) {
             $create->mapAttribute('password', function($password) {
                 return password_hash($password, PASSWORD_ARGON2I);
             });

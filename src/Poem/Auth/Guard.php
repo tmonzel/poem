@@ -3,15 +3,14 @@
 namespace Poem\Auth;
 
 use Poem\Actor\Action;
-use Poem\Actor\ActionDispatcher;
 use Poem\Actor\Behavior;
 use Poem\Actor\Exceptions\UnauthorizedException;
 
 /**
- * Actor behavior trait
+ * Guard behavior
  */
 class Guard extends Behavior {
-    function beforeAction(Action $action) {
+    function prepareAction(Action $action) {
         $except = [];
 
         extract($this->config);
@@ -19,9 +18,5 @@ class Guard extends Behavior {
         if(array_search($action->getType(), $except) === false) {
             throw new UnauthorizedException('Action not allowed');
         }
-    }
-
-    function prepareActions(ActionDispatcher $actions) {
-        $actions->addListener('before', [$this, 'beforeAction']);
     }
 }

@@ -11,9 +11,19 @@ abstract class Behavior {
     function __construct(Actor $actor, $config = []) {
         $this->actor = $actor;
         $this->config = $config;
+
+        $this->initialize();
     }
 
-    function prepareActions(ActionDispatcher $actions) {
+    function registerAction(string $actionClass, callable $initializer = null) {
+        $this->actor->addAction($actionClass, $initializer);
+    }
+
+    function initialize() {
+
+    }
+
+    function prepareAction(Action $action) {
         
     }
 }
