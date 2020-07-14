@@ -9,21 +9,10 @@ abstract class Action {
     
     protected $subject;
     protected $payload = [];
-    protected $headers = [];
 
     static function getType(): string 
     {
         return static::$type;
-    }
-
-    function setHeaders(array $headers): void
-    {
-        $this->headers = $headers;
-    }
-
-    function getHeaders(): array 
-    {
-        return $this->headers;
     }
 
     function setSubject($subject) 

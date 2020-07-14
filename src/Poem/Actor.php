@@ -76,7 +76,6 @@ class Actor {
         $action = new $actionClass;
         $action->setSubject($subject);
         $action->setPayload($query->getPayload());
-        $action->setHeaders($query->getHeaders());
 
         foreach($this->behaviors as $behavior) {
             $behavior->prepareAction($action);
