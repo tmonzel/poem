@@ -25,6 +25,10 @@ abstract class Action {
         $this->payload = $payload;
     }
 
+    function getPayload(): array {
+        return $this->payload;
+    }
+
     function dispatch() 
     {
         return $this->prepareData();
