@@ -2,6 +2,7 @@
 
 namespace Poem;
 
+use Poem\Actor\Action;
 use Poem\Actor\ActionQuery;
 use Poem\Actor\Exceptions\NotFoundException;
 
@@ -60,16 +61,17 @@ class Actor {
         $this->initialize();
         $subject = static::getSubjectClass();
 
-
         if(!$this->hasAction($query->getType())) {
             throw new NotFoundException($query->getType() . " is not registered on " . $subject::Type);
         }
 
         extract($this->actions[$query->getType()]);
 
+        /** @var Action $action */
         $action = new $actionClass;
         $action->setSubject($subject);
         $action->setPayload($query->getPayload());
+        $action->setHeaders($query->getHeaders());
 
         foreach($this->behaviors as $behavior) {
             $behavior->prepareAction($action);
