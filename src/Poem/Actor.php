@@ -57,8 +57,13 @@ class Actor {
         return $behaviors;
     }
 
-    function invokeQuery(ActionQuery $query) {
-        $this->initialize();
+    function invokeQuery(ActionQuery $query) 
+    {
+        foreach($this->behaviors as $behavior) {
+            $behavior->initialize($query);
+        }
+
+        $this->initialize($query);
         $subject = static::getSubjectClass();
 
         if(!$this->hasAction($query->getType())) {
@@ -81,10 +86,14 @@ class Actor {
             $initializer($action);
         }
 
+        if(method_exists($this, $action->getType())) {
+            $this->{$action->getType()}($action);
+        }
+
         return $action->dispatch();
     }
 
-    function initialize() {
+    function initialize(ActionQuery $query) {
         // Override for initialization
     }
 }

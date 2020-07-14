@@ -2,20 +2,22 @@
 
 namespace Poem\Auth;
 
-use Poem\Actor\Action;
+use Poem\Actor\ActionQuery;
 use Poem\Actor\Behavior;
 use Poem\Actor\Exceptions\UnauthorizedException;
 
 /**
  * Guard behavior
  */
-class Guard extends Behavior {
-    function prepareAction(Action $action) {
+class Guard extends Behavior 
+{
+    function initialize(ActionQuery $query) 
+    {
         $except = [];
 
         extract($this->config);
 
-        if(array_search($action->getType(), $except) === false) {
+        if(array_search($query->getType(), $except) === false) {
             throw new UnauthorizedException('Action not allowed');
         }
     }

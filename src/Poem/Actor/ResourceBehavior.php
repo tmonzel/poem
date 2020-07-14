@@ -9,7 +9,7 @@ use Poem\Actor\Actions\PickAction;
 use Poem\Actor\Actions\UpdateAction;
 
 class ResourceBehavior extends Behavior {
-    function initialize() {
+    function initialize(ActionQuery $query) {
         $this->registerAction(FindAction::class);
         $this->registerAction(DestroyAction::class);
         $this->registerAction(UpdateAction::class);

@@ -2,7 +2,7 @@
 
 namespace User;
 
-use Poem\Actor\ActionDispatcher;
+use Poem\Actor\ActionQuery;
 use Poem\Actor\Actions\CreateAction;
 use Poem\Actor\ResourceBehavior;
 use Poem\Auth\Actions\LoginAction;
@@ -22,7 +22,7 @@ class Actor extends \Poem\Actor {
      * Prepare or add additional actions
      * 
      */
-    function initialize() 
+    function initialize(ActionQuery $query) 
     {
         $this->addAction(LoginAction::class);
 
