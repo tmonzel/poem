@@ -52,8 +52,6 @@ class Model implements JsonSerializable {
             }
         }
 
-        
-
         return compact('type', 'id', 'attributes') + $data;
     }
 
