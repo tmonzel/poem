@@ -5,7 +5,7 @@ namespace Poem;
 use Poem\Data\ClientManager;
 
 class Data {
-    static $clientManager;
+    private static $clientManager;
 
     static function clients(): ClientManager {
         if(static::$clientManager) {
