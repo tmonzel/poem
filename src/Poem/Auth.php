@@ -33,7 +33,9 @@ class Auth {
         return self::$authorizer = new Authorizer();
     }
 
-
+    static function generateTokenFor($user) {
+        
+    }
 
     static function authorize(string $token) {
         return static::$authorizer->authorize($token);

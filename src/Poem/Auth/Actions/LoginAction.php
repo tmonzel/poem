@@ -26,15 +26,21 @@ class LoginAction extends Action {
             throw new BadRequestException('User not found');
         }
 
-        if(!password_verify($data['password'], $user->password)) {
+        if(!$this->verifyPassword($data['password'], $user->password)) {
             throw new BadRequestException('Invalid login');
         }
 
         // Generate Token
-        $token = Auth::getTokenizer()->generateToken([
-            // 'sub' => $user->id
-        ]);
+        $token = Auth::generateTokenFor($user);
 
         return compact('token');
+    }
+
+    protected function verifyPassword(string $password, string $hash) {
+        return password_verify($password, $hash);
+    }
+
+    protected function generateToken() {
+
     }
 }
