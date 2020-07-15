@@ -3,9 +3,9 @@
 namespace User;
 
 use Poem\Actor\ActionQuery;
+use Poem\Actor\Actions\CreateAction;
 use Poem\Actor\ResourceBehavior;
 use Poem\Auth\Actions\LoginAction;
-use Poem\Auth\AuthBehavior;
 
 class Actor extends \Poem\Actor {
 
@@ -16,7 +16,6 @@ class Actor extends \Poem\Actor {
      */
     const Behaviors = [
         ResourceBehavior::class,
-        AuthBehavior::class
     ];
 
     /**
@@ -26,5 +25,22 @@ class Actor extends \Poem\Actor {
     function initialize(ActionQuery $query) 
     {
         $this->addAction(LoginAction::class);
+    }
+
+    function login(LoginAction $action) 
+    {
+        
+    }
+
+    /**
+     * Modify create user action
+     * 
+     * @param CreateAction $action
+     */
+    function create(CreateAction $action)
+    {
+        $action->mapAttribute('password', function($password) {
+            return password_hash($password, PASSWORD_ARGON2I);
+        });
     }
 }
