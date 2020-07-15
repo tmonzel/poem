@@ -40,12 +40,18 @@ class Story
      * 
      * @param string $actorClass
      */
-    function about(string $actorClass) 
+    function about(string $actorClass): void
     {
         $this->actors[$actorClass::getType()] = $actorClass;
     }
 
-    function tell(Request $request = null) 
+
+    /**
+     * Resolve request and send json response to output
+     * 
+     * @param Request $request
+     */
+    function tell(Request $request = null): void
     {
         $request = $request ?? Request::createFromGlobals();
         $response = new JsonResponse();
@@ -110,6 +116,16 @@ class Story
             isset($data['payload']) ? $data['payload'] : [], 
             $request->headers->all()
         );
+
+        $headers = $request->headers->all();
+
+        if(isset($headers['authorization']) && isset($headers['authorization'][0])) {
+            $token = $headers['authorization'][0];
+
+            // Check header for token
+            // Find user for action query
+            $query->auth = new Auth($token);
+        }
 
         return $actor->invokeQuery($query);
     }

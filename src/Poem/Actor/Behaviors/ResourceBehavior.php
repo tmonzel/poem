@@ -1,12 +1,14 @@
 <?php
 
-namespace Poem\Actor;
+namespace Poem\Actor\Behaviors;
 
+use Poem\Actor\ActionQuery;
 use Poem\Actor\Actions\CreateAction;
 use Poem\Actor\Actions\DestroyAction;
 use Poem\Actor\Actions\FindAction;
 use Poem\Actor\Actions\PickAction;
 use Poem\Actor\Actions\UpdateAction;
+use Poem\Actor\Behavior;
 
 class ResourceBehavior extends Behavior {
     function initialize(ActionQuery $query) {

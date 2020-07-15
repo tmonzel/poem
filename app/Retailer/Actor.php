@@ -1,13 +1,16 @@
 <?php
 
 namespace Retailer  {
-    use Poem\Actor\ResourceBehavior;
-    use Poem\Auth\AuthGuard;
+
+    use Poem\Actor\Behaviors\{
+        ResourceBehavior, 
+        GuardBehavior
+    };
 
     class Actor extends \Poem\Actor {
         const Behaviors = [
             ResourceBehavior::class,
-            AuthGuard::class => [
+            GuardBehavior::class => [
                 'except' => [
                     'find', 
                     'pick', 

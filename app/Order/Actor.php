@@ -1,7 +1,7 @@
 <?php
 
 namespace Order  {
-    use Poem\Actor\ResourceBehavior;
+    use Poem\Actor\Behaviors\ResourceBehavior;
 
     class Actor extends \Poem\Actor {
         const Behaviors = [

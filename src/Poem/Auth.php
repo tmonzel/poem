@@ -2,46 +2,95 @@
 
 namespace Poem;
 
-use Poem\Auth\Authorizer;
-use Poem\Auth\JwtService;
-
-class Auth {
+class Auth 
+{
+    const TOKEN_SECRET = 'n239hfe23rhndqoahie';
 
     /**
-     * @var Authorizer
+     * Create authorized user from this class
+     * 
+     * @var string
      */
-    private static $authorizer;
+    static $userModel = 'User\\Model';
 
+    protected $token;
+    protected $user;
+
+    function __construct(string $token) 
+    {
+        $this->token = $token;
+    }
+
+    function authorized($role = null) {
+        return $this->user() !== null;
+    }
+
+    function resolveUser() {
+        [$header, $payload, $signature] = explode('.', trim($this->token));
+
+        if($signature === static::generateSignature($header, $payload)) {
+            $data = static::decodePayload($payload);
+
+            $user = static::$userModel::pick($data['userId']);
+
+            if($user) {
+                // User found and set
+                return $user;
+            }
+        }
+    }
+
+    // Identify the user by token or false
+    function user() {
+        if(!$this->user) {
+            $this->user = $this->resolveUser();
+        }
+
+        return $this->user;
+    }
+
+    static function decodePayload(string $payload): array
+    {
+        // replace url-safe chars
+        $base64Data = strtr($payload, '-_', '+/');
+
+        // decode array
+        return (array)json_decode(
+            base64_decode($base64Data, false), false
+        );
+    }
+
+    static function createTokenFor(Model $user) 
+    {
+        // Create token header as a JSON string
+        $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
+
+        // Create token payload as a JSON string
+        $payload = json_encode(['userId' => $user->id]);
+
+
+        $encodedHeader = static::encode($header);
+        $encodedPayload = static::encode($payload);
+        $signature = static::generateSignature($header, $payload);
+
+        return $encodedHeader . "." . $encodedPayload . "." . $signature;
+    }
+    
     /**
      * 
      */
-    private static $tokenizer;
+    private static function generateSignature($header, $payload): string
+    {
+        $signature = hash_hmac(
+            'sha256',
+            sprintf('%s.%s', $header, $payload),
+            static::TOKEN_SECRET
+        );
 
-    static function getTokenizer() {
-        if(isset(self::$tokenizer)) {
-            return self::$tokenizer;
-        }
-
-        return self::$tokenizer = new JwtService();
+        return static::encode($signature);
     }
 
-    static function getAuthorizer() {
-        if(isset(self::$authorizer)) {
-            return self::$authorizer;
-        }
-
-        return self::$authorizer = new Authorizer();
-    }
-
-    static function generateTokenFor($user) {
-        
-    }
-
-    static function authorize(string $token) {
-        return static::$authorizer->authorize($token);
-    }
-
-    static function setAuthorizer(Authorizer $authorizer) {
-        self::$authorizer = $authorizer;
+    private static function encode($obj) {
+        return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($obj));
     }
 }

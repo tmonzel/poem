@@ -1,34 +1,27 @@
 <?php
 
-namespace Poem\Auth;
+namespace Poem\Actor\Behaviors;
 
 use Poem\Actor\ActionQuery;
 use Poem\Actor\Behavior;
 use Poem\Actor\Exceptions\UnauthorizedException;
-use Poem\Auth;
 
 /**
  * Guard behavior
  */
-class AuthGuard extends Behavior 
+class GuardBehavior extends Behavior 
 {
     function initialize(ActionQuery $query) 
     {
         $except = [];
-        $token = null;
-        $headers = $query->getHeaders();
 
         extract($this->config);
 
         if(array_search($query->getType(), $except) !== false) {
             return;
         }
-
-        if(isset($headers['authorization']) && isset($headers['authorization'][0])) {
-            $token = $headers['authorization'][0];
-        }
         
-        if(!Auth::authorize($token)) {
+        if(!$query->auth->authorized()) {
             throw new UnauthorizedException('Action not allowed');
         }
     }

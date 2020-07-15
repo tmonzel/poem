@@ -3,9 +3,11 @@
 namespace User;
 
 use Poem\Actor\ActionQuery;
-use Poem\Actor\Actions\CreateAction;
-use Poem\Actor\ResourceBehavior;
-use Poem\Auth\Actions\LoginAction;
+use Poem\Actor\Actions\{
+    CreateAction, 
+    LoginAction 
+};
+use Poem\Actor\Behaviors\ResourceBehavior;
 
 class Actor extends \Poem\Actor {
 
@@ -25,11 +27,6 @@ class Actor extends \Poem\Actor {
     function initialize(ActionQuery $query) 
     {
         $this->addAction(LoginAction::class);
-    }
-
-    function login(LoginAction $action) 
-    {
-        
     }
 
     /**

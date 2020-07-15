@@ -1,6 +1,6 @@
 <?php
 
-namespace Poem\Auth\Actions;
+namespace Poem\Actor\Actions;
 
 use Poem\Actor\Action;
 
