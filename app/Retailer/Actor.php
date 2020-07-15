@@ -2,12 +2,12 @@
 
 namespace Retailer  {
     use Poem\Actor\ResourceBehavior;
-    use Poem\Auth\JwtGuard;
+    use Poem\Auth\AuthGuard;
 
     class Actor extends \Poem\Actor {
         const Behaviors = [
             ResourceBehavior::class,
-            JwtGuard::class => [
+            AuthGuard::class => [
                 'except' => [
                     'find', 
                     'pick', 

@@ -10,7 +10,7 @@ use Poem\Auth;
 /**
  * Guard behavior
  */
-class JwtGuard extends Behavior 
+class AuthGuard extends Behavior 
 {
     function initialize(ActionQuery $query) 
     {

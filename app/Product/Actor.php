@@ -1,16 +1,15 @@
 <?php
 
 namespace Product  {
-    use Poem\Actor\Actions\FindAction;
     use Poem\Actor\ResourceBehavior;
-    use Poem\Auth\Guard;
+    use Poem\Auth\AuthGuard;
 
     class Actor extends \Poem\Actor {
         const Behaviors = [
             ResourceBehavior::class,
-            Guard::class => [
+            AuthGuard::class => [
                 'role' => 'admin',
-                'allowActions' => [FindAction::class]
+                'except' => ['find']
             ]
         ];
     }
