@@ -33,11 +33,13 @@ class Auth
         if($signature === static::generateSignature($header, $payload)) {
             $data = static::decodePayload($payload);
             
-            $user = static::$userModel::pick($data['userId']);
-            
-            if($user) {
-                // User found and set
-                return $user;
+            if(isset($data['userId'])) {
+                $user = static::$userModel::pick($data['userId']);
+                
+                if($user) {
+                    // User found and set
+                    return $user;
+                }
             }
         }
     }
