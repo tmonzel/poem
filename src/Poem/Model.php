@@ -9,16 +9,34 @@ use Poem\Model\AttributeAccessor;
 use Poem\Model\Relationships;
 use Poem\Model\Set;
 
-class Model implements JsonSerializable {
+class Model implements JsonSerializable 
+{
     use AttributeAccessor, 
         Relationships;
 
-    static $clientId;
-    static $serializable;
+    /**
+     * Client connection name
+     * 
+     * @static
+     * @var string
+     */
+    static $clientKey = 'default';
+
+    /**
+     * Primary key column
+     * 
+     * @static
+     * @var string
+     */
     static $primaryKey = 'id';
 
-    function __construct(array $attributes = []) {
-        
+    /**
+     * Create a new model instance
+     * 
+     * @param array $attributes
+     */
+    function __construct(array $attributes = [])
+    {
         // Initialize relationships if there are any (!once per class)
         $this->initializeRelationships();
 
@@ -26,11 +44,23 @@ class Model implements JsonSerializable {
         $this->writeAttributes($attributes);
     }
 
-    function jsonSerialize() {
+    /**
+     * Serialize for json_encode
+     * 
+     * @return array
+     */
+    function jsonSerialize(): array
+    {
         return $this->toData();
     }
 
-    function serialize() {
+    /**
+     * Serialize just the attributes
+     * 
+     * @return array
+     */
+    function serialize(): array 
+    {
         $attributes = $this->attributes;
         $calledClass = get_called_class();
 
@@ -111,23 +141,56 @@ class Model implements JsonSerializable {
         }
     }
 
-    static function client(): Client {
-        return Data::clients()->resolveClient(static::$clientId);
+    /**
+     * Return the client
+     */
+    static function client(): Client 
+    {
+        return Data::clients()->resolveClient(static::$clientKey);
     }
 
-    static function collection(): Collection {
+    /**
+     * Return the related persistant collection e.g. a table
+     * 
+     * @static
+     * @return Collection
+     */
+    static function collection(): Collection 
+    {
         return static::client()->getCollection(get_called_class()::Type);
     }
 
-    static function all(): Set {
+    /**
+     * Shorthand for static::find()
+     * Returns all documents
+     * 
+     * @static
+     * @return Set
+     */
+    static function all(): Set 
+    {
         return static::find();
     }
 
-    static function pick(int $id) {
+    /**
+     * Picks a single document
+     * 
+     * @return static
+     */
+    static function pick(int $id) 
+    {
         return static::first(compact('id'));
     }
 
-    static function find($conditions = []): Set {
+    /**
+     * Find documents by conditions
+     * 
+     * @static
+     * @param array $conditions
+     * @return Set
+     */
+    static function find(array $conditions = []): Set 
+    {
         $resultSet = static::collection()->findMany($conditions);
         $items = [];
 
@@ -138,7 +201,15 @@ class Model implements JsonSerializable {
         return new Set($items);
     }
 
-    static function first($conditions = []) {
+    /**
+     * Find the first occurrent document
+     * 
+     * @static
+     * @param array $conditions
+     * @return static
+     */
+    static function first(array $conditions = []) 
+    {
         $document = static::collection()->findFirst($conditions);
 
         if(!$document) {
@@ -148,22 +219,53 @@ class Model implements JsonSerializable {
         return new static((array)$document);
     }
 
-    static function create(array $attributes): self {
+    /**
+     * Create a new document instance
+     * 
+     * @static
+     * @param array $attributes
+     * @return static
+     */
+    static function create(array $attributes) 
+    {
         $document = new static($attributes);
         $document->save();
         return $document;
     }
 
-    static function update(array $attributes, array $conditions = []) {
+    /**
+     * Update documents by conditions
+     * 
+     * @static
+     * @param array $attributes
+     * @param array $conditions
+     */
+    static function update(array $attributes, array $conditions = []) 
+    {
         return static::collection()->updateMany($attributes, $conditions);
     }
 
-    static function delete(int $id) {
+    /**
+     * Delete a single document by id
+     * 
+     * @static
+     * @param int $id
+     * @return bool
+     */
+    static function delete(int $id) 
+    {
         $document = static::first(compact('id'));
         return $document->destroy();
     }
 
-    static function foreignKey(): string {
+    /**
+     * Return the foreign key for this model
+     * 
+     * @static
+     * @return string
+     */
+    static function foreignKey(): string 
+    {
         $className = get_called_class();
         return strtolower(substr($className, 0, strrpos($className, '\\'))) . "_" . static::$primaryKey;
     }

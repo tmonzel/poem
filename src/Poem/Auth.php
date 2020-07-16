@@ -21,11 +21,13 @@ class Auth
         $this->token = $token;
     }
 
-    function authorized($role = null) {
+    function authorized($role = null) 
+    {
         return $this->user() !== null;
     }
 
-    function resolveUser() {
+    function resolveUser() 
+    {
         $token = preg_replace('/^Bearer /', '', $this->token);
 
         [$header, $payload, $signature] = explode('.', trim($token));
@@ -45,7 +47,8 @@ class Auth
     }
 
     // Identify the user by token or false
-    function user() {
+    function user() 
+    {
         if(!$this->user) {
             $this->user = $this->resolveUser();
         }

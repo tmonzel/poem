@@ -6,12 +6,5 @@ namespace Market {
         const BelongsTo = [
             'retailer' => \Retailer\Model::class
         ];
-
-        function serialize() {
-
-            return [
-                'name' => $this->name
-            ];
-        }
     }
 }

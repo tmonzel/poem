@@ -8,8 +8,8 @@ use Countable;
 use IteratorAggregate;
 use JsonSerializable;
 
-class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable {
-
+class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable 
+{
     /**
      * The items contained in the set.
      *
@@ -17,7 +17,14 @@ class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
      */
     protected $items = [];
 
-    function __construct(array $items = []) {
+    /**
+     * Create a new set.
+     * 
+     * @param array $items
+     * @return void
+     */
+    function __construct(array $items = [])
+    {
         $this->items = $items;
     }
 
@@ -26,7 +33,8 @@ class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
      *
      * @return array
      */
-    public function all(): array {
+    public function all(): array 
+    {
         return $this->items;
     }
 
@@ -36,14 +44,21 @@ class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
      * @param  callable  $callback
      * @return static
      */
-    public function map(callable $callback) {
+    public function map(callable $callback) 
+    {
         $keys = array_keys($this->items);
         $items = array_map($callback, $this->items, $keys);
 
         return new static(array_combine($keys, $items));
     }
 
-    public function jsonSerialize() {
+    /**
+     * Serialize items for json_encode.
+     * 
+     * @return array
+     */
+    public function jsonSerialize(): array 
+    {
         return $this->items;
     }
 
@@ -52,16 +67,18 @@ class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
      *
      * @return int
      */
-    public function count() {
+    public function count(): int
+    {
         return count($this->items);
     }
 
     /**
      * Get an iterator for the items.
      *
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
-    public function getIterator() {
+    public function getIterator(): ArrayIterator
+    {
         return new ArrayIterator($this->items);
     }
 
@@ -71,7 +88,8 @@ class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
      * @param  mixed  $key
      * @return bool
      */
-    public function offsetExists($key) {
+    public function offsetExists($key): bool
+    {
         return isset($this->items[$key]);
     }
 
@@ -81,7 +99,8 @@ class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
      * @param  mixed  $key
      * @return mixed
      */
-    public function offsetGet($key) {
+    public function offsetGet($key) 
+    {
         return $this->items[$key];
     }
 
@@ -92,7 +111,8 @@ class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
      * @param  mixed  $value
      * @return void
      */
-    public function offsetSet($key, $value) {
+    public function offsetSet($key, $value): void 
+    {
         if (is_null($key)) {
             $this->items[] = $value;
         } else {
@@ -106,7 +126,8 @@ class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
      * @param  string  $key
      * @return void
      */
-    public function offsetUnset($key) {
+    public function offsetUnset($key): void 
+    {
         unset($this->items[$key]);
     }
 }

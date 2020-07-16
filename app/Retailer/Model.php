@@ -11,6 +11,7 @@ namespace Retailer {
          * @var array
          */
         const Attributes = [
+            'id',
             'name'
         ];
         

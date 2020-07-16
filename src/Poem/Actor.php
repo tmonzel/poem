@@ -12,33 +12,40 @@ class Actor {
     protected $behaviors = [];
     protected $actions = [];
 
-    function __construct() {
+    function __construct() 
+    {
         $this->behaviors = $this->buildBehaviors();
     }
 
-    static function getType(): string {
+    static function getType(): string 
+    {
         $subjectClass = static::getSubjectClass();
         return class_exists($subjectClass) ? $subjectClass::Type : static::$type;
     }
 
-    static function getNamespace(): string {
+    static function getNamespace(): string 
+    {
         $className = get_called_class();
         return substr($className, 0, strrpos($className, '\\'));
     }
 
-    static function getSubjectClass(): string {
+    static function getSubjectClass(): string 
+    {
         return static::getNamespace() . '\\Model';
     }
 
-    function addAction(string $actionClass, callable $initializer = null) {
+    function addAction(string $actionClass, callable $initializer = null) 
+    {
         $this->actions[$actionClass::getType()] = compact('actionClass', 'initializer');
     }
 
-    function hasAction($type): bool {
+    function hasAction($type): bool 
+    {
         return isset($this->actions[$type]);
     }
 
-    protected function buildBehaviors(): array {
+    protected function buildBehaviors(): array 
+    {
         $behaviors = [];
         $calledClass = get_called_class();
 
