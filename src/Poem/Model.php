@@ -146,7 +146,7 @@ class Model implements JsonSerializable
      */
     static function client(): Client 
     {
-        return Data::clients()->resolveClient(static::$clientKey);
+        return Data::resolveConnection(static::$clientKey);
     }
 
     /**

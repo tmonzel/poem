@@ -2,26 +2,45 @@
 
 namespace Poem;
 
-use Poem\Data\ClientManager;
+use Exception;
+use Poem\Data\Client;
 
-class Data {
-    static $resolverClass = ClientManager::class;
-
-    private static $clientManager;
-
+class Data 
+{
     /**
-     * Returns the data clients container which holds all the 
-     * connectable clients
+     * Registered connections
      * 
      * @static
-     * @return ClientManager
+     * @var array
      */
-    static function clients(): ClientManager 
-    {
-        if(static::$clientManager) {
-            return static::$clientManager;
+    private static $connections = [];
+
+    /**
+     * Resolved clients
+     * 
+     * @static
+     * @var array
+     */
+    private static $clients = [];
+
+    static function registerConnection($clientClass, array $config, $name = 'default') {
+        self::$connections[$name] = compact('clientClass', 'config');
+    }
+
+    static function resolveConnection($name): Client 
+    {   
+        if(static::$clients[$name]) {
+            return static::$clients[$name];
         }
 
-        return static::$clientManager = new static::$resolverClass;
+        if(!isset(static::$connections[$name])) {
+            throw new Exception("Connection $name is not registered");
+        }
+
+        $connection = static::$connections[$name];
+        $client = new $connection['clientClass'];
+        $client->establishConnection($connection['config']);
+
+        return static::$clients[$name] = $client;
     }
 }

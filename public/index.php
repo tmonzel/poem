@@ -10,14 +10,13 @@ $loader = require __DIR__ . '/../vendor/autoload.php';
 $loader->addPsr4('Poem\\', __DIR__ . '/../src/Poem');
 $loader->addPsr4(null, __DIR__ . '/../app');
 
-// Prepare data clients
-$clients = Data::clients();
-$clients->addClient(new MySqlClient([
+// Register data connection
+Data::registerConnection(MySqlClient::class, [
     "host" => "localhost",
     "database" => "poem",
     "username" => "root",
     "password" => "" 
-]));
+]);
 
 // Tell a new story
 $story = Story::new();
