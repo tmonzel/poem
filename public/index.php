@@ -10,13 +10,23 @@ $loader = require __DIR__ . '/../vendor/autoload.php';
 $loader->addPsr4('Poem\\', __DIR__ . '/../src/Poem');
 $loader->addPsr4(null, __DIR__ . '/../app');
 
+const ENV_FILE = __DIR__ . "/../env.php";
+
+if(file_exists(ENV_FILE)) {
+    $config = require_once ENV_FILE;
+
+    foreach($config as $k => $v) {
+        putenv("$k=$v");
+    }
+}
+
 // Prepare data clients
 $clients = Data::clients();
 $clients->addClient(new MySqlClient([
-    "host" => "localhost",
-    "database" => "poem",
-    "username" => "root",
-    "password" => "" 
+    "host" => getenv('DB_HOST'),
+    "database" => getenv('DB_NAME'),
+    "username" => getenv('DB_USER'),
+    "password" => getenv('DB_PASSWORD') 
 ]));
 
 // Tell a new story
