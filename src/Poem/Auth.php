@@ -26,13 +26,15 @@ class Auth
     }
 
     function resolveUser() {
-        [$header, $payload, $signature] = explode('.', trim($this->token));
+        $token = preg_replace('/^Bearer /', '', $this->token);
+
+        [$header, $payload, $signature] = explode('.', trim($token));
 
         if($signature === static::generateSignature($header, $payload)) {
             $data = static::decodePayload($payload);
-
+            
             $user = static::$userModel::pick($data['userId']);
-
+            
             if($user) {
                 // User found and set
                 return $user;
@@ -68,10 +70,9 @@ class Auth
         // Create token payload as a JSON string
         $payload = json_encode(['userId' => $user->id]);
 
-
         $encodedHeader = static::encode($header);
         $encodedPayload = static::encode($payload);
-        $signature = static::generateSignature($header, $payload);
+        $signature = static::generateSignature($encodedHeader, $encodedPayload);
 
         return $encodedHeader . "." . $encodedPayload . "." . $signature;
     }
