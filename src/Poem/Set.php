@@ -5,9 +5,10 @@ namespace Poem;
 use ArrayAccess;
 use ArrayIterator;
 use Countable;
+use IteratorAggregate;
 use JsonSerializable;
 
-class Set implements ArrayAccess, Countable, JsonSerializable {
+class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable {
 
     /**
      * The items contained in the set.
