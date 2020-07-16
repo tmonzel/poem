@@ -21,7 +21,7 @@ class GuardBehavior extends Behavior
             return;
         }
         
-        if(!$query->auth->authorized()) {
+        if(!$query->auth || !$query->auth->authorized()) {
             throw new UnauthorizedException('Action not allowed');
         }
     }
