@@ -27,32 +27,7 @@ class Model implements JsonSerializable {
     }
 
     function jsonSerialize() {
-        $subject = get_called_class();
-        $attributes = $this->serialize();
-        $id = (int)$this->attributes[static::$primaryKey];
-
-        if(isset($attributes[static::$primaryKey])) {
-            unset($attributes[static::$primaryKey]);
-        }
-        
-        $type = $subject::Type;
-        $data = [];
-
-        if(count(static::$relationships[$subject]) > 0) {
-            $data['relationships'] = [];
-
-            foreach(static::$relationships[$subject] as $name => $relClass) {
-                $result = $this->{$name};
-
-                if($result) {
-                    $data['relationships'][$name] = [
-                        'data' => $result->toRelatedData()
-                    ];
-                }
-            }
-        }
-
-        return compact('type', 'id', 'attributes') + $data;
+        return $this->toData();
     }
 
     function serialize() {
@@ -67,6 +42,49 @@ class Model implements JsonSerializable {
         }
 
         return $attributes;
+    }
+
+    function toData(array $options = []) {
+        $format = isset($options['format']) ? $options['format'] : null;
+        $subject = get_called_class();
+        
+        if($format && defined($subject . '::Attributes')) {
+            $attributes = [];
+            foreach($format as $n) {
+                if(array_search($n, $subject::Attributes) !== false) {
+                    $attributes[$n] = $this->attributes[$n];
+                }
+            }
+
+            return $attributes;
+        }
+
+        $attributes = $this->serialize();
+        $id = (int)$this->attributes[static::$primaryKey];
+
+        if(isset($attributes[static::$primaryKey])) {
+            unset($attributes[static::$primaryKey]);
+        }
+        
+        $type = $subject::Type;
+        $data = [];
+        $include = isset($options['include']) ? $options['include'] : null;
+
+        if($include && isset(static::$relationships[$subject][$include])) {
+            $data['relationships'] = [];
+
+            foreach(static::$relationships[$subject] as $name => $relClass) {
+                $result = $this->{$name};
+
+                if($result) {
+                    $data['relationships'][$name] = [
+                        'data' => $result->toRelatedData()
+                    ];
+                }
+            }
+        }
+
+        return compact('type', 'id', 'attributes') + $data;
     }
 
     function toArray(): array {
