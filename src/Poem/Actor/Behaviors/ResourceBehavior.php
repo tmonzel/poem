@@ -6,7 +6,6 @@ use Poem\Actor\ActionQuery;
 use Poem\Actor\Actions\CreateAction;
 use Poem\Actor\Actions\DestroyAction;
 use Poem\Actor\Actions\FindAction;
-use Poem\Actor\Actions\PickAction;
 use Poem\Actor\Actions\UpdateAction;
 use Poem\Actor\Behavior;
 
@@ -15,7 +14,6 @@ class ResourceBehavior extends Behavior {
         $this->registerAction(FindAction::class);
         $this->registerAction(DestroyAction::class);
         $this->registerAction(UpdateAction::class);
-        $this->registerAction(PickAction::class);
         $this->registerAction(CreateAction::class);
     }
 }
