@@ -96,6 +96,10 @@ class Story
 
         $data = $this->parseQueryData($request);
 
+        if(!$data) {
+            throw new BadRequestException('Invalid query. Please provide valid json format');
+        }
+
         if(!isset($data['subject'])) {
             throw new BadRequestException('No subject defined');
         }
