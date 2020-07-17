@@ -18,6 +18,12 @@ class Table implements CollectionAdapter {
      */
     protected $name;
 
+    /**
+     * Create table instance.
+     * 
+     * @param string $name
+     * @param PDO $connection
+     */
     function __construct($name, PDO $connection) 
     {
         $this->name = $name;
@@ -74,7 +80,8 @@ class Table implements CollectionAdapter {
         
     }
 
-    function updateFirst(array $data, array $conditions = []) {
+    function updateFirst(array $data, array $conditions = []) 
+    {
         $sql = "UPDATE $this->name";
         $params = $conditions;
 
