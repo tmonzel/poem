@@ -100,23 +100,23 @@ class Story
             throw new BadRequestException('Invalid query. Please provide valid json format');
         }
 
-        if(!isset($data['subject'])) {
-            throw new BadRequestException('No subject defined');
-        }
-
-        if(!isset($this->actors[$data['subject']])) {
-            throw new NotFoundException('Subject not registered');
-        }
-
         if(!isset($data['type'])) {
-            throw new BadRequestException('No action type defined');
+            throw new BadRequestException('No type defined');
+        }
+
+        if(!isset($this->actors[$data['type']])) {
+            throw new NotFoundException('Type ' . $data['type'] . ' not available');
+        }
+
+        if(!isset($data['action'])) {
+            throw new BadRequestException('No action defined');
         }
 
         /** @var Actor $actor */
-        $actor = new $this->actors[$data['subject']];
+        $actor = new $this->actors[$data['type']];
 
         $query = new ActionQuery(
-            $data['type'], 
+            $data['action'], 
             isset($data['payload']) ? $data['payload'] : [], 
             $request->headers->all()
         );
