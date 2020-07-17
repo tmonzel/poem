@@ -158,6 +158,9 @@ class Model implements JsonSerializable
 
     /**
      * Return the selected connection
+     * 
+     * @static
+     * @return Connection
      */
     static function connection(): Connection 
     {
