@@ -6,12 +6,29 @@ use Poem\Actor\Action;
 use Poem\Actor\ActionQuery;
 use Poem\Actor\Exceptions\NotFoundException;
 
-class Actor {
+class Actor 
+{
     static $type;
 
+    /**
+     * Initialized behaviors
+     * 
+     * @var array
+     */
     protected $behaviors = [];
+
+    /**
+     * Registered actions
+     * 
+     * @var array
+     */
     protected $actions = [];
 
+    /**
+     * Create a new actor instance.
+     * Builds all defined behaviors
+     * 
+     */
     function __construct() 
     {
         $this->behaviors = $this->buildBehaviors();
@@ -74,7 +91,7 @@ class Actor {
         $subject = static::getSubjectClass();
 
         if(!$this->hasAction($query->getType())) {
-            throw new NotFoundException($query->getType() . " is not registered on " . $subject::Type);
+            throw new NotFoundException("Action " . $query->getType() . " is not registered on " . $subject::Type);
         }
 
         extract($this->actions[$query->getType()]);
