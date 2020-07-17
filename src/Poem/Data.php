@@ -44,7 +44,7 @@ class Data
      */
     static function resolveConnection($name): Connection 
     {   
-        if(static::$clients[$name]) {
+        if(isset(static::$clients[$name])) {
             return static::$clients[$name];
         }
 
