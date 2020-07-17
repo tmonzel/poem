@@ -11,9 +11,13 @@ namespace Retailer  {
         const Behaviors = [
             ResourceBehavior::class,
             GuardBehavior::class => [
+                'permit' => [
+                    '*' => ['admin'],
+                    'find' => ['admin']
+                ],
+
                 'except' => [
                     'find', 
-                    'pick', 
                     'create'
                 ]
             ]
