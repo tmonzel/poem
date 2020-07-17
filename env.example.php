@@ -1,9 +1,18 @@
 <?php
 
-// Config
+/**
+ * Environment configuration
+ * 
+ * @return array
+ */
 return [
-    'DB_NAME' => 'db_name',
-    'DB_USER' => 'db_user',
+    
+    // Configure database
     'DB_HOST' => 'localhost',
-    'DB_PASSWORD' => 'secret'
+    'DB_NAME' => '',
+    'DB_USER' => '',
+    'DB_PASSWORD' => 'secret',
+
+    // Configure auth
+    'AUTH_SECRET' => 'secret'
 ];
