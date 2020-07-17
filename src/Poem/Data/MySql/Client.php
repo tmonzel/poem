@@ -3,24 +3,24 @@
 namespace Poem\Data\MySql;
 
 use PDO;
-use Poem\Data\Client as ClientInterface;
 use Poem\Data\Collection;
+use Poem\Data\Connection;
 
-class Client implements ClientInterface {
-    private $config;
+class Client implements Connection {
     private $connection;
 
-    function __construct($config) {
-        $this->config = $config;
-        $this->establishConnection();
-    }
+    protected $collections = [];
 
-    function establishConnection() {
-        extract($this->config);
+    function connect(array $config) {
+        extract($config);
         $this->connection = new PDO("mysql:host=$host;dbname=$database", $username, $password);
     }
 
-    function getCollection($name): Collection {
-        return new Table($name, $this->connection);
+    function accessCollection($name): Collection {
+        if(isset($this->collections[$name])) {
+            return $this->collections[$name];
+        }
+
+        return $this->collections[$name] = new Table($name, $this->connection);
     }
 }

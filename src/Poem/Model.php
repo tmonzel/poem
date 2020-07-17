@@ -5,6 +5,7 @@ namespace Poem;
 use JsonSerializable;
 use Poem\Data\Client;
 use Poem\Data\Collection;
+use Poem\Data\Connection;
 use Poem\Model\AttributeAccessor;
 use Poem\Model\Relationships;
 use Poem\Model\Set;
@@ -74,7 +75,8 @@ class Model implements JsonSerializable
         return $attributes;
     }
 
-    function toData(array $options = []) {
+    function toData(array $options = []) 
+    {
         $format = isset($options['format']) ? $options['format'] : null;
         $subject = get_called_class();
         
@@ -117,19 +119,32 @@ class Model implements JsonSerializable
         return compact('type', 'id', 'attributes') + $data;
     }
 
-    function toArray(): array {
+    function toArray(): array 
+    {
         return $this->attributes;
     }
 
-    function destroy() {
+    /**
+     * Remove this document from the collection
+     * 
+     */
+    function destroy() 
+    {
         return static::collection()->deleteFirst([static::$primaryKey => $this->id]);
     }
 
-    function exists(): bool {
+    /**
+     * Does this document exist (has id attribute)
+     * 
+     * @return bool
+     */
+    function exists(): bool 
+    {
         return isset($this->id);
     }
 
-    function save() {
+    function save() 
+    {
         if($this->exists()) {
             // Update existing document
             return static::collection()->updateFirst($this->attributes, [static::$primaryKey => $this->id]);
@@ -142,11 +157,11 @@ class Model implements JsonSerializable
     }
 
     /**
-     * Return the client
+     * Return the selected connection
      */
-    static function client(): Client 
+    static function connection(): Connection 
     {
-        return Data::clients()->resolveClient(static::$clientKey);
+        return Data::resolveConnection(static::$clientKey);
     }
 
     /**
@@ -157,7 +172,7 @@ class Model implements JsonSerializable
      */
     static function collection(): Collection 
     {
-        return static::client()->getCollection(get_called_class()::Type);
+        return static::connection()->accessCollection(get_called_class()::Type);
     }
 
     /**

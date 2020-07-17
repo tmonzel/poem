@@ -13,7 +13,7 @@ class GuardBehavior extends Behavior
 {
     function initialize(ActionQuery $query) 
     {
-        $except = [];
+        $except = $permit = [];
 
         extract($this->config);
 

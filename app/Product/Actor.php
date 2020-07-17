@@ -1,7 +1,6 @@
 <?php
 
 namespace Product  {
-
     use Poem\Actor\Behaviors\GuardBehavior;
     use Poem\Actor\Behaviors\ResourceBehavior;
 
@@ -9,7 +8,6 @@ namespace Product  {
         const Behaviors = [
             ResourceBehavior::class,
             GuardBehavior::class => [
-                'role' => 'admin',
                 'except' => ['find']
             ]
         ];
