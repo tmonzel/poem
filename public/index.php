@@ -32,4 +32,5 @@ $story->about(Product\Actor::class);
 $story->about(User\Actor::class);
 $story->about(Retailer\Actor::class);
 $story->about(Market\Actor::class);
+$story->about(Order\Actor::class);
 $story->tell();
