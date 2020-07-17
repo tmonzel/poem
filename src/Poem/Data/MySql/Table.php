@@ -3,22 +3,29 @@
 namespace Poem\Data\MySql;
 
 use PDO;
-use Poem\Data\Collection;
+use Poem\Data\CollectionAdapter;
 use Poem\Set;
 
-class Table extends Collection {
+class Table implements CollectionAdapter {
     
     /**
      * @var PDO
      */
     protected $connection;
 
-    function __construct($name, PDO $connection) {
-        parent::__construct($name);
+    /**
+     * 
+     */
+    protected $name;
+
+    function __construct($name, PDO $connection) 
+    {
+        $this->name = $name;
         $this->connection = $connection;
     }
 
-    function findMany($conditions = []): Set {
+    function findMany($conditions = []): Set 
+    {
         $sql = "SELECT * FROM $this->name";
         
         if(count($conditions) > 0) {
@@ -32,7 +39,8 @@ class Table extends Collection {
         return new ResultSet($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    function findFirst(array $conditions = []) {
+    function findFirst(array $conditions = []) 
+    {
         $sql = "SELECT * FROM $this->name";
 
         if(count($conditions) > 0) {
@@ -47,7 +55,8 @@ class Table extends Collection {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    function insert(array $document) {
+    function insert(array $document) 
+    {
         $fields = array_keys($document);
         $values = array_values($document);
         $placeholder = array_fill(0, count($values), '?');
@@ -58,6 +67,11 @@ class Table extends Collection {
         $stmt->execute($values);
 
         return $this->connection->lastInsertId();
+    }
+
+    function insertMany(array $documents) 
+    {
+        
     }
 
     function updateFirst(array $data, array $conditions = []) {
@@ -89,7 +103,13 @@ class Table extends Collection {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    function deleteFirst(array $conditions = []) {
+    function updateMany($data, array $conditions = []) 
+    {
+
+    }
+
+    function deleteFirst(array $conditions = []) 
+    {
         $where = $this->buildWhere($conditions);
         $sql = "DELETE FROM $this->name WHERE $where";  
 
@@ -97,7 +117,13 @@ class Table extends Collection {
         return $stmt->execute($conditions);
     }
 
-    private function buildWhere(array $conditions) {
+    function deleteMany(array $conditions = []) 
+    {
+        
+    }
+
+    private function buildWhere(array $conditions) 
+    {
         $mappedConditions = array_map(function ($key) { 
             return "`". $key . "`= :" . $key; 
         }, array_keys($conditions));

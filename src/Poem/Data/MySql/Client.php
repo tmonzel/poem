@@ -3,7 +3,7 @@
 namespace Poem\Data\MySql;
 
 use PDO;
-use Poem\Data\Collection;
+use Poem\Data\CollectionAdapter;
 use Poem\Data\Connection;
 
 class Client implements Connection {
@@ -69,7 +69,7 @@ class Client implements Connection {
         $this->connection->exec(sprintf($sql, implode(',', $fields)));
     }
 
-    function accessCollection($name): Collection 
+    function accessCollection($name): CollectionAdapter 
     {
         if(isset($this->collections[$name])) {
             return $this->collections[$name];

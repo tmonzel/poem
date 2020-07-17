@@ -3,8 +3,7 @@
 namespace Poem;
 
 use JsonSerializable;
-use Poem\Data\Client;
-use Poem\Data\Collection;
+use Poem\Data\CollectionAdapter;
 use Poem\Data\Connection;
 use Poem\Model\AttributeAccessor;
 use Poem\Model\Relationships;
@@ -171,9 +170,9 @@ class Model implements JsonSerializable
      * Return the related persistant collection e.g. a table
      * 
      * @static
-     * @return Collection
+     * @return CollectionAdapter
      */
-    static function collection(): Collection 
+    static function collection(): CollectionAdapter 
     {
         return static::connection()->accessCollection(get_called_class()::Type);
     }
