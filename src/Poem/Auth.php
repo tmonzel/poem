@@ -4,8 +4,6 @@ namespace Poem;
 
 class Auth 
 {
-    const TOKEN_SECRET = 'n239hfe23rhndqoahie';
-
     /**
      * Create authorized user from this class
      * 
@@ -90,7 +88,7 @@ class Auth
         $signature = hash_hmac(
             'sha256',
             sprintf('%s.%s', $header, $payload),
-            static::TOKEN_SECRET
+            getenv('AUTH_SECRET')
         );
 
         return static::encode($signature);
