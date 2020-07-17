@@ -4,6 +4,7 @@ namespace Poem;
 
 use Exception;
 use Poem\Data\Client;
+use Poem\Data\Connection;
 
 class Data 
 {
@@ -16,18 +17,32 @@ class Data
     private static $connections = [];
 
     /**
-     * Resolved clients
+     * Keeper of all resolved clients
      * 
      * @static
      * @var array
      */
     private static $clients = [];
 
-    static function registerConnection($clientClass, array $config, $name = 'default') {
-        self::$connections[$name] = compact('clientClass', 'config');
+    /**
+     * Register
+     * 
+     * @static
+     */
+    static function registerConnection($connectionClass, array $config, $name = 'default')
+    {
+        self::$connections[$name] = compact('connectionClass', 'config');
     }
 
-    static function resolveConnection($name): Client 
+    /**
+     * Returns an already resolved client or
+     * creates and establishes a new one
+     * 
+     * @static
+     * @param string $name
+     * @return Client
+     */
+    static function resolveConnection($name): Connection 
     {   
         if(static::$clients[$name]) {
             return static::$clients[$name];
@@ -38,8 +53,10 @@ class Data
         }
 
         $connection = static::$connections[$name];
-        $client = new $connection['clientClass'];
-        $client->establishConnection($connection['config']);
+
+        /** @var Connection $client */
+        $client = new $connection['connectionClass'];
+        $client->connect($connection['config']);
 
         return static::$clients[$name] = $client;
     }
