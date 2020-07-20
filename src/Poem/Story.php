@@ -3,6 +3,7 @@
 namespace Poem;
 
 use Poem\Actor\ActionQuery;
+use Poem\Actor\ActionResolver;
 use Poem\Actor\Exceptions\ActionException;
 use Poem\Actor\Exceptions\BadRequestException;
 use Poem\Actor\Exceptions\NotFoundException;
@@ -26,13 +27,22 @@ class Story
     protected $endpoint;
 
     /**
-     * Construct a new story
+     * Create  a new story
      * 
      * @param string $endpoint
      */
     function __construct(string $endpoint = '/api') 
     {
         $this->endpoint = $endpoint;
+    }
+
+    /**
+     * Return all registered actors
+     * 
+     * @return array
+     */
+    function getActors(): array {
+        return $this->actors;
     }
 
     /**
@@ -45,7 +55,6 @@ class Story
         $this->actors[$actorClass::getType()] = $actorClass;
     }
 
-
     /**
      * Resolve request and send json response to output
      * 
@@ -55,10 +64,10 @@ class Story
     {
         $request = $request ?? Request::createFromGlobals();
         $response = new JsonResponse();
-        $data = [];
 
         try {
             $data = $this->resolveData($request);
+            $response->setData($data);
         } catch(ActionException $e) {
             $response->setStatusCode($e->getCode());
             $errors = $e->getErrors();
@@ -69,11 +78,9 @@ class Story
                 ];
             }
 
-            $data = compact('errors');
+            $response->setData(compact('errors'));
         }
 
-        $response->setData($data);
-        
         // Deliver to output
         $response->send();
     }
@@ -94,17 +101,28 @@ class Story
             throw new BadRequestException('Invalid method used');
         }
 
-        $data = $this->parseQueryData($request);
+        $query = new Query($request);
+        $query->compile();
 
-        if(!$data) {
-            throw new BadRequestException('Invalid query. Please provide valid json format');
+        return $this->prepareQueryData($query->getData());
+    }
+
+    function prepareQueryData(array $data) 
+    {
+        if(isset($data[0])) {
+            // Multiple actions
+            return array_map(function($d) {
+                return $this->prepareQueryData($d);
+            }, $data);
         }
 
+        $actors = $this->getActors();
+        
         if(!isset($data['type'])) {
             throw new BadRequestException('No type defined');
         }
 
-        if(!isset($this->actors[$data['type']])) {
+        if(!isset($actors[$data['type']])) {
             throw new NotFoundException('Type ' . $data['type'] . ' not available');
         }
 
@@ -113,34 +131,12 @@ class Story
         }
 
         /** @var Actor $actor */
-        $actor = new $this->actors[$data['type']];
+        $actor = new $actors[$data['type']]($this);
 
-        $query = new ActionQuery(
+        return $actor->prepareAction(
             $data['action'], 
-            isset($data['payload']) ? $data['payload'] : [], 
-            $request->headers->all()
+            isset($data['payload']) ? $data['payload'] : []
         );
-
-        $headers = $request->headers->all();
-
-        if(isset($headers['authorization']) && isset($headers['authorization'][0])) {
-            $token = $headers['authorization'][0];
-
-            // Check header for token
-            // Find user for action query
-            $query->auth = new Auth($token);
-        }
-
-        return $actor->invokeQuery($query);
-    }
-
-    /**
-     * 
-     */
-    private function parseQueryData(Request $request)
-    {
-        $rawBody = $request->getContent();
-        return $rawBody ? json_decode($rawBody, true) : [];
     }
 
     /**

@@ -6,18 +6,12 @@ use Poem\Actor;
 
 abstract class Behavior {
     protected $config;
-    protected $actor;
 
-    function __construct(Actor $actor, $config = []) {
-        $this->actor = $actor;
+    function __construct($config = []) {
         $this->config = $config;
     }
 
-    function registerAction(string $actionClass, callable $initializer = null) {
-        $this->actor->addAction($actionClass, $initializer);
-    }
-
-    function initialize(ActionQuery $query) {
+    function initialize(Actor $actor, string $actionType, array $payload = []) {
 
     }
 

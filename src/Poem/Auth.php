@@ -14,8 +14,7 @@ class Auth
     protected $token;
     protected $user;
 
-    function __construct(string $token) 
-    {
+    function setToken(string $token) {
         $this->token = $token;
     }
 

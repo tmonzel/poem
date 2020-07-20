@@ -26,7 +26,7 @@ class Actor extends \Poem\Actor {
      */
     function initialize(ActionQuery $query) 
     {
-        $this->addAction(LoginAction::class);
+        $this->registerAction(LoginAction::class);
     }
 
     /**

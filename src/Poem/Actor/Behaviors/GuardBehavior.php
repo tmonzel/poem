@@ -2,7 +2,7 @@
 
 namespace Poem\Actor\Behaviors;
 
-use Poem\Actor\ActionQuery;
+use Poem\Actor;
 use Poem\Actor\Behavior;
 use Poem\Actor\Exceptions\UnauthorizedException;
 
@@ -11,18 +11,18 @@ use Poem\Actor\Exceptions\UnauthorizedException;
  */
 class GuardBehavior extends Behavior 
 {
-    function initialize(ActionQuery $query) 
+    function initialize(Actor $actor, string $actionType, array $payload = []) 
     {
         $except = $permit = [];
 
         extract($this->config);
 
-        if(array_search($query->getType(), $except) !== false) {
+        if(array_search($actionType, $except) !== false) {
             return;
         }
         
-        if(!$query->auth || !$query->auth->authorized()) {
+        /*if(!$query->auth || !$query->auth->authorized()) {
             throw new UnauthorizedException('Action not allowed');
-        }
+        }*/
     }
 }

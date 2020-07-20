@@ -4,6 +4,7 @@ namespace Poem;
 
 use Poem\Actor\Action;
 use Poem\Actor\ActionQuery;
+use Poem\Actor\ActionStatement;
 use Poem\Actor\Exceptions\NotFoundException;
 
 class Actor 
@@ -25,12 +26,23 @@ class Actor
     protected $actions = [];
 
     /**
+     * @var Story
+     */
+    protected $story;
+
+    /**
+     * @var Auth
+     */
+    protected $auth;
+
+    /**
      * Create a new actor instance.
      * Builds all defined behaviors
      * 
      */
-    function __construct() 
+    function __construct(Story $story) 
     {
+        $this->story = $story;
         $this->behaviors = $this->buildBehaviors();
     }
 
@@ -51,7 +63,12 @@ class Actor
         return static::getNamespace() . '\\Model';
     }
 
-    function addAction(string $actionClass, callable $initializer = null) 
+    function setAuth(Auth $auth) 
+    {
+        $this->auth = $auth;
+    }
+
+    function registerAction(string $actionClass, callable $initializer = null) 
     {
         $this->actions[$actionClass::getType()] = compact('actionClass', 'initializer');
     }
@@ -72,34 +89,27 @@ class Actor
 
         foreach($calledClass::Behaviors as $k => $behaviorClass) {
             if(is_numeric($k)) {
-                $behaviors[] = new $behaviorClass($this);
+                $behaviors[] = new $behaviorClass();
             } else {
-                $behaviors[] = new $k($this, $behaviorClass);
+                $behaviors[] = new $k($behaviorClass);
             }
         }
 
         return $behaviors;
     }
 
-    function invokeQuery(ActionQuery $query) 
-    {
-        foreach($this->behaviors as $behavior) {
-            $behavior->initialize($query);
-        }
+    function isActionAllowed($type, $payload) {
 
-        $this->initialize($query);
+    }
+
+    function dispatchAction(string $actionClass, array $payload = []) {
         $subject = static::getSubjectClass();
-
-        if(!$this->hasAction($query->getType())) {
-            throw new NotFoundException("Action " . $query->getType() . " is not registered on " . $subject::Type);
-        }
-
-        extract($this->actions[$query->getType()]);
+        $type = $actionClass::getType();
 
         /** @var Action $action */
         $action = new $actionClass;
         $action->setSubject($subject);
-        $action->setPayload($query->getPayload());
+        $action->setPayload($payload);
 
         foreach($this->behaviors as $behavior) {
             $behavior->prepareAction($action);
@@ -109,14 +119,37 @@ class Actor
             $initializer($action);
         }
 
-        if(method_exists($this, $action->getType())) {
-            $this->{$action->getType()}($action);
+        if(method_exists($this, $type)) {
+            $this->{$type}($action);
         }
 
         return $action->dispatch();
     }
 
-    function initialize(ActionQuery $query) {
+    function prepareAction(string $actionType, array $payload = []) {
+        foreach($this->behaviors as $behavior) {
+            $behavior->initialize($this, $actionType, $payload);
+        }
+
+        $this->initialize($actionType, $payload);
+
+        $subject = static::getSubjectClass();
+
+        if(!$this->hasAction($actionType)) {
+            throw new NotFoundException("Action " . $actionType . " is not registered on " . $subject::Type);
+        }
+
+        if(!$this->isActionAllowed($actionType, $payload)) {
+            // throw unauthorized error
+        }
+
+        $actionClass = $this->actions[$actionType]['actionClass'];
+
+        return new ActionStatement($this, $actionClass, $payload);
+
+    }
+
+    function initialize(string $actionType, array $payload = []) {
         // Override for initialization
     }
 }
