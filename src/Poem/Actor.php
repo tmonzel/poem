@@ -8,7 +8,7 @@ use Poem\Actor\Exceptions\NotFoundException;
 
 class Actor 
 {
-    static $type;
+    use Module;
 
     /**
      * Initialized behaviors
@@ -25,11 +25,15 @@ class Actor
     protected $actions = [];
 
     /**
+     * Parent story
+     * 
      * @var Story
      */
     protected $story;
 
     /**
+     * Auth helper
+     * 
      * @var Auth
      */
     protected $auth;
@@ -46,23 +50,6 @@ class Actor
         $this->story = $story;
         $this->auth = $story->getAuth();
         $this->behaviors = $this->buildBehaviors();
-    }
-
-    static function getType(): string 
-    {
-        $subjectClass = static::getSubjectClass();
-        return class_exists($subjectClass) ? $subjectClass::Type : static::$type;
-    }
-
-    static function getNamespace(): string 
-    {
-        $className = get_called_class();
-        return substr($className, 0, strrpos($className, '\\'));
-    }
-
-    static function getSubjectClass(): string 
-    {
-        return static::getNamespace() . '\\Model';
     }
 
     function registerAction(string $actionClass, callable $initializer = null) 
