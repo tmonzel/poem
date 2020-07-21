@@ -27,13 +27,21 @@ class Story
     protected $endpoint;
 
     /**
-     * Create  a new story
+     * 
+     * @var Auth
+     */
+    protected $auth;
+
+    /**
+     * Create a new story
      * 
      * @param string $endpoint
+     * @param Auth $auth
      */
-    function __construct(string $endpoint = '/api') 
+    function __construct(string $endpoint = '/api', Auth $auth = null) 
     {
         $this->endpoint = $endpoint;
+        $this->auth = $auth ?? new Auth();
     }
 
     /**
@@ -43,6 +51,15 @@ class Story
      */
     function getActors(): array {
         return $this->actors;
+    }
+
+    /**
+     * Return authenticator
+     * 
+     * @return Auth
+     */
+    function getAuth(): Auth {
+        return $this->auth;
     }
 
     /**
@@ -101,18 +118,28 @@ class Story
             throw new BadRequestException('Invalid method used');
         }
 
-        $query = new Query($request);
-        $query->compile();
+        $headers = $request->headers->all();
 
-        return $this->prepareQueryData($query->getData(), $query->getAuth());
+        if(isset($headers['authorization']) && isset($headers['authorization'][0])) {
+            $token = $headers['authorization'][0];
+            $this->auth->setToken($token);
+        }
+
+        $data = $this->encodeRequestBody($request);
+
+        if(!$data) {
+            throw new BadRequestException('Invalid query. Please provide valid json format');
+        }
+
+        return $this->prepareQueryData($data);
     }
 
-    function prepareQueryData(array $data, Auth $auth) 
+    function prepareQueryData(array $data) 
     {
         if(isset($data[0])) {
             // Multiple actions
-            return array_map(function($d) use($auth) {
-                return $this->prepareQueryData($d, $auth);
+            return array_map(function($d) {
+                return $this->prepareQueryData($d);
             }, $data);
         }
 
@@ -131,12 +158,21 @@ class Story
         }
 
         /** @var Actor $actor */
-        $actor = new $actors[$data['type']]($this, $auth);
+        $actor = new $actors[$data['type']]($this);
 
         return $actor->prepareAction(
             $data['action'], 
             isset($data['payload']) ? $data['payload'] : []
         );
+    }
+
+    /**
+     * 
+     */
+    private function encodeRequestBody(Request $request): array
+    {
+        $rawBody = $request->getContent();
+        return $rawBody ? json_decode($rawBody, true) : [];
     }
 
     /**

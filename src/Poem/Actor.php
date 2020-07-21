@@ -41,10 +41,10 @@ class Actor
      * @param Story $story,
      * @param Auth $auth
      */
-    function __construct(Story $story, Auth $auth = null) 
+    function __construct(Story $story) 
     {
         $this->story = $story;
-        $this->auth = $auth;
+        $this->auth = $story->getAuth();
         $this->behaviors = $this->buildBehaviors();
     }
 
