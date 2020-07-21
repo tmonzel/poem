@@ -4,7 +4,6 @@ namespace Poem\Actor\Actions;
 
 use Poem\Actor\Action;
 use Poem\Actor\Exceptions\BadRequestException;
-use Poem\Auth;
 
 class LoginAction extends Action {
     static $type = 'login';
@@ -31,7 +30,7 @@ class LoginAction extends Action {
         }
 
         // Generate Token
-        $token = Auth::createTokenFor($user);
+        $token = $this->auth->createTokenFor($user);
 
         return compact('token');
     }

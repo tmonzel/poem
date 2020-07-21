@@ -44,7 +44,7 @@ class Auth
 
         [$header, $payload, $signature] = explode('.', trim($token));
 
-        if($signature === static::generateSignature($header, $payload)) {
+        if($signature === $this->generateSignature($header, $payload)) {
             $data = static::decodePayload($payload);
             
             if(isset($data['userId'])) {
@@ -79,7 +79,7 @@ class Auth
         );
     }
 
-    static function createTokenFor(Model $user) 
+    function createTokenFor(Model $user) 
     {
         // Create token header as a JSON string
         $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
@@ -87,9 +87,9 @@ class Auth
         // Create token payload as a JSON string
         $payload = json_encode(['userId' => $user->id]);
 
-        $encodedHeader = static::encode($header);
-        $encodedPayload = static::encode($payload);
-        $signature = static::generateSignature($encodedHeader, $encodedPayload);
+        $encodedHeader = $this->encode($header);
+        $encodedPayload = $this->encode($payload);
+        $signature = $this->generateSignature($encodedHeader, $encodedPayload);
 
         return $encodedHeader . "." . $encodedPayload . "." . $signature;
     }
@@ -97,7 +97,7 @@ class Auth
     /**
      * 
      */
-    private static function generateSignature($header, $payload): string
+    private function generateSignature($header, $payload): string
     {
         $signature = hash_hmac(
             'sha256',
@@ -105,10 +105,10 @@ class Auth
             getenv('AUTH_SECRET')
         );
 
-        return static::encode($signature);
+        return $this->encode($signature);
     }
 
-    private static function encode($obj) {
+    private function encode($obj) {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($obj));
     }
 }

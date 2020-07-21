@@ -127,6 +127,7 @@ class Actor
             $action = new $actionClass;
             $action->setSubject($subject);
             $action->setPayload($payload);
+            $action->setAuth($this->auth);
 
             foreach($this->behaviors as $behavior) {
                 $behavior->prepareAction($action);
