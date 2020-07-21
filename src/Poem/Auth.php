@@ -25,7 +25,7 @@ class Auth
 
     function resolveUser() 
     {
-        if(empty($this->token)) {
+        if(empty($this->token) || substr_count($this->token, '.') !== 2) {
             return;
         }
         
