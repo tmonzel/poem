@@ -2,12 +2,12 @@
 
 namespace User;
 
-use Poem\Actor\ActionQuery;
 use Poem\Actor\Actions\{
     CreateAction, 
     LoginAction 
 };
 use Poem\Actor\Behaviors\ResourceBehavior;
+use Poem\Actor\Exceptions\UnauthorizedException;
 
 class Actor extends \Poem\Actor {
 
@@ -24,9 +24,16 @@ class Actor extends \Poem\Actor {
      * Prepare or add additional actions
      * 
      */
-    function initialize(ActionQuery $query) 
+    function initialize(string $actionType, array $payload = [])
     {
         $this->registerAction(LoginAction::class);
+        $this->registerAction('me', function($payload) {
+            if(!$this->auth->authorized()) {
+                throw new UnauthorizedException('No authorized user found');
+            }
+
+            return $this->auth->user();
+        });
     }
 
     /**
