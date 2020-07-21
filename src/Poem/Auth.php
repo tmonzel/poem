@@ -25,6 +25,10 @@ class Auth
 
     function resolveUser() 
     {
+        if(empty($this->token)) {
+            return;
+        }
+        
         $token = preg_replace('/^Bearer /', '', $this->token);
 
         [$header, $payload, $signature] = explode('.', trim($token));
