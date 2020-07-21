@@ -52,6 +52,12 @@ class Actor
         $this->behaviors = $this->buildBehaviors();
     }
 
+    /**
+     * Register an action by class or name and callback
+     * 
+     * @param string $actionClass
+     * @param callable $initializer
+     */
     function registerAction(string $actionClass, callable $initializer = null) 
     {
         if(class_exists($actionClass)) {
@@ -61,15 +67,31 @@ class Actor
         }
     }
 
-    function getAuth(): Auth {
+    /**
+     * Return the auth helper
+     * 
+     * @return Auth
+     */
+    function getAuth(): Auth 
+    {
         return $this->auth;
     }
 
-    function hasAction($type): bool 
+    /**
+     * Test if this actor has an action with a specific name
+     * 
+     * @return bool
+     */
+    function hasAction(string $name): bool 
     {
-        return isset($this->actions[$type]);
+        return isset($this->actions[$name]);
     }
 
+    /**
+     * Build defined behaviors
+     * 
+     * @return array
+     */
     protected function buildBehaviors(): array 
     {
         $behaviors = [];
@@ -90,11 +112,11 @@ class Actor
         return $behaviors;
     }
 
-    function isActionAllowed($type, $payload) {
-
-    }
-
-    function executeAction(string $actionType, array $payload = []) {
+    /**
+     * @TODO: Move to action statement (maybe?)
+     */
+    function executeAction(string $actionType, array $payload = []) 
+    {
         $subject = static::getSubjectClass();
         extract($this->actions[$actionType]);
 
@@ -126,7 +148,15 @@ class Actor
         }
     }
 
-    function prepareAction(string $actionType, array $payload = []) {
+    /**
+     * Build and return a action statement
+     * 
+     * @param string $actionType
+     * @param array $payload
+     * @return ActionStatement
+     */
+    function prepareAction(string $actionType, array $payload = []) 
+    {
         foreach($this->behaviors as $behavior) {
             $behavior->initialize($this, $actionType, $payload);
         }
@@ -139,17 +169,18 @@ class Actor
             throw new NotFoundException("Action " . $actionType . " is not registered on " . $subject::Type);
         }
 
-        if(!$this->isActionAllowed($actionType, $payload)) {
-            // throw unauthorized error
-        }
-
-        // $actionClass = $this->actions[$actionType]['actionClass'];
-
         return new ActionStatement($this, $actionType, $payload);
 
     }
 
-    function initialize(string $actionType, array $payload = []) {
+    /**
+     * Initialize the action before execution
+     * 
+     * @param string $actionType
+     * @param array $payload
+     */
+    function initialize(string $actionType, array $payload = []) 
+    {
         // Override for initialization
     }
 }
