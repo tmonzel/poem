@@ -7,19 +7,19 @@ use Poem\Actor;
 
 class ActionStatement implements JsonSerializable {
     protected $actor;
-    protected $actionClass;
+    protected $actionType;
     protected $payload = [];
 
-    function __construct(Actor $actor, string $actionClass, $payload = []) 
+    function __construct(Actor $actor, string $actionType, $payload = []) 
     {
         $this->actor = $actor;
-        $this->actionClass = $actionClass;
+        $this->actionType = $actionType;
         $this->payload = $payload;
     }
 
     function execute() 
     {
-        return $this->actor->dispatchAction($this->actionClass, $this->payload);
+        return $this->actor->dispatchAction($this->actionType, $this->payload);
     }
 
     function jsonSerialize()

@@ -14,6 +14,7 @@ class GuardBehavior extends Behavior
     function initialize(Actor $actor, string $actionType, array $payload = []) 
     {
         $except = $permit = [];
+        $auth = $actor->getAuth();
 
         extract($this->config);
 
@@ -21,8 +22,8 @@ class GuardBehavior extends Behavior
             return;
         }
         
-        /*if(!$query->auth || !$query->auth->authorized()) {
+        if(!$auth->authorized()) {
             throw new UnauthorizedException('Action not allowed');
-        }*/
+        }
     }
 }

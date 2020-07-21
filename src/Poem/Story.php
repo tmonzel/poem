@@ -104,15 +104,15 @@ class Story
         $query = new Query($request);
         $query->compile();
 
-        return $this->prepareQueryData($query->getData());
+        return $this->prepareQueryData($query->getData(), $query->getAuth());
     }
 
-    function prepareQueryData(array $data) 
+    function prepareQueryData(array $data, Auth $auth) 
     {
         if(isset($data[0])) {
             // Multiple actions
-            return array_map(function($d) {
-                return $this->prepareQueryData($d);
+            return array_map(function($d) use($auth) {
+                return $this->prepareQueryData($d, $auth);
             }, $data);
         }
 
@@ -131,7 +131,7 @@ class Story
         }
 
         /** @var Actor $actor */
-        $actor = new $actors[$data['type']]($this);
+        $actor = new $actors[$data['type']]($this, $auth);
 
         return $actor->prepareAction(
             $data['action'], 

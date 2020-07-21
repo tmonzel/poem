@@ -3,7 +3,6 @@
 namespace Poem;
 
 use Poem\Actor\Action;
-use Poem\Actor\ActionQuery;
 use Poem\Actor\ActionStatement;
 use Poem\Actor\Exceptions\NotFoundException;
 
@@ -39,10 +38,13 @@ class Actor
      * Create a new actor instance.
      * Builds all defined behaviors
      * 
+     * @param Story $story,
+     * @param Auth $auth
      */
-    function __construct(Story $story) 
+    function __construct(Story $story, Auth $auth = null) 
     {
         $this->story = $story;
+        $this->auth = $auth;
         $this->behaviors = $this->buildBehaviors();
     }
 
@@ -63,14 +65,17 @@ class Actor
         return static::getNamespace() . '\\Model';
     }
 
-    function setAuth(Auth $auth) 
-    {
-        $this->auth = $auth;
-    }
-
     function registerAction(string $actionClass, callable $initializer = null) 
     {
-        $this->actions[$actionClass::getType()] = compact('actionClass', 'initializer');
+        if(class_exists($actionClass)) {
+            $this->actions[$actionClass::getType()] = compact('actionClass', 'initializer');
+        } else {
+            $this->actions[$actionClass] = compact('initializer');
+        }
+    }
+
+    function getAuth(): Auth {
+        return $this->auth;
     }
 
     function hasAction($type): bool 
@@ -102,28 +107,36 @@ class Actor
 
     }
 
-    function dispatchAction(string $actionClass, array $payload = []) {
+    function dispatchAction(string $actionType, array $payload = []) {
         $subject = static::getSubjectClass();
-        $type = $actionClass::getType();
+        extract($this->actions[$actionType]);
 
-        /** @var Action $action */
-        $action = new $actionClass;
-        $action->setSubject($subject);
-        $action->setPayload($payload);
+        if(isset($actionClass)) {
+            $type = $actionClass::getType();
 
-        foreach($this->behaviors as $behavior) {
-            $behavior->prepareAction($action);
+            /** @var Action $action */
+            $action = new $actionClass;
+            $action->setSubject($subject);
+            $action->setPayload($payload);
+
+            foreach($this->behaviors as $behavior) {
+                $behavior->prepareAction($action);
+            }
+
+            if(isset($initializer)) {
+                $initializer($action);
+            }
+    
+            if(method_exists($this, $type)) {
+                $this->{$type}($action);
+            }
+
+            return $action->dispatch();
         }
 
         if(isset($initializer)) {
-            $initializer($action);
+            return $initializer($payload);
         }
-
-        if(method_exists($this, $type)) {
-            $this->{$type}($action);
-        }
-
-        return $action->dispatch();
     }
 
     function prepareAction(string $actionType, array $payload = []) {
@@ -143,9 +156,9 @@ class Actor
             // throw unauthorized error
         }
 
-        $actionClass = $this->actions[$actionType]['actionClass'];
+        // $actionClass = $this->actions[$actionType]['actionClass'];
 
-        return new ActionStatement($this, $actionClass, $payload);
+        return new ActionStatement($this, $actionType, $payload);
 
     }
 
