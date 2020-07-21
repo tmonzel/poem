@@ -3,6 +3,7 @@
 namespace Poem\Actor\Actions;
 
 use Poem\Actor\Action;
+use Poem\Actor\Exceptions\NotFoundException;
 
 /**
  * This action fetches data of a given subject
@@ -25,6 +26,11 @@ class FindAction extends Action {
         if(isset($this->payload['id'])) {
             // Return a single document
             $document = $this->subject::pick((int)$this->payload['id']);
+
+            if(!$document) {
+                throw new NotFoundException('Document not found');
+            }
+
             return $document->toData($this->payload);
         }
         
