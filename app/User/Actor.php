@@ -6,18 +6,23 @@ use Poem\Actor\Actions\{
     CreateAction, 
     LoginAction 
 };
+use Poem\Actor\Behaviors\GuardBehavior;
 use Poem\Actor\Behaviors\ResourceBehavior;
 use Poem\Actor\Exceptions\UnauthorizedException;
 
-class Actor extends \Poem\Actor {
+class Actor extends \Poem\Actor 
+{
 
     /**
-     * Behaves as a resource
+     * Initializes with all the resource actions
      * 
      * @var array
      */
     const Behaviors = [
         ResourceBehavior::class,
+        GuardBehavior::class => [
+            'except' => ['find']
+        ]
     ];
 
     /**
