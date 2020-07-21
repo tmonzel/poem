@@ -19,7 +19,7 @@ class ActionStatement implements JsonSerializable {
 
     function execute() 
     {
-        return $this->actor->dispatchAction($this->actionType, $this->payload);
+        return $this->actor->executeAction($this->actionType, $this->payload);
     }
 
     function jsonSerialize()

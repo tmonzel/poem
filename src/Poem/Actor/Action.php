@@ -93,7 +93,7 @@ abstract class Action
      * 
      * @return mixed
      */
-    function dispatch() 
+    function execute() 
     {
         return $this->prepareData();
     }

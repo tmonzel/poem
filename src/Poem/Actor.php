@@ -107,7 +107,7 @@ class Actor
 
     }
 
-    function dispatchAction(string $actionType, array $payload = []) {
+    function executeAction(string $actionType, array $payload = []) {
         $subject = static::getSubjectClass();
         extract($this->actions[$actionType]);
 
@@ -131,7 +131,7 @@ class Actor
                 $this->{$type}($action);
             }
 
-            return $action->dispatch();
+            return $action->execute();
         }
 
         if(isset($initializer)) {
