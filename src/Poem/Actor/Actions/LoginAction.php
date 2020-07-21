@@ -38,8 +38,4 @@ class LoginAction extends Action {
     protected function verifyPassword(string $password, string $hash) {
         return password_verify($password, $hash);
     }
-
-    protected function generateToken() {
-
-    }
 }
