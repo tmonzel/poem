@@ -2,8 +2,6 @@
 
 namespace Poem;
 
-use Poem\Actor\ActionQuery;
-use Poem\Actor\ActionResolver;
 use Poem\Actor\Exceptions\ActionException;
 use Poem\Actor\Exceptions\BadRequestException;
 use Poem\Actor\Exceptions\NotFoundException;
@@ -83,7 +81,7 @@ class Story
         $response = new JsonResponse();
 
         try {
-            $data = $this->resolveData($request);
+            $data = $this->resolveQuery($request);
             $response->setData($data);
         } catch(ActionException $e) {
             $response->setStatusCode($e->getCode());
@@ -103,12 +101,13 @@ class Story
     }
 
     /**
-     * 
+     * Validate and resolve the query
+     * Initialize auth helper
      * 
      * @param Request $request
      * @return mixed
      */
-    private function resolveData(Request $request)
+    function resolveQuery(Request $request)
     {
         if($request->getRequestUri() !== $this->endpoint) {
             throw new NotFoundException('Endpoint not found');
@@ -118,28 +117,29 @@ class Story
             throw new BadRequestException('Invalid method used');
         }
 
-        $headers = $request->headers->all();
+        $this->auth->initialize($request);
 
-        if(isset($headers['authorization']) && isset($headers['authorization'][0])) {
-            $token = $headers['authorization'][0];
-            $this->auth->setToken($token);
-        }
-
-        $data = $this->encodeRequestBody($request);
+        $data = $this->parseQueryData($request);
 
         if(!$data) {
-            throw new BadRequestException('Invalid query. Please provide valid json format');
+            throw new BadRequestException('Invalid query data. Please provide valid json format');
         }
 
-        return $this->prepareQueryData($data);
+        return $this->parseQuery($data);
     }
 
-    function prepareQueryData(array $data) 
+    /**
+     * Parse the query data
+     * 
+     * @param array $data
+     * @return mixed
+     */
+    function parseQuery(array $data) 
     {
         if(isset($data[0])) {
             // Multiple actions
             return array_map(function($d) {
-                return $this->prepareQueryData($d);
+                return $this->parseQuery($d);
             }, $data);
         }
 
@@ -167,16 +167,19 @@ class Story
     }
 
     /**
+     * Return the json decoded request body
      * 
+     * @param Request $request
+     * @return array
      */
-    private function encodeRequestBody(Request $request): array
+    private function parseQueryData(Request $request): array
     {
         $rawBody = $request->getContent();
         return $rawBody ? json_decode($rawBody, true) : [];
     }
 
     /**
-     * Create new story
+     * Create a new story helper
      * 
      * @return Story
      */

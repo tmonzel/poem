@@ -2,6 +2,8 @@
 
 namespace Poem;
 
+use Symfony\Component\HttpFoundation\Request;
+
 class Auth 
 {
     /**
@@ -13,6 +15,15 @@ class Auth
 
     protected $token;
     protected $user;
+
+    function initialize(Request $request) {
+        $headers = $request->headers->all();
+
+        if(isset($headers['authorization']) && isset($headers['authorization'][0])) {
+            $token = $headers['authorization'][0];
+            $this->setToken($token);
+        }
+    }
 
     function setToken(string $token) {
         $this->token = $token;
