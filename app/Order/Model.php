@@ -7,5 +7,9 @@ namespace Order {
             'id' => 'pk',
             'state' => 'string'
         ];
+
+        const HasMany = [
+            'items' => Item::class
+        ];
     }
 }
