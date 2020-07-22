@@ -6,5 +6,9 @@ namespace Market {
         const BelongsTo = [
             'retailer' => \Retailer\Model::class
         ];
+
+        const Attributes = [
+            'name'
+        ];
     }
 }

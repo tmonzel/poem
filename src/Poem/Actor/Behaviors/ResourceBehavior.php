@@ -9,6 +9,10 @@ use Poem\Actor\Actions\FindAction;
 use Poem\Actor\Actions\UpdateAction;
 use Poem\Actor\Behavior;
 
+/**
+ * Resource behaviors register all CRUD-Actions
+ * on the fly (find, create, update, destroy)
+ */
 class ResourceBehavior extends Behavior {
     function initialize(Actor $actor, string $actionType, array $payload = []) {
         $actor->registerAction(FindAction::class);

@@ -170,9 +170,9 @@ class Story
      * Return the json decoded request body
      * 
      * @param Request $request
-     * @return array
+     * @return mixed
      */
-    private function parseQueryData(Request $request): array
+    private function parseQueryData(Request $request)
     {
         $rawBody = $request->getContent();
         return $rawBody ? json_decode($rawBody, true) : [];
