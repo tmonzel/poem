@@ -9,7 +9,7 @@ namespace Order {
         ];
 
         const HasMany = [
-            'items' => Item::class
+            'items' => Item\Model::class
         ];
     }
 }
