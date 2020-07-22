@@ -24,6 +24,10 @@ class CreateAction extends Action {
      */
     function prepareData() 
     {
+        if(!isset($this->payload['attributes'])) {
+            throw new BadRequestException('No attributes found for create action');
+        }
+
         $attributes = $this->payload['attributes'];
         $document = new $this->subject($this->map($attributes));
 
