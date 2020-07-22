@@ -54,6 +54,9 @@ class Client implements Connection {
                     case 'pk':
                         $fields[] = $field . " INT(11) AUTO_INCREMENT PRIMARY KEY";
                     break;
+                    case 'fk':
+                        $fields[] = $field . " INT(11)";
+                    break;
                     case 'string':
                         $fields[] = $field . " VARCHAR(180) NOT NULL";
                     break;

@@ -162,7 +162,7 @@ class Model implements JsonSerializable
         if(defined($calledClass . '::Schema')) {
             foreach($calledClass::Schema as $name => $type) {
                 if(class_exists($type)) {
-                    $schema[$name] = $type::foreignKey();
+                    $schema[$type::foreignKey()] = 'fk';
                 } else {
                     $schema[$name] = $type;
                 }
