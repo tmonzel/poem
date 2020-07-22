@@ -2,8 +2,7 @@
 
 namespace User;
 
-use Poem\Actor\Actions\{
-    CreateAction, 
+use Poem\Actor\Actions\{ 
     LoginAction 
 };
 use Poem\Actor\Behaviors\GuardBehavior;
@@ -38,18 +37,6 @@ class Actor extends \Poem\Actor
             }
 
             return $this->auth->user();
-        });
-    }
-
-    /**
-     * Modify create user action
-     * 
-     * @param CreateAction $action
-     */
-    function create(CreateAction $action)
-    {
-        $action->mapAttribute('password', function($password) {
-            return password_hash($password, PASSWORD_ARGON2I);
         });
     }
 }

@@ -35,11 +35,13 @@ namespace User {
         ];
 
         /**
-         * Should mutate attributes before create or update
+         * Mutate attributes before create or update
          * 
-         * @TODO: Implement this functionality
+         * @static
+         * @param array $attributes
+         * @return array
          */
-        function mutateAttributes(array $attributes) 
+        protected static function mutateAttributes(array $attributes): array
         {
             if(isset($attributes['password'])) {
                 $attributes['password'] = password_hash($attributes['password'], PASSWORD_ARGON2I);
