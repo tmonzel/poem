@@ -40,9 +40,8 @@ class MigrateCommand extends Command
             return Command::FAILURE;
         }
 
-        /** @var Connection $client */
-        $client = $subject::connection();
-        $client->createCollection($subject::Type, $subject::prepareSchema());
+        // Syncronize subject
+        $subject::sync();
 
         return Command::SUCCESS;
     }

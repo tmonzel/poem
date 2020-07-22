@@ -303,4 +303,19 @@ class Model implements JsonSerializable
         $className = get_called_class();
         return strtolower(substr($className, 0, strrpos($className, '\\'))) . "_" . static::$primaryKey;
     }
+
+    /**
+     * Syncronize the schema for this model
+     */
+    static function sync() {
+        $collection = static::collection();
+        $calledClass = get_called_class();
+        
+        if($collection->exists()) {
+            // sync
+            $collection->sync(static::prepareSchema());
+        } else {
+            static::connection()->createCollection($calledClass::Type, static::prepareSchema());
+        }
+    }
 }

@@ -75,18 +75,6 @@ class Client implements Connection {
         return $this->connection->lastInsertId();
     }
 
-    function syncSchema($name, array $schema) 
-    {
-        $collection = $this->accessCollection($name);
-        
-        if($collection->exists()) {
-            // sync
-            $collection->sync($schema);
-        } else {
-            $this->createCollection($name, $schema);
-        }
-    }
-
     function createCollection($name, array $schema = null) 
     {
         $sql = "CREATE TABLE `" . $name . "`(%s)";
