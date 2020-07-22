@@ -1,4 +1,4 @@
-## Poem
+# Poem
 
 An **experimental** action based micro api framework which uses a single json endpoint. 
 
@@ -6,7 +6,7 @@ An **experimental** action based micro api framework which uses a single json en
 * Add authorization based on user roles
 * Format json output via action parameter e.g. "format"
 
-## Example Request
+## Single Action Request/Response
 ``POST http://your.host/api``
 
 ```json
@@ -19,7 +19,7 @@ An **experimental** action based micro api framework which uses a single json en
 }
 ```
 
-## Example Response (https://jsonapi.org/)
+### Response (https://jsonapi.org/)
 
 ```json
 [
@@ -53,5 +53,46 @@ An **experimental** action based micro api framework which uses a single json en
             }
         }
     },
+]
+```
+<br />
+
+## Multiple Action Request/Response
+``POST http://your.host/api``
+
+```json
+[
+    {
+        "type": "movies",
+        "action": "create",
+        "payload": {
+            "name": "Iron Man"
+        },
+        "format": ["id", "name"]
+    },
+
+    {
+        "type": "movies",
+        "action": "create",
+        "payload": {
+            "name": "Hulk"
+        },
+        "format": ["name"]
+    }
+]
+```
+
+### Formatted Response
+
+```json
+[
+    {
+        "id": 1,
+        "name": "Iron Man"
+    },
+
+    {
+        "name": "Hulk"
+    }
 ]
 ```
