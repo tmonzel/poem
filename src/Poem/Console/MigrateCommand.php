@@ -2,7 +2,6 @@
 
 namespace Poem\Console;
 
-use Poem\Data\Connection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -31,17 +30,20 @@ class MigrateCommand extends Command
         $subject = null;
 
         if(strpos($type, '.') !== false) {
-            $subject = str_replace('.', '\\', $type);
+            $subject = str_replace('.', '\\', $type) . "\\Model";
         } else {
             $subject = $type . '\\Model';
         }
         
         if(!$subject || !class_exists($subject)) {
+            $output->writeln("Subject not found for $type");
             return Command::FAILURE;
         }
 
         // Syncronize subject
         $subject::sync();
+
+        $output->writeln('Migrated ' . $subject::Type . ' schema');
 
         return Command::SUCCESS;
     }
