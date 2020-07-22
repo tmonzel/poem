@@ -9,11 +9,22 @@ use Poem\Actor\Exceptions\BadRequestException;
 class CreateAction extends Action {
     use AttributeMapper;
 
+    /**
+     * Create action type (required)
+     * 
+     * @static
+     * @var string
+     */
     static $type = 'create';
 
+    /**
+     * Prepare data for execution
+     * 
+     * @return mixed
+     */
     function prepareData() 
     {
-        $attributes = $this->payload;
+        $attributes = $this->payload['attributes'];
         $document = new $this->subject($this->map($attributes));
 
         if(method_exists($document, 'valid')) {
@@ -27,6 +38,6 @@ class CreateAction extends Action {
 
         $document->save();
 
-        return $document;
+        return $document->toData($this->payload);
     }
 }
