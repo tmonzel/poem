@@ -74,12 +74,13 @@ abstract class Action
      * 
      * @return array
      */
-    function getPayload(): array {
+    function getPayload(): array 
+    {
         return $this->payload;
     }
 
     /**
-     * Set the authentication object
+     * Set the authentication helper
      * 
      * @param Auth $auth
      */
@@ -98,7 +99,10 @@ abstract class Action
         return $this->prepareData();
     }
 
-    function prepareData() {
-        
-    }
+    /**
+     * Prepare data for execution
+     * 
+     * @return mixed
+     */
+    abstract function prepareData();
 }
