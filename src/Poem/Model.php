@@ -155,6 +155,23 @@ class Model implements JsonSerializable
         }
     }
 
+    static function prepareSchema(): array {
+        $calledClass = get_called_class();
+        $schema = [];
+
+        if(defined($calledClass . '::Schema')) {
+            foreach($calledClass::Schema as $name => $type) {
+                if(class_exists($type)) {
+                    $schema[$name] = $type::foreignKey();
+                } else {
+                    $schema[$name] = $type;
+                }
+            }
+        }
+
+        return $schema;
+    }
+
     /**
      * Return the selected connection
      * 

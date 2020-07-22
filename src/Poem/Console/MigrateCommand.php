@@ -49,7 +49,7 @@ class MigrateCommand extends Command
 
         /** @var Connection $client */
         $client = $subject::connection();
-        $client->createCollection($type, $subject::Schema);
+        $client->createCollection($type, $subject::prepareSchema());
 
         return Command::SUCCESS;
     }
