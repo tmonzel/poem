@@ -66,18 +66,23 @@ An **experimental** action based micro api framework which uses a single json en
         "type": "movies",
         "action": "create",
         "payload": {
-            "name": "Iron Man"
+            "attributes": {
+                "name": "Iron Man"
+            },
+            "format": ["id", "name"]
         },
-        "format": ["id", "name"]
+        
     },
 
     {
         "type": "movies",
         "action": "create",
         "payload": {
-            "name": "Hulk"
-        },
-        "format": ["name"]
+            "attributes": {
+                "name": "Hulk"
+            },
+            "format": ["name"]
+        }
     }
 ]
 ```
