@@ -1,36 +1,21 @@
 <?php
 
-use Composer\Autoload\ClassLoader;
-use Poem\Story;
-use Poem\Data;
-use Poem\Data\MySql\Client as MySqlClient;
+/**
+ * Serve api endpoint
+ */
+namespace Poem {
+    require __DIR__ . "/../bootstrap.php";
 
-/** @var ClassLoader $loader */
-$loader = require __DIR__ . '/../vendor/autoload.php';
-$loader->addPsr4('Poem\\', __DIR__ . '/../src/Poem');
-$loader->addPsr4(null, __DIR__ . '/../app');
-
-const ENV_FILE = __DIR__ . "/../env.php";
-
-if(file_exists(ENV_FILE)) {
-    foreach(require(ENV_FILE) as $k => $v) {
-        putenv("$k=$v");
-    }
+    // Tell a new story
+    $story = Story::new();
+    
+    // Introduce all public actors
+    $story->about(\Product\Actor::class);
+    $story->about(\User\Actor::class);
+    $story->about(\Retailer\Actor::class);
+    $story->about(\Market\Actor::class);
+    $story->about(\Order\Actor::class);
+    
+    // Send compiled json response output
+    $story->tell();
 }
-
-// Register data connection
-Data::registerConnection(MySqlClient::class, [
-    "host" => getenv('DB_HOST'),
-    "database" => getenv('DB_NAME'),
-    "username" => getenv('DB_USER'),
-    "password" => getenv('DB_PASSWORD') 
-]);
-
-// Tell a new story
-$story = Story::new();
-$story->about(Product\Actor::class);
-$story->about(User\Actor::class);
-$story->about(Retailer\Actor::class);
-$story->about(Market\Actor::class);
-$story->about(Order\Actor::class);
-$story->tell();
