@@ -27,29 +27,22 @@ class MigrateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $appDir = constant('APP_ROOT') . "/app";
         $type = $input->getArgument('type');
         $subject = null;
 
-        foreach (scandir($appDir) as $file) {
-            if ($file !== '.' && $file !== '..') {
-                $files[] = $file;
-
-                $subjectClass = $file . "\\Model";
-                if($subjectClass::Type === $type) {
-                    $subject = $subjectClass;
-                    break;
-                }
-            }
-        }   
-
-        if(!$subject) {
+        if(strpos($type, '.') !== false) {
+            $subject = str_replace('.', '\\', $type);
+        } else {
+            $subject = $type . '\\Model';
+        }
+        
+        if(!$subject || !class_exists($subject)) {
             return Command::FAILURE;
         }
 
         /** @var Connection $client */
         $client = $subject::connection();
-        $client->createCollection($type, $subject::prepareSchema());
+        $client->createCollection($subject::Type, $subject::prepareSchema());
 
         return Command::SUCCESS;
     }
