@@ -147,13 +147,32 @@ class Model implements JsonSerializable
     {
         if($this->exists()) {
             // Update existing document
-            return static::collection()->updateFirst($this->attributes, [static::$primaryKey => $this->id]);
+            return static::collection()->updateFirst(
+                static::mutateAttributes($this->attributes), 
+                [static::$primaryKey => $this->id]
+            );
+
         } else {
             // Create new document
-            $insertId = static::collection()->insert($this->attributes);
+            $insertId = static::collection()->insert(
+                static::mutateAttributes($this->attributes)
+            );
+
             $this->id = $insertId;
             return true;
         }
+    }
+
+    /**
+     * Mutate attributes before create or update
+     * 
+     * @static
+     * @param array $attributes
+     * @return array
+     */
+    protected static function mutateAttributes(array $attributes): array 
+    {
+        return $attributes;
     }
 
     static function prepareSchema(): array {
@@ -263,7 +282,10 @@ class Model implements JsonSerializable
      */
     static function create(array $attributes) 
     {
+        $attributes = static::mutateAttributes($attributes);
+
         $insertId = static::collection()->insert($attributes);
+
         return new static($attributes + ['id' => $insertId]);
     }
 
