@@ -6,17 +6,27 @@ use PDO;
 use Poem\Data\CollectionAdapter;
 use Poem\Set;
 
-class Table implements CollectionAdapter {
-    
+class Table implements CollectionAdapter 
+{
     /**
-     * @var PDO
+     * Associated client
+     * 
+     * @var Client
      */
-    protected $connection;
+    protected $client;
+
+    /**
+     * Table name
+     * 
+     * @var string
+     */
+    protected $name;
 
     /**
      * 
+     * @var array
      */
-    protected $name;
+    protected $schema = [];
 
     /**
      * Create table instance.
@@ -24,12 +34,84 @@ class Table implements CollectionAdapter {
      * @param string $name
      * @param PDO $connection
      */
-    function __construct($name, PDO $connection) 
+    function __construct(string $name, Client $client) 
     {
         $this->name = $name;
-        $this->connection = $connection;
+        $this->client = $client;
     }
 
+    /**
+     * Ensure this table exists
+     */
+    function exists(): bool 
+    {
+        return $this->client->query(
+            "SHOW TABLES LIKE '$this->name'"
+        )->rowCount() > 0;
+    }
+
+    function dropField(string $name) 
+    {
+        return $this->client->query(
+            "ALTER TABLE $this->name DROP COLUMN $name"
+        );
+    }
+
+    function addField(string $name, string $type) 
+    {
+        return $this->client->query(
+            "ALTER TABLE $this->name ADD COLUMN $name " . $this->client->translateFieldType($type)
+        );
+    }
+
+    function fetchSchema(): array 
+    {
+        $columns = $this->client->query("SHOW COLUMNS FROM $this->name")->fetchAll(PDO::FETCH_ASSOC);
+        $schema = [];
+
+        foreach($columns as $column) {
+            $schema[$column['Field']] = [
+                'type' => $column['Type'],
+                'default' => $column['Default'],
+                'key' => $column['Key'],
+                'extra' => $column['Extra']
+            ];
+        }
+
+        return $schema;
+    }
+
+    function sync(array $schema) {
+        if(!$this->exists()) {
+            // Do nothing if table does not exist
+            return;
+        }
+
+        $remoteSchema = $this->fetchSchema();
+
+        // Remove columns which not exist in codebase
+        foreach($remoteSchema as $attr => $settings) {
+            if(!isset($schema[$attr])) {
+                // attribute does not exist in codebase => drop field
+                $this->dropField($attr);
+            }    
+        }
+
+        // Add fields which not exist in db
+        foreach($schema as $attr => $settings) {
+            if(!isset($remoteSchema[$attr])) {
+                // attribute does not exist in db => add field
+                $this->addField($attr, $schema[$attr]);
+            }
+        }
+    }
+
+    /**
+     * Find many entries
+     * 
+     * @param mixed $conditions
+     * @return Set
+     */
     function findMany($conditions = []): Set 
     {
         $sql = "SELECT * FROM $this->name";
@@ -39,8 +121,7 @@ class Table implements CollectionAdapter {
             $sql .= " WHERE $where";
         }
 
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($conditions);
+        $stmt = $this->client->query($sql, $conditions);
         
         return new ResultSet($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
@@ -55,8 +136,7 @@ class Table implements CollectionAdapter {
         }
         
         $sql .= " LIMIT 1";
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($conditions);
+        $stmt = $this->client->query($sql, $conditions);
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -69,10 +149,9 @@ class Table implements CollectionAdapter {
 
         $sql = "INSERT INTO `$this->name` (" . implode(',', $fields). ") VALUES (" . implode(',', $placeholder). ")";
 
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($values);
+        $stmt = $this->client->query($sql, $values);
 
-        return $this->connection->lastInsertId();
+        return $this->client->lastInsertId();
     }
 
     function insertMany(array $documents) 
@@ -104,9 +183,7 @@ class Table implements CollectionAdapter {
         }
         
         $sql .= " LIMIT 1";
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
-
+        $stmt = $this->client->query($sql, $params);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -120,8 +197,8 @@ class Table implements CollectionAdapter {
         $where = $this->buildWhere($conditions);
         $sql = "DELETE FROM $this->name WHERE $where";  
 
-        $stmt = $this->connection->prepare($sql);
-        return $stmt->execute($conditions);
+        $stmt = $this->client->query($sql, $conditions);
+        return $stmt;
     }
 
     function deleteMany(array $conditions = []) 

@@ -3,6 +3,7 @@
 namespace Poem\Data\MySql;
 
 use PDO;
+use PDOStatement;
 use Poem\Data\CollectionAdapter;
 use Poem\Data\Connection;
 
@@ -26,6 +27,8 @@ class Client implements Connection {
         'username' => 'root',
     ];
 
+    protected $settings = [];
+
     /**
      * Stored collection instances
      * 
@@ -35,12 +38,53 @@ class Client implements Connection {
 
     function connect(array $config) 
     {
-        extract(array_merge($this->defaultSettings, $config));
+        $this->settings = array_merge($this->defaultSettings, $config);
+        extract($this->settings);
+        
         $this->connection = new PDO("mysql:host=$host;dbname=$database", $username, $password);
         $this->connection->setAttribute( 
             PDO::ATTR_ERRMODE, 
             PDO::ERRMODE_EXCEPTION 
         );
+    }
+
+    /**
+     * Executes an SQL statement
+     * 
+     * @param string $sql,
+     * @param array $params
+     * @return PDOStatement|bool
+     */
+    function query(string $sql, array $params = null) 
+    {
+        if(isset($params)) {
+            $statement = $this->connection->prepare($sql);
+            $statement->execute($params);
+            return $statement;
+        }
+
+        return $this->connection->query($sql);
+    }
+
+    /**
+     * 
+     * @return string
+     */
+    function lastInsertId() 
+    {
+        return $this->connection->lastInsertId();
+    }
+
+    function syncSchema($name, array $schema) 
+    {
+        $collection = $this->accessCollection($name);
+        
+        if($collection->exists()) {
+            // sync
+            $collection->sync($schema);
+        } else {
+            $this->createCollection($name, $schema);
+        }
     }
 
     function createCollection($name, array $schema = null) 
@@ -50,26 +94,11 @@ class Client implements Connection {
 
         if($schema) {
             foreach($schema as $field => $type) {
-                switch($type) {
-                    case 'pk':
-                        $fields[] = $field . " INT(11) AUTO_INCREMENT PRIMARY KEY";
-                    break;
-                    case 'fk':
-                        $fields[] = $field . " INT(11)";
-                    break;
-                    case 'string':
-                        $fields[] = $field . " VARCHAR(180) NOT NULL";
-                    break;
-                    case 'date':
-                        $fields[] = $field . " DATETIME()";
-                    break;
-                    default:
-                        $fields[] = $field . " " . $type;
-                }
+                $fields[] = $field . " " . $this->translateFieldType($type);
             }
         }
 
-        $this->connection->exec(sprintf($sql, implode(',', $fields)));
+        $this->query(sprintf($sql, implode(',', $fields)));
     }
 
     function accessCollection($name): CollectionAdapter 
@@ -78,6 +107,24 @@ class Client implements Connection {
             return $this->collections[$name];
         }
 
-        return $this->collections[$name] = new Table($name, $this->connection);
+        return $this->collections[$name] = new Table($name, $this);
+    }
+
+    function translateFieldType(string $type) {
+        switch($type) {
+            case 'pk':
+                return "INT(11) AUTO_INCREMENT PRIMARY KEY";
+            break;
+            case 'fk':
+                return "INT(11)";
+            break;
+            case 'string':
+                return "VARCHAR(180) NOT NULL";
+            break;
+            case 'date':
+                return "DATETIME()";
+        }
+
+        return $type;
     }
 }

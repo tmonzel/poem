@@ -15,4 +15,7 @@ interface CollectionAdapter
 
     function deleteFirst(array $conditions = []);
     function deleteMany(array $conditions = []);
+
+    function exists(): bool;
+    function sync(array $schema);
 }
