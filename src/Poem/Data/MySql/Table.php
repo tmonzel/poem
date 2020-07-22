@@ -166,10 +166,10 @@ class Table implements CollectionAdapter
 
         if(count($data) > 0) {
             $mappedSetClause = array_map(function ($key) { 
-                return $key . " = :data_" . $key; 
+                return "`" . $key . "` = :data_" . $key; 
             }, array_keys($data));
             
-            $sql .= " SET " . implode(',', $mappedSetClause);
+            $sql .= " SET " . implode(', ', $mappedSetClause);
             
             foreach($data as $k => $v) {
                 $params['data_' . $k] = $v;
@@ -183,8 +183,7 @@ class Table implements CollectionAdapter
         }
         
         $sql .= " LIMIT 1";
-        $stmt = $this->client->query($sql, $params);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $this->client->query($sql, $params);
     }
 
     function updateMany($data, array $conditions = []) 
