@@ -19,6 +19,7 @@ namespace User {
          * @var array
          */
         const Attributes = [
+            'id',
             'name'
         ];
 
