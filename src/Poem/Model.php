@@ -2,6 +2,7 @@
 
 namespace Poem;
 
+use Exception;
 use JsonSerializable;
 use Poem\Data\CollectionAdapter;
 use Poem\Data\Connection;
@@ -307,9 +308,15 @@ class Model implements JsonSerializable
     /**
      * Syncronize the schema for this model
      */
-    static function sync() {
-        $collection = static::collection();
+    static function sync() 
+    {
         $calledClass = get_called_class();
+
+        if(!defined($calledClass . '::Schema')) {
+            throw new Exception('No schema defined for ' . static::class);
+        }
+
+        $collection = static::collection();
         
         if($collection->exists()) {
             // sync
