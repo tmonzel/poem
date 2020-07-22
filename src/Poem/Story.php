@@ -71,6 +71,32 @@ class Story
     }
 
     /**
+     * Check if actor with type is registered
+     * 
+     * @param string $type
+     * @return bool
+     */
+    function hasActor(string $type): bool 
+    {
+        return isset($this->actors[$type]);
+    }
+
+    /**
+     * Build an actor from a given type
+     * 
+     * @param string $type
+     * @return Actor
+     */
+    function buildActor(string $type): Actor 
+    {
+        if(!$this->hasActor($type)) {
+            throw new NotFoundException("Actor $type not available");
+        }
+
+        return new $this->actors[$type]($this);
+    }
+
+    /**
      * Resolve request and send json response to output
      * 
      * @param Request $request
@@ -137,20 +163,14 @@ class Story
     function parseQuery(array $data) 
     {
         if(isset($data[0])) {
-            // Multiple actions
+            // Parse multiple actions
             return array_map(function($d) {
                 return $this->parseQuery($d);
             }, $data);
         }
-
-        $actors = $this->getActors();
         
         if(!isset($data['type'])) {
             throw new BadRequestException('No type defined');
-        }
-
-        if(!isset($actors[$data['type']])) {
-            throw new NotFoundException('Type ' . $data['type'] . ' not available');
         }
 
         if(!isset($data['action'])) {
@@ -158,7 +178,7 @@ class Story
         }
 
         /** @var Actor $actor */
-        $actor = new $actors[$data['type']]($this);
+        $actor = $this->buildActor($data['type']);
 
         return $actor->prepareAction(
             $data['action'], 
