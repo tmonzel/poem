@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "state": "cart"
+    },
+
+    {
+        "id": 2,
+        "state": "cart"
+    },
+
+    {
+        "id": 3,
+        "state": "ordered"
+    }
+]
