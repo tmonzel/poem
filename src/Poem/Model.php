@@ -263,9 +263,8 @@ class Model implements JsonSerializable
      */
     static function create(array $attributes) 
     {
-        $document = new static($attributes);
-        $document->save();
-        return $document;
+        $insertId = static::collection()->insert($attributes);
+        return new static($attributes + ['id' => $insertId]);
     }
 
     /**
