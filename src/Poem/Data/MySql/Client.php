@@ -75,6 +75,11 @@ class Client implements Connection {
         return $this->connection->lastInsertId();
     }
 
+    function truncateCollection($name) 
+    {
+        return $this->query("TRUNCATE $name");
+    }
+
     function createCollection($name, array $schema = null) 
     {
         $sql = "CREATE TABLE `" . $name . "`(%s)";
