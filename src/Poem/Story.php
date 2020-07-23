@@ -47,7 +47,8 @@ class Story
      * 
      * @return array
      */
-    function getActors(): array {
+    function getActors(): array 
+    {
         return $this->actors;
     }
 
@@ -56,7 +57,8 @@ class Story
      * 
      * @return Auth
      */
-    function getAuth(): Auth {
+    function getAuth(): Auth 
+    {
         return $this->auth;
     }
 
