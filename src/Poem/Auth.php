@@ -34,31 +34,9 @@ class Auth
         return $this->user() !== null;
     }
 
-    function resolveUser() 
-    {
-        if(empty($this->token) || substr_count($this->token, '.') !== 2) {
-            return;
-        }
-        
-        $token = preg_replace('/^Bearer /', '', $this->token);
-
-        [$header, $payload, $signature] = explode('.', trim($token));
-
-        if($signature === $this->generateSignature($header, $payload)) {
-            $data = static::decodePayload($payload);
-            
-            if(isset($data['userId'])) {
-                $user = static::$userModel::pick($data['userId']);
-                
-                if($user) {
-                    // User found and set
-                    return $user;
-                }
-            }
-        }
-    }
-
-    // Identify the user by token or false
+    /**
+     * @return Model
+     */
     function user() 
     {
         if(!$this->user) {
@@ -66,17 +44,6 @@ class Auth
         }
 
         return $this->user;
-    }
-
-    static function decodePayload(string $payload): array
-    {
-        // replace url-safe chars
-        $base64Data = strtr($payload, '-_', '+/');
-
-        // decode array
-        return (array)json_decode(
-            base64_decode($base64Data, false), false
-        );
     }
 
     function createTokenFor(Model $user) 
@@ -93,11 +60,47 @@ class Auth
 
         return $encodedHeader . "." . $encodedPayload . "." . $signature;
     }
+
+    protected function resolveUser() 
+    {
+        if(empty($this->token) || substr_count($this->token, '.') !== 2) {
+            return;
+        }
+        
+        $token = preg_replace('/^Bearer /', '', $this->token);
+
+        [$header, $payload, $signature] = explode('.', trim($token));
+ 
+        if($signature === $this->generateSignature($header, $payload)) {
+            $data = $this->decodePayload($payload);
+            
+            if(isset($data['userId'])) {
+                $user = static::$userModel::pick($data['userId']);
+                
+                if($user) {
+                    // User found and set
+                    return $user;
+                }
+            }
+        }
+    }
+
+    private function decodePayload(string $payload): array
+    {
+        // replace url-safe chars
+        $base64Data = strtr($payload, '-_', '+/');
+
+        // decode array
+        return (array)json_decode(
+            base64_decode($base64Data, false), 
+            false
+        );
+    }
     
     /**
      * 
      */
-    private function generateSignature($header, $payload): string
+    private function generateSignature(string $header, string $payload): string
     {
         $signature = hash_hmac(
             'sha256',
@@ -108,7 +111,17 @@ class Auth
         return $this->encode($signature);
     }
 
-    private function encode($obj) {
-        return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($obj));
+    /**
+     * Encode to base64
+     * 
+     * @param string $data
+     * @return string
+     */
+    private function encode(string $data) {
+        return str_replace(
+            ['+', '/', '='], 
+            ['-', '_', ''], 
+            base64_encode($data)
+        );
     }
 }
