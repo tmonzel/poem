@@ -4,7 +4,7 @@ namespace Poem;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class Auth 
+class Auth implements Worker
 {
     /**
      * Create authorized user from this class
