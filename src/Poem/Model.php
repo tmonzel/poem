@@ -143,6 +143,11 @@ class Model implements JsonSerializable
         return isset($this->id);
     }
 
+    /**
+     * Update document if id is set, otherwise create a new one
+     * 
+     * @return mixed
+     */
     function save() 
     {
         if($this->exists()) {
@@ -175,7 +180,13 @@ class Model implements JsonSerializable
         return $attributes;
     }
 
-    static function prepareSchema(): array {
+    /**
+     * Prepare schema for migration
+     * 
+     * @return array
+     */
+    static function prepareSchema(): array 
+    {
         $calledClass = get_called_class();
         $schema = [];
 
@@ -283,9 +294,7 @@ class Model implements JsonSerializable
     static function create(array $attributes) 
     {
         $attributes = static::mutateAttributes($attributes);
-
         $insertId = static::collection()->insert($attributes);
-
         return new static($attributes + ['id' => $insertId]);
     }
 
