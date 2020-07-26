@@ -32,13 +32,6 @@ class Actor
     protected $story;
 
     /**
-     * Auth helper
-     * 
-     * @var Auth
-     */
-    protected $auth;
-
-    /**
      * Create a new actor instance.
      * Builds all defined behaviors
      * 
@@ -48,7 +41,6 @@ class Actor
     function __construct(Story $story) 
     {
         $this->story = $story;
-        $this->auth = $story->getAuth();
         $this->behaviors = $this->buildBehaviors();
     }
 
@@ -65,16 +57,6 @@ class Actor
         } else {
             $this->actions[$actionClass] = compact('initializer');
         }
-    }
-
-    /**
-     * Return the auth helper
-     * 
-     * @return Auth
-     */
-    function getAuth(): Auth 
-    {
-        return $this->auth;
     }
 
     /**
@@ -127,7 +109,6 @@ class Actor
             $action = new $actionClass;
             $action->setSubject($subject);
             $action->setPayload($payload);
-            $action->setAuth($this->auth);
 
             foreach($this->behaviors as $behavior) {
                 $behavior->prepareAction($action);

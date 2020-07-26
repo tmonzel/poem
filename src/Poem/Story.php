@@ -25,21 +25,14 @@ class Story
     protected $endpoint;
 
     /**
-     * 
-     * @var Auth
-     */
-    protected $auth;
-
-    /**
      * Create a new story
      * 
      * @param string $endpoint
      * @param Auth $auth
      */
-    function __construct(string $endpoint = '/api', Auth $auth = null) 
+    function __construct(string $endpoint = '/api') 
     {
         $this->endpoint = $endpoint;
-        $this->auth = $auth ?? new Auth();
     }
 
     /**
@@ -50,16 +43,6 @@ class Story
     function getActors(): array 
     {
         return $this->actors;
-    }
-
-    /**
-     * Return authenticator
-     * 
-     * @return Auth
-     */
-    function getAuth(): Auth 
-    {
-        return $this->auth;
     }
 
     /**
@@ -145,7 +128,14 @@ class Story
             throw new BadRequestException('Invalid method used');
         }
 
-        $this->auth->initialize($request);
+        $director = Director::get();
+
+        $director->eachWorkerWithInterface(
+            RequestHandler::class, 
+            function(RequestHandler $worker) use($request) {
+                $worker->handleRequest($request);
+            }
+        );
 
         $data = $this->parseQueryData($request);
 

@@ -30,13 +30,6 @@ abstract class Action
      * @var array 
      */
     protected $payload = [];
-    
-    /**
-     * User auth instance
-     * 
-     * @var Auth
-     */
-    protected $auth;
 
     /**
      * Provide the action type definition
@@ -77,16 +70,6 @@ abstract class Action
     function getPayload(): array 
     {
         return $this->payload;
-    }
-
-    /**
-     * Set the authentication helper
-     * 
-     * @param Auth $auth
-     */
-    function setAuth(Auth $auth) 
-    {
-        $this->auth = $auth;
     }
 
     /**

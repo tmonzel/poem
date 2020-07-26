@@ -1,16 +1,46 @@
 <?php
 
-namespace Poem\Support;
+namespace Poem;
 
 use Exception;
 
 class Director {
+    private static $assignedDirector;
+
     private $registeredServices = [];
     private $services = [];
 
-    function registerWorker(string $identifier, string $class) 
+    static function get() {
+        return static::$assignedDirector;
+    }
+
+    static function provide($accessor) {
+        return static::get()->accessWorker($accessor);
+    }
+
+    function assign() {
+        static::$assignedDirector = $this;
+    }
+
+    function eachWorkerWithInterface($interface, callable $callback) {
+        foreach($this->getWorkerWithInterface($interface) as $worker) {
+            $callback($worker);
+        }
+    }
+
+    function getWorkerWithInterface(string $interface) {
+        $services = array_filter($this->registeredServices, function($class) use($interface) {
+            return class_implements($class, $interface) !== false;
+        });
+
+        return array_map(function($val, $identifier) { 
+            return $this->accessWorker($identifier);
+        }, $services);
+    }
+
+    function hire(string $workerClass, callable $initializer = null) 
     {
-        $this->registeredServices[$identifier] = $class;
+        $this->registeredServices[$workerClass::Accessor] = compact('workerClass', 'initializer');
     }
     
     function accessWorker($name)
@@ -20,13 +50,21 @@ class Director {
         }
 
         if(!isset($this->registeredServices[$name])) {
-            throw new Exception("Service with name $name not registered");
+            throw new Exception("Worker with name $name not registered");
         }
 
-        if(!class_exists($this->registeredServices[$name])) {
-            throw new Exception("Service class " . $this->registeredServices[$name] . " does not exist");
+        extract($this->registeredServices[$name]);
+
+        if(!class_exists($workerClass)) {
+            throw new Exception("Worker class " . $workerClass . " does not exist");
         }
 
-        return $this->services[$name] = new $this->registeredServices[$name];
+        $worker = new $workerClass;
+
+        if(isset($initializer)) {
+            $initializer($worker);
+        }
+
+        return $this->services[$name] = $worker;
     }
 }
