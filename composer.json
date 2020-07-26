@@ -10,5 +10,12 @@
 
     "config": {
         "process-timeout": 0
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Poem\\": "src/Poem",
+            "": "app/"
+        }
     }
 }

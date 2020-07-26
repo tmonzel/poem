@@ -4,7 +4,14 @@
  * Serve api endpoint
  */
 namespace Poem {
-    require __DIR__ . "/../bootstrap.php";
+    require __DIR__ . '/../vendor/autoload.php';
+    
+    /** @var Director $director */
+    $director = require __DIR__ . "/../bootstrap.php";
+    $director->hire(Auth\Worker::class);
+
+    // Register director
+    $director->assign();
 
     // Tell a new story
     $story = Story::new();
