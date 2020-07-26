@@ -4,8 +4,11 @@ namespace Poem\Actor\Actions;
 
 use Poem\Actor\Action;
 use Poem\Actor\Exceptions\BadRequestException;
+use Poem\Auth\Accessor as AuthAccessor;
 
 class LoginAction extends Action {
+    use AuthAccessor;
+
     static $type = 'login';
     
     function prepareData() 
@@ -29,8 +32,8 @@ class LoginAction extends Action {
             throw new BadRequestException('Invalid login');
         }
 
-        // Generate Token
-        $token = $this->auth->createTokenFor($user);
+        // Create token via auth worker
+        $token = static::Auth()->createTokenFor($user);
 
         return compact('token');
     }

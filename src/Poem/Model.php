@@ -9,10 +9,12 @@ use Poem\Data\Connection;
 use Poem\Model\AttributeAccessor;
 use Poem\Model\Relationships;
 use Poem\Model\Set;
+use Poem\Data\Accessor as DataAccessor;
 
 class Model implements JsonSerializable 
 {
-    use AttributeAccessor, 
+    use DataAccessor,
+        AttributeAccessor, 
         Relationships;
 
     /**
@@ -211,7 +213,7 @@ class Model implements JsonSerializable
      */
     static function connection(): Connection 
     {
-        return Data::resolveConnection(static::$clientKey);
+        return static::Data()->resolveConnection(static::$clientKey);
     }
 
     /**

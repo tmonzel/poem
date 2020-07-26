@@ -5,16 +5,17 @@ namespace Poem\Actor\Behaviors;
 use Poem\Actor;
 use Poem\Actor\Behavior;
 use Poem\Actor\Exceptions\UnauthorizedException;
-
+use Poem\Auth\Accessor as AuthAccessor;
 /**
- * Guard behavior
+ * Protect actions from being accessed
  */
 class GuardBehavior extends Behavior 
 {
+    use AuthAccessor;
+    
     function initialize(Actor $actor, string $actionType, array $payload = []) 
     {
         $except = $permit = [];
-        $auth = $actor->getAuth();
 
         extract($this->config);
 
@@ -22,7 +23,7 @@ class GuardBehavior extends Behavior
             return;
         }
         
-        if(!$auth->authorized()) {
+        if(!static::Auth()->authorized()) {
             throw new UnauthorizedException('Action not allowed');
         }
     }
