@@ -8,15 +8,11 @@ use Poem\Actor\Exceptions\NotFoundException;
 
 class Actor 
 {
-    use Module;
+    use Module,
+        Actable;
 
-    /**
-     * Initialized behaviors
-     * 
-     * @var array
-     */
-    protected $behaviors = [];
-
+    const PREPARE_ACTION_EVENT = 'actor_prepare_action';
+    
     /**
      * Registered actions
      * 
@@ -33,15 +29,15 @@ class Actor
 
     /**
      * Create a new actor instance.
-     * Builds all defined behaviors
      * 
-     * @param Story $story,
-     * @param Auth $auth
+     * @param Story $story
      */
     function __construct(Story $story) 
     {
         $this->story = $story;
-        $this->behaviors = $this->buildBehaviors();
+
+        // Initialize behaviors if defined
+        static::initializeBehaviors();
     }
 
     /**
@@ -70,31 +66,6 @@ class Actor
     }
 
     /**
-     * Build defined behaviors
-     * 
-     * @return array
-     */
-    protected function buildBehaviors(): array 
-    {
-        $behaviors = [];
-        $calledClass = get_called_class();
-
-        if(!defined($calledClass . '::Behaviors')) {
-            return $behaviors;
-        }
-
-        foreach($calledClass::Behaviors as $k => $behaviorClass) {
-            if(is_numeric($k)) {
-                $behaviors[] = new $behaviorClass();
-            } else {
-                $behaviors[] = new $k($behaviorClass);
-            }
-        }
-
-        return $behaviors;
-    }
-
-    /**
      * @TODO: Move to action statement (maybe?)
      */
     function executeAction(string $actionType, array $payload = []) 
@@ -109,10 +80,6 @@ class Actor
             $action = new $actionClass;
             $action->setSubject($subject);
             $action->setPayload($payload);
-
-            foreach($this->behaviors as $behavior) {
-                $behavior->prepareAction($action);
-            }
 
             if(isset($initializer)) {
                 $initializer($action);
@@ -139,9 +106,10 @@ class Actor
      */
     function prepareAction(string $actionType, array $payload = []) 
     {
-        foreach($this->behaviors as $behavior) {
-            $behavior->initialize($this, $actionType, $payload);
-        }
+        $this->dispatchEvent(self::PREPARE_ACTION_EVENT, [
+            'actionType' => $actionType, 
+            'payload' => $payload
+        ]);
 
         $this->initialize($actionType, $payload);
 

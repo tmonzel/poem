@@ -1,13 +1,14 @@
 <?php
 
 namespace Product  {
-    use Poem\Actor\Behaviors\GuardBehavior;
-    use Poem\Actor\Behaviors\ResourceBehavior;
+
+    use Poem\Actor\BehaveAsResource;
+    use Poem\Auth\BehaveAsGuard;
 
     class Actor extends \Poem\Actor {
         const Behaviors = [
-            ResourceBehavior::class,
-            GuardBehavior::class => [
+            BehaveAsResource::class,
+            BehaveAsGuard::class => [
                 'except' => ['find']
             ]
         ];

@@ -1,20 +1,25 @@
 <?php
 
-namespace Poem\Actor\Behaviors;
+namespace Poem\Actor;
 
 use Poem\Actor;
 use Poem\Actor\Actions\CreateAction;
 use Poem\Actor\Actions\DestroyAction;
 use Poem\Actor\Actions\FindAction;
 use Poem\Actor\Actions\UpdateAction;
-use Poem\Actor\Behavior;
+use Poem\Behavior;
 
 /**
- * Resource behaviors register all CRUD-Actions
- * on the fly (find, create, update, destroy)
+ * Actor behaves as a Resource
+ * Adds default CRUD actions
  */
-class ResourceBehavior extends Behavior {
-    function initialize(Actor $actor, string $actionType, array $payload = []) {
+class BehaveAsResource extends Behavior {
+    function initialize()
+    {
+        $this->shouldActOn(Actor::PREPARE_ACTION_EVENT, [$this, 'prepareAction']);
+    }
+
+    function prepareAction(Actor $actor, array $payload = []) {
         $actor->registerAction(FindAction::class);
         $actor->registerAction(DestroyAction::class);
         $actor->registerAction(UpdateAction::class);

@@ -5,9 +5,9 @@ namespace User;
 use Poem\Actor\Actions\{ 
     LoginAction 
 };
-use Poem\Actor\Behaviors\GuardBehavior;
-use Poem\Actor\Behaviors\ResourceBehavior;
+use Poem\Actor\BehaveAsResource;
 use Poem\Actor\Exceptions\UnauthorizedException;
+use Poem\Auth\BehaveAsGuard;
 
 class Actor extends \Poem\Actor 
 {
@@ -18,8 +18,8 @@ class Actor extends \Poem\Actor
      * @var array
      */
     const Behaviors = [
-        ResourceBehavior::class,
-        GuardBehavior::class => [
+        BehaveAsResource::class,
+        BehaveAsGuard::class => [
             'except' => ['login']
         ]
     ];

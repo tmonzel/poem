@@ -2,22 +2,19 @@
 
 namespace Retailer  {
 
-    use Poem\Actor\Behaviors\{
-        ResourceBehavior, 
-        GuardBehavior
-    };
+    use Poem\Actor\BehaveAsResource;
+    use Poem\Auth\BehaveAsGuard;
 
     class Actor extends \Poem\Actor {
         const Behaviors = [
-            ResourceBehavior::class,
-            GuardBehavior::class => [
+            BehaveAsResource::class,
+            BehaveAsGuard::class => [
                 'permit' => [
                     '*' => ['admin'],
                     'find' => ['admin']
                 ],
 
                 'except' => [
-                    'find', 
                     'create'
                 ]
             ]

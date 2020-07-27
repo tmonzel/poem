@@ -2,7 +2,7 @@
 
 namespace Market;
 
-use Poem\Actor\Behaviors\ResourceBehavior;
+use Poem\Actor\BehaveAsResource;
 
 class Actor extends \Poem\Actor {
 
@@ -12,6 +12,6 @@ class Actor extends \Poem\Actor {
      * @var array
      */
     const Behaviors = [
-        ResourceBehavior::class,
+        BehaveAsResource::class,
     ];
 }

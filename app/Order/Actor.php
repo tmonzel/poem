@@ -1,11 +1,12 @@
 <?php
 
 namespace Order  {
-    use Poem\Actor\Behaviors\ResourceBehavior;
+
+    use Poem\Actor\BehaveAsResource;
 
     class Actor extends \Poem\Actor {
         const Behaviors = [
-            ResourceBehavior::class,
+            BehaveAsResource::class,
         ];
 
         function prepareEvents($events) {
