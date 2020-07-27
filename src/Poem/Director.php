@@ -29,13 +29,14 @@ class Director {
     }
 
     function getWorkerWithInterface(string $interface) {
-        $services = array_filter($this->registeredServices, function($class) use($interface) {
-            return class_implements($class, $interface) !== false;
+        $services = array_filter($this->registeredServices, function($definition) use($interface) {
+            $interfaces = class_implements($definition['workerClass']);
+            return $interfaces ? isset($interfaces[$interface]) : false;
         });
 
-        return array_map(function($val, $identifier) { 
-            return $this->accessWorker($identifier);
-        }, $services);
+        return array_map(function($accessor) { 
+            return $this->accessWorker($accessor);
+        }, array_keys($services));
     }
 
     function hire(string $workerClass, callable $initializer = null) 
