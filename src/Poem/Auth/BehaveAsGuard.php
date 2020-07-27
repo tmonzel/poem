@@ -18,7 +18,7 @@ class BehaveAsGuard extends Behavior {
         $this->shouldActOn(Actor::PREPARE_ACTION_EVENT, [$this, 'prepareAction']);
     }
 
-    function prepareAction($actor, array $payload) 
+    function prepareAction(Actor $actor, array $payload) 
     {
         $except = $permit = [];
         
@@ -28,7 +28,7 @@ class BehaveAsGuard extends Behavior {
         if(array_search($actionType, $except) !== false) {
             return;
         }
-        var_dump(static::Auth()->authorized());
+        
         if(!static::Auth()->authorized()) {
             throw new UnauthorizedException('Action not allowed');
         }
