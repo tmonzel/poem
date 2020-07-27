@@ -15,18 +15,24 @@ class Worker implements RequestHandler
      * 
      * @var string
      */
-    static $userModel = 'User\\Model';
+    protected $userSubject = 'User\\Model';
 
     protected $token;
     protected $user;
 
     function handleRequest(Request $request) {
         $headers = $request->headers->all();
-
+        
         if(isset($headers['authorization']) && isset($headers['authorization'][0])) {
             $token = $headers['authorization'][0];
             $this->setToken($token);
+            
         }
+    }
+
+    function setUserSubject(string $userSubject) 
+    {
+        $this->userSubject = $userSubject;
     }
 
     function setToken(string $token) 
@@ -80,7 +86,7 @@ class Worker implements RequestHandler
             $data = $this->decodePayload($payload);
             
             if(isset($data['userId'])) {
-                $user = static::$userModel::pick($data['userId']);
+                $user = $this->userSubject::pick($data['userId']);
                 
                 if($user) {
                     // User found and set
