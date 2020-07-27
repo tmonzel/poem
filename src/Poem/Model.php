@@ -18,6 +18,8 @@ class Model implements JsonSerializable
         Relationships,
         Actable;
 
+    const BEFORE_SAVE_EVENT = 'model_before_save';
+
     /**
      * Client connection name
      * 
@@ -154,36 +156,26 @@ class Model implements JsonSerializable
      * 
      * @return mixed
      */
-    function save() 
+    function save($forceCreate = false) 
     {
-        if($this->exists()) {
+        $this->dispatchEvent(self::BEFORE_SAVE_EVENT, $this->attributes);
+        
+        if($this->exists() && !$forceCreate) {
             // Update existing document
             return static::collection()->updateFirst(
-                static::mutateAttributes($this->attributes), 
+                $this->attributes, 
                 [static::$primaryKey => $this->id]
             );
 
         } else {
             // Create new document
             $insertId = static::collection()->insert(
-                static::mutateAttributes($this->attributes)
+                $this->attributes
             );
 
             $this->id = $insertId;
             return true;
         }
-    }
-
-    /**
-     * Mutate attributes before create or update
-     * 
-     * @static
-     * @param array $attributes
-     * @return array
-     */
-    protected static function mutateAttributes(array $attributes): array 
-    {
-        return $attributes;
     }
 
     /**
@@ -299,9 +291,9 @@ class Model implements JsonSerializable
      */
     static function create(array $attributes) 
     {
-        $attributes = static::mutateAttributes($attributes);
-        $insertId = static::collection()->insert($attributes);
-        return new static($attributes + ['id' => $insertId]);
+        $document = new static($attributes);
+        $document->save(true);
+        return $document;
     }
 
     /**
