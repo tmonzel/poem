@@ -194,7 +194,7 @@ class Table implements CollectionAdapter
     function deleteFirst(array $conditions = []) 
     {
         $where = $this->buildWhere($conditions);
-        $sql = "DELETE FROM $this->name WHERE $where";  
+        $sql = "DELETE FROM $this->name WHERE $where LIMIT 1";  
 
         $stmt = $this->client->query($sql, $conditions);
         return $stmt;
