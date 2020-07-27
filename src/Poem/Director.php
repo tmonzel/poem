@@ -4,32 +4,83 @@ namespace Poem;
 
 use Exception;
 
-class Director {
+class Director 
+{
+    /**
+     * Assigned director instance
+     * 
+     * @static
+     * @var Director
+     */
     private static $assignedDirector;
 
-    private $registeredServices = [];
-    private $services = [];
+    /**
+     * Hired worker classes
+     * 
+     * @var array
+     */
+    protected $hiredWorkers = [];
+    
+    /**
+     * Initialized worker instances
+     * 
+     * @var array
+     */
+    protected $workers = [];
 
-    static function get() {
+    /**
+     * Returns the assigned director instance
+     * 
+     * @static
+     * @return Director
+     */
+    static function get(): Director
+    {
         return static::$assignedDirector;
     }
 
-    static function provide($accessor) {
+    /**
+     * Provide a worker by accessor
+     * 
+     * @static
+     * @param string $accessor
+     * @return mixed
+     */
+    static function provide(string $accessor)
+    {
         return static::get()->accessWorker($accessor);
     }
 
-    function assign() {
+    /**
+     * Assign the director to use globally
+     */
+    function assign() 
+    {
         static::$assignedDirector = $this;
     }
 
-    function eachWorkerWithInterface($interface, callable $callback) {
+    /**
+     * Walk each worker with a given interface
+     * 
+     * @param string $interface
+     * @param callable $onEach
+     */
+    function eachWorkerWithInterface(string $interface, callable $onEach) 
+    {
         foreach($this->getWorkerWithInterface($interface) as $worker) {
-            $callback($worker);
+            $onEach($worker);
         }
     }
 
-    function getWorkerWithInterface(string $interface) {
-        $services = array_filter($this->registeredServices, function($definition) use($interface) {
+    /**
+     * Returns all worker interfaces with a given interface
+     * 
+     * @param string $interface
+     * @return array
+     */
+    function getWorkerWithInterface(string $interface): array
+    {
+        $services = array_filter($this->hiredWorkers, function($definition) use($interface) {
             $interfaces = class_implements($definition['workerClass']);
             return $interfaces ? isset($interfaces[$interface]) : false;
         });
@@ -39,22 +90,34 @@ class Director {
         }, array_keys($services));
     }
 
+    /**
+     * Hire a worker by class
+     * 
+     * @param string $workerClass
+     * @param callable $initializer
+     */
     function hire(string $workerClass, callable $initializer = null) 
     {
-        $this->registeredServices[$workerClass::Accessor] = compact('workerClass', 'initializer');
+        $this->hiredWorkers[$workerClass::Accessor] = compact('workerClass', 'initializer');
     }
     
-    function accessWorker($name)
+    /**
+     * Access given worker by accessor
+     * 
+     * @param string $name
+     * @return mixed
+     */
+    function accessWorker(string $name)
     {
-        if(isset($this->services[$name])) {
-            return $this->services[$name];
+        if(isset($this->workers[$name])) {
+            return $this->workers[$name];
         }
 
-        if(!isset($this->registeredServices[$name])) {
+        if(!isset($this->hiredWorkers[$name])) {
             throw new Exception("Worker with name $name not registered");
         }
 
-        extract($this->registeredServices[$name]);
+        extract($this->hiredWorkers[$name]);
 
         if(!class_exists($workerClass)) {
             throw new Exception("Worker class " . $workerClass . " does not exist");
@@ -66,6 +129,6 @@ class Director {
             $initializer($worker);
         }
 
-        return $this->services[$name] = $worker;
+        return $this->workers[$name] = $worker;
     }
 }
