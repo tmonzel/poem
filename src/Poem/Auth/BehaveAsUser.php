@@ -8,18 +8,17 @@ use Poem\Model;
 /**
  * Model behavior
  */
-class BehaveAsUser extends Behavior {
+class BehaveAsUser extends Behavior 
+{
     function initialize() 
     {
-        $this->shouldActOn('model_map_attributes', [$this, 'mapAttributes']);
+        $this->shouldActOn(Model::BEFORE_SAVE_EVENT, [$this, 'beforeSave']);
     }
 
-    function mapAttributes(Model $user, array $payload) 
+    function beforeSave(Model $user, array $payload = []) 
     {
-        if(isset($payload['password'])) {
-            $payload['password'] = password_hash($payload['password'], PASSWORD_ARGON2I);
+        if(isset($user->password)) {
+            $user->password = password_hash($user->password, PASSWORD_ARGON2I);
         }
-
-        return $payload;
     }
 }
