@@ -30,8 +30,7 @@ namespace User {
          */
         const Schema = [
             'name' => 'string',
-            'password' => 'string',
-            'role' => Role::class
+            'password' => 'string'
         ];
 
         /**
@@ -49,15 +48,6 @@ namespace User {
 
             return $attributes;
         }
-
-        /**
-         * User belongs to one role
-         * 
-         * @var array
-         */
-       /* const BelongsTo = [
-            'role' => Role::class
-        ];*/
 
         /**
          * User validations
