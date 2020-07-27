@@ -20,7 +20,7 @@ class Actor extends \Poem\Actor
     const Behaviors = [
         BehaveAsResource::class,
         BehaveAsGuard::class => [
-            'except' => ['login']
+            'except' => ['login', 'create']
         ]
     ];
 
