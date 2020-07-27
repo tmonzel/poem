@@ -15,7 +15,8 @@ class Model implements JsonSerializable
 {
     use DataAccessor,
         AttributeAccessor, 
-        Relationships;
+        Relationships,
+        Actable;
 
     /**
      * Client connection name
@@ -40,8 +41,11 @@ class Model implements JsonSerializable
      */
     function __construct(array $attributes = [])
     {
+        // Initialize behaviors (!once per class)
+        static::initializeBehaviors();
+        
         // Initialize relationships if there are any (!once per class)
-        $this->initializeRelationships();
+        static::initializeRelationships();
 
         // Write initial attributes
         $this->writeAttributes($attributes);

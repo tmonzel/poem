@@ -1,6 +1,8 @@
 <?php
 
 namespace User {
+
+    use Poem\Auth\BehaveAsUser;
     use Poem\Model\Validateable;
 
     class Model extends \Poem\Model {
@@ -12,6 +14,15 @@ namespace User {
          * @var string
          */
         const Type = 'users';
+
+        /**
+         * Behaviors for this model
+         * 
+         * @var array
+         */
+        const Behaviors = [
+            BehaveAsUser::class
+        ];
 
         /**
          * Public attributes
@@ -32,22 +43,6 @@ namespace User {
             'name' => 'string',
             'password' => 'string'
         ];
-
-        /**
-         * Mutate attributes before create or update
-         * 
-         * @static
-         * @param array $attributes
-         * @return array
-         */
-        protected static function mutateAttributes(array $attributes): array
-        {
-            if(isset($attributes['password'])) {
-                $attributes['password'] = password_hash($attributes['password'], PASSWORD_ARGON2I);
-            }
-
-            return $attributes;
-        }
 
         /**
          * User validations

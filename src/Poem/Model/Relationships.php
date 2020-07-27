@@ -16,7 +16,7 @@ trait Relationships {
 
     protected $relations = [];
 
-    function initializeRelationships() {
+    static function initializeRelationships() {
         $calledClass = get_called_class();
 
         // Do not initialize twice for this model
