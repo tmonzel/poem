@@ -5,6 +5,7 @@ namespace Poem\Model;
 use Poem\Model\Relationships\BelongsToRelationship;
 use Poem\Model\Relationships\HasManyRelationship;
 use Poem\Model\Relationships\HasOneRelationship;
+use Poem\Model\Relationships\Relationship;
 
 trait Relationships {
     static $relationships = [];
@@ -39,12 +40,22 @@ trait Relationships {
         }
     }
 
-    function getRelationship($name) {
+    function getRelationship($name): Relationship {
         $calledClass = get_called_class();
     
         if(isset(static::$relationships[$calledClass][$name])) {
             return static::$relationships[$calledClass][$name];
         }
+    }
+
+    function getConnectedRelationship($name) {
+        $relationship = $this->getRelationship($name);
+
+        if($relationship) {
+            $relationship->connect($this);
+        }
+
+        return $relationship;
     }
 
     function hasRelation($name) {
