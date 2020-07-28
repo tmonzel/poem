@@ -8,9 +8,11 @@ use Poem\Actor\Actions\{
 use Poem\Actor\BehaveAsResource;
 use Poem\Actor\Exceptions\UnauthorizedException;
 use Poem\Auth\BehaveAsGuard;
+use Poem\Auth\Accessor as AuthAccessor;
 
 class Actor extends \Poem\Actor 
 {
+    use AuthAccessor;
 
     /**
      * Initializes with all the resource actions
@@ -32,11 +34,11 @@ class Actor extends \Poem\Actor
     {
         $this->registerAction(LoginAction::class);
         $this->registerAction('me', function($payload) {
-            if(!$this->auth->authorized()) {
+            if(!static::Auth()->authorized()) {
                 throw new UnauthorizedException('No authorized user found');
             }
 
-            return $this->auth->user();
+            return static::Auth()->user();
         });
     }
 }
