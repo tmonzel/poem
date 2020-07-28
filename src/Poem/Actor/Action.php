@@ -2,8 +2,6 @@
 
 namespace Poem\Actor;
 
-use Poem\Auth;
-
 abstract class Action 
 {
     /**
