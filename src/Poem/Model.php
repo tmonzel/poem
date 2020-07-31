@@ -43,10 +43,10 @@ class Model implements JsonSerializable
      */
     function __construct(array $attributes = [])
     {
-        // Initialize behaviors (!once per class)
+        // Initialize behaviors once per class
         static::initializeBehaviors();
         
-        // Initialize relationships if there are any (!once per class)
+        // Initialize relationships once per class 
         static::initializeRelationships();
 
         // Write initial attributes
