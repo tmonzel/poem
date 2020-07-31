@@ -32,7 +32,7 @@ class Table implements CollectionAdapter
      * Create table instance.
      * 
      * @param string $name
-     * @param PDO $connection
+     * @param Client $client
      */
     function __construct(string $name, Client $client) 
     {
@@ -202,7 +202,11 @@ class Table implements CollectionAdapter
 
     function deleteMany(array $conditions = []) 
     {
-        
+        $where = $this->buildWhere($conditions);
+        $sql = "DELETE FROM $this->name WHERE $where";  
+
+        $stmt = $this->client->query($sql, $conditions);
+        return $stmt;
     }
 
     private function buildWhere(array $conditions) 
