@@ -25,6 +25,16 @@ class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
      */
     function __construct(array $items = [])
     {
+        $this->fill($items);
+    }
+
+    /**
+     * Set the items in the set
+     * 
+     * @param array $items
+     */
+    function fill(array $items) 
+    {
         $this->items = $items;
     }
 
@@ -49,7 +59,17 @@ class Set implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
         $keys = array_keys($this->items);
         $items = array_map($callback, $this->items, $keys);
 
-        return new static(array_combine($keys, $items));
+        return $this->new(array_combine($keys, $items));
+    }
+
+    /**
+     * Create a new set
+     * 
+     * @param array $items
+     * @return static
+     */
+    function new(array $items = []) {
+        return new static($items);
     }
 
     /**
