@@ -17,4 +17,11 @@ class RelatedSet extends PersistantSet {
     {
         $this->subject::create($this->conditions + $attributes);
     }
+
+    function new(array $items = [])
+    {
+        $set = new static($this->subject, $this->relatedDocument);
+        $set->fill($items);
+        return $set;
+    }
 }
