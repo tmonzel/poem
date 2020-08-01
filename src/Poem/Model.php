@@ -309,16 +309,15 @@ class Model implements JsonSerializable
     }
 
     /**
-     * Delete a single document by id
+     * Delete all documents matching the given conditions
      * 
      * @static
-     * @param int $id
+     * @param array $conditions
      * @return bool
      */
-    static function delete(int $id) 
+    static function delete(array $conditions = []) 
     {
-        $document = static::first(compact('id'));
-        return $document->destroy();
+        return static::collection()->deleteMany($conditions);
     }
 
     /**
