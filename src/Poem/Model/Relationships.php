@@ -40,12 +40,14 @@ trait Relationships {
         }
     }
 
-    function getRelationship($name): Relationship {
+    function getRelationship($name): ?Relationship {
         $calledClass = get_called_class();
     
         if(isset(static::$relationships[$calledClass][$name])) {
             return static::$relationships[$calledClass][$name];
         }
+
+        return null;
     }
 
     function getConnectedRelationship($name) {
