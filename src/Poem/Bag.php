@@ -49,6 +49,25 @@ class Bag implements IteratorAggregate, JsonSerializable
         return isset($this->_params[$name]);
     }
 
+    /**
+     * Inverse of has()
+     * 
+     * @param string $name
+     * @return bool
+     */
+    function missing(string $name): bool
+    {
+        return !$this->has($name);
+    }
+
+    /**
+     * 
+     */
+    function present(string $name) 
+    {
+        return $this->has($name) && !empty($this->_params[$name]);
+    }
+
     function toArray() 
     {
         return $this->_params;
