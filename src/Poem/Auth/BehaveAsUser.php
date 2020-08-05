@@ -3,20 +3,22 @@
 namespace Poem\Auth;
 
 use Poem\Behavior;
-use Poem\Model;
+use Poem\Model\Collection;
 
 /**
- * Model behavior
+ * Collection behavior
  */
 class BehaveAsUser extends Behavior 
 {
     function initialize() 
     {
-        $this->shouldActOn(Model::BEFORE_SAVE_EVENT, [$this, 'beforeSave']);
+        $this->shouldActOn(Collection::BEFORE_SAVE_EVENT, [$this, 'beforeSave']);
     }
 
-    function beforeSave(Model $user, array $payload = []) 
+    function beforeSave(Collection $collection, array $payload = []) 
     {
+        [$user] = $payload;
+        
         if(isset($user->password)) {
             $user->password = password_hash($user->password, PASSWORD_ARGON2I);
         }
