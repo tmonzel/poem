@@ -92,9 +92,9 @@ class Actor
      * 
      * @param string $actionType
      * @param array $payload
-     * @return JsonSerializable
+     * @return mixed
      */
-    function executeAction(string $actionType, array $payload = []): JsonSerializable 
+    function executeAction(string $actionType, array $payload = []) 
     {
         extract($this->actions[$actionType]);
 
