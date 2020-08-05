@@ -178,10 +178,7 @@ class Document implements JsonSerializable
         
         $type = $this->_type;
         $id = $this->id;
-
-        $attributes = array_filter( $this->_attributes, function($key) {
-            return array_search($key, $this->_hiddenAttributes) === false;
-        }, ARRAY_FILTER_USE_KEY);
+        $attributes = $this->collectVisibleAttributes();
 
         if(isset($attributes['id'])) {
             unset($attributes['id']);
@@ -199,14 +196,44 @@ class Document implements JsonSerializable
     function translateWithFormat(array $format): array
     {
         $attributes = [];
+        $visibleAttributes = $this->collectVisibleAttributes();
 
         foreach($format as $n) {
-            if(array_search($n, $this->_hiddenAttributes) === false) {
-                $attributes[$n] = $this->_attributes[$n];
+            if(isset($visibleAttributes[$n])) {
+                $attributes[$n] = $visibleAttributes[$n];
             }
         }
 
         return $attributes;
+    }
+
+    /**
+     * Collects the not-hidden attributes
+     * 
+     * @return array
+     */
+    function collectVisibleAttributes(): array
+    {
+        return array_filter($this->_attributes, function($key) {
+            return array_search($key, $this->_hiddenAttributes) === false;
+        }, ARRAY_FILTER_USE_KEY);
+    }
+
+    /**
+     * Return an array with the given attribute names
+     * 
+     * @param array $attributeNames
+     * @return array
+     */
+    function extract(array $attributeNames): array
+    {
+        $result = [];
+
+        foreach($attributeNames as $name) {
+            $result[$name] = $this->readAttribute($name);
+        }
+
+        return $result;
     }
 
     /**
