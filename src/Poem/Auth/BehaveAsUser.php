@@ -4,6 +4,7 @@ namespace Poem\Auth;
 
 use Poem\Behavior;
 use Poem\Model\Collection;
+use Poem\Model\Document;
 
 /**
  * Collection behavior
@@ -16,10 +17,11 @@ class BehaveAsUser extends Behavior
     }
 
     function beforeSave(Collection $collection, array $payload = []) 
-    {
-        [$user] = $payload;
+    {   
+        /** @var Document $user */
+        $user = $payload[0];
         
-        if(isset($user->password)) {
+        if($user->isDirty('password')) {
             $user->password = password_hash($user->password, PASSWORD_ARGON2I);
         }
     }
