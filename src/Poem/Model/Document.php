@@ -30,6 +30,14 @@ class Document implements JsonSerializable
     protected $_hiddenAttributes = [];
 
     /**
+     * Holds all attribute names that were modified or added
+     * after the initial creation
+     * 
+     * @var array
+     */
+    protected $_dirtyAttributes = [];
+
+    /**
      * Format structure
      * 
      * @var array
@@ -45,7 +53,7 @@ class Document implements JsonSerializable
     function __construct(string $type, array $attributes = [])
     {
         $this->_type = $type;
-        $this->fill($attributes);
+        $this->_attributes = $attributes;
 
         $calledClass = get_called_class();
 
@@ -108,6 +116,7 @@ class Document implements JsonSerializable
      */
     function writeAttribute(string $name, $value): void
     {
+        $this->_dirtyAttributes[$name] = true;
         $this->_attributes[$name] = $value;
     }
 
@@ -120,6 +129,17 @@ class Document implements JsonSerializable
     function has(string $name): bool
     {
         return isset($this->_attributes[$name]);
+    }
+
+    /**
+     * Check if the given attribute name were modified
+     * 
+     * @param string $name
+     * @return bool
+     */
+    function isDirty(string $name): bool
+    {
+        return isset($this->_dirtyAttributes[$name]);
     }
 
     /**
