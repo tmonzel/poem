@@ -62,6 +62,13 @@ class Document implements JsonSerializable
         $this->_type = $type;
         $this->_attributes = $attributes;
 
+        if(!$this->exists()) {
+            // If there is no id attribute mark all attributes as dirty
+            foreach(array_keys($this->_attributes) as $attributeName) {
+                $this->_dirtyAttributes[$attributeName] = true;
+            }
+        }
+
         $calledClass = get_called_class();
 
         if(defined($calledClass . '::Hide')) {
