@@ -38,6 +38,13 @@ class Document implements JsonSerializable
     protected $_dirtyAttributes = [];
 
     /**
+     * Holds all validation errors by attribute name
+     * 
+     * @var array
+     */
+    protected $_errors = [];
+
+    /**
      * Format structure
      * 
      * @var array
@@ -147,6 +154,7 @@ class Document implements JsonSerializable
      * Uses Document::writeAttribute() on every iteration
      * 
      * @param array $attributes
+     * @return void
      */
     function fill(array $attributes): void 
     {
@@ -159,10 +167,46 @@ class Document implements JsonSerializable
      * Set serialization format.
      * 
      * @param array|null $format
+     * @return void
      */
-    function setFormat(?array $format) 
+    function setFormat(?array $format): void 
     {
         $this->_format = $format;
+    }
+
+    /**
+     * Sets validation errors for this document.
+     * 
+     * @param array $errors
+     * @return void
+     */
+    function setErrors(array $errors): void 
+    {
+        $this->_errors = $errors;
+    }
+
+    /**
+     * Check for validation errors
+     * 
+     * @return bool
+     */
+    function hasErrors(): bool 
+    {
+        foreach($this->_errors as $error) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns all validation errors.
+     * 
+     * @return bool
+     */
+    function getErrors(): array 
+    {
+        return $this->_errors;
     }
 
     /**

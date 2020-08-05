@@ -7,8 +7,6 @@ use Poem\Model\Validateable;
 
 class Collection extends \Poem\Model\Collection 
 {
-    use Validateable;
-
     /**
      * Database schema needed for migrations
      * 

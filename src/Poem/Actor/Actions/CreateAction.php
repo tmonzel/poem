@@ -31,17 +31,15 @@ class CreateAction extends Action
 
         $attributes = $this->map($this->payload->attributes);
         $document = $this->collection->new($attributes);
-
-        /*if(method_exists($document, 'valid')) {
-            if(!$document->valid()) {
+        
+        if(!$this->collection->save($document)) {
+            if($document->hasErrors()) {
                 throw new BadRequestException(
                     'Validation errors', 
-                    $document->validationErrors()
+                    $document->getErrors()
                 );
             }
-        }*/
-
-        $this->collection->save($document);
+        }
 
         return $document;
     }

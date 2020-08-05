@@ -135,14 +135,17 @@ class Collection
     }
 
     /**
-     * Update document if exists, 
-     * otherwise create a new one
+     * Updates or creates a given document.
      * 
      * @param Document $document
      * @return mixed
      */
     function save(Document $document) 
     {
+        if(!$this->validate($document)) {
+            return false;
+        }
+        
         $this->dispatchEvent(self::BEFORE_SAVE_EVENT, [$document]);
         
         if($document->exists()) {
@@ -161,6 +164,50 @@ class Collection
             $document->id = $insertId;
             return true;
         }
+    }
+
+    /**
+     * Validates a given document
+     * 
+     * @param Document $document
+     * @return bool
+     */
+    function validate(Document $document): bool 
+    {
+        $validations = $this->validations();
+        $errors = [];
+
+        foreach($validations as $name => $config) {
+            if(!is_array($config)) {
+                $config = [$config];   
+            }
+
+            foreach($config as $test) {
+                switch($test) {
+                    case 'required':
+                        if(!$document->has($name)) {
+                            $errors[$name] = [
+                                'status' => 400,
+                                'title' => $name . " is required"
+                            ];
+                        }
+                }
+            }
+        }
+        
+        $document->setErrors($errors);
+
+        return !$document->hasErrors();
+    }
+
+    /**
+     * Override this to specify validations
+     * 
+     * @return array
+     */
+    function validations(): array
+    {
+        return [];
     }
 
     /**
