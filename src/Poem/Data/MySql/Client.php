@@ -94,7 +94,7 @@ class Client implements Connection {
         $this->query(sprintf($sql, implode(',', $fields)));
     }
 
-    function accessCollection($name): CollectionAdapter 
+    function getCollectionAdapter(string $name): CollectionAdapter
     {
         if(isset($this->collections[$name])) {
             return $this->collections[$name];
