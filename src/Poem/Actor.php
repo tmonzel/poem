@@ -2,7 +2,6 @@
 
 namespace Poem;
 
-use JsonSerializable;
 use Poem\Actor\Action;
 use Poem\Actor\ActionStatement;
 use Poem\Actor\Exceptions\NotFoundException;
@@ -12,7 +11,7 @@ use Poem\Model\Accessor as ModelAccessor;
 class Actor 
 {
     use Module,
-        Actable,
+        Mutable,
         ModelAccessor;
 
     /**

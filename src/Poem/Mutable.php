@@ -2,7 +2,8 @@
 
 namespace Poem;
 
-trait Actable {
+trait Mutable 
+{
     protected static $behaviors = [];
 
     static function buildBehaviors() {

@@ -3,18 +3,18 @@
 namespace Poem\Model;
 
 use Exception;
-use Poem\Actable;
 use Poem\Data\Accessor as DataAccessor;
 use Poem\Data\CollectionAdapter;
 use Poem\Data\Cursor;
 use Poem\Module;
+use Poem\Mutable;
 
 class Collection
 {
     use Module,
         DataAccessor,
         Relationships,
-        Actable;
+        Mutable;
 
     /**
      * Before save event key
