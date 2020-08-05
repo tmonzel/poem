@@ -43,11 +43,11 @@ class Actor extends \Poem\Actor
     {
         $this->registerAction(LoginAction::class);
         $this->registerAction('me', function($payload) {
-            if(!$this->Auth()->authorized()) {
+            if(!static::Auth()->authorized()) {
                 throw new UnauthorizedException('No authorized user found');
             }
 
-            return $this->Auth()->user();
+            return static::Auth()->user();
         });
     }
 }
