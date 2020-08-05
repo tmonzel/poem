@@ -208,4 +208,14 @@ class Document implements JsonSerializable
 
         return $attributes;
     }
+
+    /**
+     * Return all attributes
+     * 
+     * @return array
+     */
+    function toArray(): array 
+    {
+        return $this->_attributes;
+    }
 }
