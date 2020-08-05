@@ -4,6 +4,7 @@ namespace Poem\Data\MySql;
 
 use PDO;
 use Poem\Data\CollectionAdapter;
+use Poem\Data\Cursor;
 use Poem\Set;
 
 class Table implements CollectionAdapter 
@@ -38,6 +39,12 @@ class Table implements CollectionAdapter
     {
         $this->name = $name;
         $this->client = $client;
+    }
+
+
+    function getType(): string
+    {
+        return $this->name;
     }
 
     /**
@@ -112,18 +119,18 @@ class Table implements CollectionAdapter
      * @param mixed $conditions
      * @return Set
      */
-    function findMany($conditions = []): Set 
+    function find(array $filter = [], array $options = []): Cursor 
     {
         $sql = "SELECT * FROM $this->name";
         
-        if(count($conditions) > 0) {
-            $where = $this->buildWhere($conditions);
+        if(count($filter) > 0) {
+            $where = $this->buildWhere($filter);
             $sql .= " WHERE $where";
         }
 
-        $stmt = $this->client->query($sql, $conditions);
+        $stmt = $this->client->query($sql, $filter);
         
-        return new ResultSet($stmt->fetchAll(PDO::FETCH_ASSOC));
+        return new FindResult($stmt);
     }
 
     function findFirst(array $conditions = []) 
@@ -141,7 +148,7 @@ class Table implements CollectionAdapter
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    function insert(array $document) 
+    function insert(array $document, array $options = []) 
     {
         $fields = array_keys($document);
         $values = array_values($document);
@@ -154,15 +161,10 @@ class Table implements CollectionAdapter
         return $this->client->lastInsertId();
     }
 
-    function insertMany(array $documents) 
-    {
-        
-    }
-
-    function updateFirst(array $data, array $conditions = []) 
+    function update(array $filter, array $data, array $options = []) 
     {
         $sql = "UPDATE $this->name";
-        $params = $conditions;
+        $params = $filter;
 
         if(count($data) > 0) {
             $mappedSetClause = array_map(function ($key) { 
@@ -177,35 +179,20 @@ class Table implements CollectionAdapter
             }
         }
 
-        if(count($conditions) > 0) {
-            $where = $this->buildWhere($conditions);
+        if(count($filter) > 0) {
+            $where = $this->buildWhere($filter);
             $sql .= " WHERE $where";
         }
-        
-        $sql .= " LIMIT 1";
+
         return $this->client->query($sql, $params);
     }
 
-    function updateMany($data, array $conditions = []) 
+    function delete(array $filter, array $options = []) 
     {
-
-    }
-
-    function deleteFirst(array $conditions = []) 
-    {
-        $where = $this->buildWhere($conditions);
-        $sql = "DELETE FROM $this->name WHERE $where LIMIT 1";  
-
-        $stmt = $this->client->query($sql, $conditions);
-        return $stmt;
-    }
-
-    function deleteMany(array $conditions = []) 
-    {
-        $where = $this->buildWhere($conditions);
+        $where = $this->buildWhere($filter);
         $sql = "DELETE FROM $this->name WHERE $where";  
 
-        $stmt = $this->client->query($sql, $conditions);
+        $stmt = $this->client->query($sql, $filter);
         return $stmt;
     }
 
