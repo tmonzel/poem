@@ -2,12 +2,17 @@
 
 namespace Poem\Auth;
 
+use Exception;
 use Poem\Model;
 use Poem\RequestHandler;
 use Symfony\Component\HttpFoundation\Request;
+use Poem\Model\Accessor as ModelAccessor;
+use Poem\Model\Document;
 
 class Worker implements RequestHandler
 {
+    use ModelAccessor;
+
     const Accessor = 'auth';
 
     /**
@@ -15,7 +20,7 @@ class Worker implements RequestHandler
      * 
      * @var string
      */
-    protected $userSubject = 'User\\Model';
+    protected $userSubject = 'User\\Collection';
 
     protected $token;
     protected $user;
@@ -57,8 +62,12 @@ class Worker implements RequestHandler
         return $this->user;
     }
 
-    function createTokenFor(Model $user) 
+    function createTokenFor(Document $user) 
     {
+        if(!$user->exists()) {
+            throw new Exception('User does not exist');
+        }
+        
         // Create token header as a JSON string
         $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
 
@@ -86,7 +95,9 @@ class Worker implements RequestHandler
             $data = $this->decodePayload($payload);
             
             if(isset($data['userId'])) {
-                $user = $this->userSubject::pick($data['userId']);
+                $collection = $this->Model()->users;
+
+                $user = $collection->pick($data['userId']);
                 
                 if($user) {
                     // User found and set
