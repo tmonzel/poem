@@ -6,6 +6,7 @@ use Exception;
 use Poem\Actable;
 use Poem\Data\Accessor as DataAccessor;
 use Poem\Data\CollectionAdapter;
+use Poem\Data\Cursor;
 use Poem\Module;
 
 class Collection
@@ -179,28 +180,34 @@ class Collection
     }
 
     /**
-     * Creates a find query
+     * Creates a find query builder
      * 
      * @return FindQuery
      */
     function find(): FindQuery 
-    {        
-        $query = new FindQuery(function(FindQuery $query) {
-            $conditions = $query->getConditions();
-            $result = $this->adapter->find($conditions['filter']);
-            $format = isset($conditions['format']) ? $conditions['format'] : null;
+    {
+        return new FindQuery($this);
+    }
 
-            $result->map(function($attributes) use($format) {
-                $document = $this->buildDocument($attributes);
-                $document->setFormat($format);
-                
-                return $document;
-            });
+    /**
+     * Execute a direct find query by conditions
+     * 
+     * @param array $conditions
+     * @return Cursor
+     */
+    function findWith(array $conditions): Cursor 
+    {
+        $result = $this->adapter->find($conditions['filter']);
+        $format = isset($conditions['format']) ? $conditions['format'] : null;
 
-            return $result;
+        $result->map(function($attributes) use($format) {
+            $document = $this->buildDocument($attributes);
+            $document->setFormat($format);
+            
+            return $document;
         });
 
-        return $query;
+        return $result;
     }
 
     /**
