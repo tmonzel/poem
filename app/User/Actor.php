@@ -2,9 +2,7 @@
 
 namespace User;
 
-use Poem\Actor\Actions\{ 
-    LoginAction 
-};
+use Poem\Auth\Actions\LoginAction;
 use Poem\Actor\BehaveAsResource;
 use Poem\Actor\Exceptions\UnauthorizedException;
 use Poem\Auth\BehaveAsGuard;
