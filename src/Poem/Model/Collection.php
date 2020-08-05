@@ -254,14 +254,29 @@ class Collection
     }
 
     /**
+     * Removes a single document
+     * 
+     * @param Document $document
+     * @return int
+     */
+    function destroy(Document $document) 
+    {
+        if(!$document->exists()) {
+            return false;
+        }
+
+        return $this->delete([static::$primaryKey => $document->id], ['limit' => 1]);
+    }
+
+    /**
      * Delete many documents
      * 
      * @param array $filter
      * @return int affected rows or throw error (TODO)
      */
-    function delete(array $filter) 
+    function delete(array $filter, array $options = []) 
     {
-        return $this->adapter->delete($filter);
+        return $this->adapter->delete($filter, $options);
     }
 
     /**
