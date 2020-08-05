@@ -25,23 +25,25 @@ class FindAction extends Action {
     {
         if(isset($this->payload['id'])) {
             // Return a single document
-            $document = $this->subject::pick((int)$this->payload['id']);
+            $document = $this->collection->pick((int)$this->payload['id']);
 
             if(!$document) {
                 throw new NotFoundException('Document not found');
             }
 
-            return $document->toData($this->payload);
-        }
-        
-        $data = [];
-        $conditions = isset($this->payload['conditions']) ? $this->payload['conditions'] : [];
-        $documents = $this->subject::find($conditions);
-
-        foreach($documents as $d) {
-            $data[] = $d->toData($this->payload);
+            return $document;
         }
 
-        return $data;
+        $query = $this->collection->find();
+
+        if(isset($this->payload['filter'])) {
+            $query->filter($this->payload['filter']);
+        }
+
+        if(isset($this->payload['format'])) {
+            $query->format($this->payload['format']);
+        }
+
+        return $query;
     }
 }

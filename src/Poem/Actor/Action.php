@@ -2,6 +2,8 @@
 
 namespace Poem\Actor;
 
+use Poem\Model\Collection;
+
 abstract class Action 
 {
     /**
@@ -16,7 +18,7 @@ abstract class Action
     
     /**
      * Action subject
-     * Typically a model class
+     * Typically a model collection
      * 
      * @var mixed
      */
@@ -28,6 +30,13 @@ abstract class Action
      * @var array 
      */
     protected $payload = [];
+
+
+    /**
+     * 
+     * @var Collection
+     */
+    protected $collection;
 
     /**
      * Provide the action type definition
@@ -48,6 +57,11 @@ abstract class Action
     function setSubject($subject) 
     {
         $this->subject = $subject;
+    }
+
+    function setCollection(Collection $collection) 
+    {
+        $this->collection = $collection;
     }
 
     /**

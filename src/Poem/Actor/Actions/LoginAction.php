@@ -19,7 +19,7 @@ class LoginAction extends Action {
 
         $data = $this->payload;
 
-        $user = $this->subject::first([
+        $user = $this->collection->first([
             'name' => $data['name'],
         ]);
 
@@ -33,7 +33,7 @@ class LoginAction extends Action {
         }
 
         // Create token via auth worker
-        $token = static::Auth()->createTokenFor($user);
+        $token = $this->Auth()->createTokenFor($user);
 
         return compact('token');
     }

@@ -29,19 +29,19 @@ class CreateAction extends Action {
         }
 
         $attributes = $this->payload['attributes'];
-        $document = new $this->subject($this->map($attributes));
+        $document = $this->collection->buildDocument($this->map($attributes));
 
-        if(method_exists($document, 'valid')) {
+        /*if(method_exists($document, 'valid')) {
             if(!$document->valid()) {
                 throw new BadRequestException(
                     'Validation errors', 
                     $document->validationErrors()
                 );
             }
-        }
+        }*/
 
-        $document->save();
+        $this->collection->save($document);
 
-        return $document->toData($this->payload);
+        return $document;
     }
 }
