@@ -31,6 +31,7 @@ class Worker
      * Access collection instance via property
      * 
      * @param string $name
+     * @return Collection
      */
     function __get(string $name) 
     {
