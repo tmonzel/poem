@@ -3,12 +3,12 @@
 namespace Poem\Model;
 
 trait Validateable {
-    abstract static function validations(): array;
+    abstract function validations(): array;
 
     private $validationErrors = [];
 
     function valid(): bool {
-        $validations = static::validations();
+        $validations = $this->validations();
         $attributes = $this->attributes;
         $this->validationErrors = [];
 
