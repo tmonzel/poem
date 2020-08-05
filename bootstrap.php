@@ -1,6 +1,8 @@
 <?php
 
 use Poem\Data;
+use Poem\Model;
+use Poem\Actor;
 use Poem\Data\MySql\Client as MySqlClient;
 use Poem\Director;
 
@@ -14,8 +16,8 @@ if(file_exists(ENV_FILE)) {
     }
 }
 
-$director = new Director();
-$director->hire(Data\Worker::class, function($worker) {
+$director = Director::access();
+$director->add(Data\Worker::class, function(Data\Worker $worker) {
     
     // Register mysql client to data worker
     $worker->registerConnection(MySqlClient::class, [
@@ -26,5 +28,18 @@ $director->hire(Data\Worker::class, function($worker) {
     ]);
 
 });
+
+$director->add(Actor\Worker::class, function(Actor\Worker $worker) {
+    
+    // Register application actors
+    $worker->register(User\Actor::class);
+    $worker->register(Retailer\Actor::class);
+    $worker->register(Product\Actor::class);
+    $worker->register(Market\Actor::class);
+    $worker->register(Order\Actor::class);
+
+});
+
+$director->add(Model\Worker::class);
 
 return $director;

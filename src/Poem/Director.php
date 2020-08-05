@@ -34,9 +34,13 @@ class Director
      * @static
      * @return Director
      */
-    static function get(): Director
+    static function access(): Director
     {
-        return static::$assignedDirector;
+        if(isset(static::$assignedDirector)) {
+            return static::$assignedDirector;
+        }
+        
+        return static::$assignedDirector = new static();
     }
 
     /**
@@ -48,15 +52,7 @@ class Director
      */
     static function provide(string $accessor)
     {
-        return static::get()->accessWorker($accessor);
-    }
-
-    /**
-     * Assign the director to use globally
-     */
-    function assign() 
-    {
-        static::$assignedDirector = $this;
+        return static::access()->accessWorker($accessor);
     }
 
     /**
@@ -96,9 +92,13 @@ class Director
      * @param string $workerClass
      * @param callable $initializer
      */
-    function hire(string $workerClass, callable $initializer = null) 
+    function add(string $workerClass, callable $initializer = null) 
     {
         $this->hiredWorkers[$workerClass::Accessor] = compact('workerClass', 'initializer');
+    }
+
+    function newStory() {
+        return new Story($this);
     }
     
     /**

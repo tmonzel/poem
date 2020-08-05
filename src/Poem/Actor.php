@@ -2,15 +2,24 @@
 
 namespace Poem;
 
+use JsonSerializable;
 use Poem\Actor\Action;
 use Poem\Actor\ActionStatement;
 use Poem\Actor\Exceptions\NotFoundException;
+use Poem\Actor\Worker;
+use Poem\Model\Accessor as ModelAccessor;
 
 class Actor 
 {
     use Module,
-        Actable;
+        Actable,
+        ModelAccessor;
 
+    /**
+     * Prepare action event key
+     * 
+     * @var string
+     */
     const PREPARE_ACTION_EVENT = 'actor_prepare_action';
     
     /**
@@ -21,23 +30,36 @@ class Actor
     protected $actions = [];
 
     /**
-     * Parent story
-     * 
-     * @var Story
-     */
-    protected $story;
-
-    /**
      * Create a new actor instance.
      * 
-     * @param Story $story
+     * @param Module $module
      */
-    function __construct(Story $story) 
+    function __construct() 
     {
-        $this->story = $story;
-
         // Initialize behaviors if defined
         static::initializeBehaviors();
+
+        // Collect actions from constant
+        static::withDefinedConstant('Actions', function($actionClasses) {
+            foreach($actionClasses as $actionClass) {
+                $this->registerAction($actionClass);
+            }
+        });
+    }
+
+    /**
+     * Initializes this actor on configuration layer
+     * Also called on Actor\Worker::register()
+     * 
+     * @param Worker $worker
+     */
+    static function register(Worker $worker): void
+    {
+        $actorClass = get_called_class();
+
+        static::withNamespaceClass('Collection', function($collectionClass) use($actorClass) {
+            static::Model()->register($actorClass::Type, $collectionClass);
+        });
     }
 
     /**
@@ -46,7 +68,7 @@ class Actor
      * @param string $actionClass
      * @param callable $initializer
      */
-    function registerAction(string $actionClass, callable $initializer = null) 
+    function registerAction(string $actionClass, callable $initializer = null): void 
     {
         if(class_exists($actionClass)) {
             $this->actions[$actionClass::getType()] = compact('actionClass', 'initializer');
@@ -66,20 +88,28 @@ class Actor
     }
 
     /**
-     * @TODO: Move to action statement (maybe?)
+     * Executes a given action.
+     * 
+     * @param string $actionType
+     * @param array $payload
+     * @return JsonSerializable
      */
-    function executeAction(string $actionType, array $payload = []) 
+    function executeAction(string $actionType, array $payload = []): JsonSerializable 
     {
-        $subject = static::getSubjectClass();
         extract($this->actions[$actionType]);
 
         if(isset($actionClass)) {
             $type = $actionClass::getType();
+            $calledClass = get_called_class();
 
             /** @var Action $action */
             $action = new $actionClass;
-            $action->setSubject($subject);
+            // $action->setSubject($subject);
             $action->setPayload($payload);
+
+            $collection = $this->Model()->access($calledClass::Type);
+            
+            $action->setCollection($collection);
 
             if(isset($initializer)) {
                 $initializer($action);
@@ -113,10 +143,10 @@ class Actor
 
         $this->initialize($actionType, $payload);
 
-        $subject = static::getSubjectClass();
+        $calledClass = get_called_class();
 
         if(!$this->hasAction($actionType)) {
-            throw new NotFoundException("Action " . $actionType . " is not registered on " . $subject::Type);
+            throw new NotFoundException("Action " . $actionType . " is not registered on " . $calledClass::Type);
         }
 
         return new ActionStatement($this, $actionType, $payload);

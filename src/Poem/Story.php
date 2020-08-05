@@ -2,20 +2,22 @@
 
 namespace Poem;
 
+use Exception;
 use Poem\Actor\Exceptions\ActionException;
 use Poem\Actor\Exceptions\BadRequestException;
 use Poem\Actor\Exceptions\NotFoundException;
+use Poem\Actor\Worker as ActorWorker;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class Story 
 {
     /**
-     * Registered actor classes
+     * Applied director
      * 
-     * @var array
+     * @var Director
      */
-    protected $actors = [];
+    protected $director;
 
     /**
      * Action endpoint
@@ -25,64 +27,19 @@ class Story
     protected $endpoint;
 
     /**
-     * Create a new story
+     * Create a new story.
      * 
+     * @param Director $director
      * @param string $endpoint
-     * @param Auth $auth
      */
-    function __construct(string $endpoint = '/api') 
+    function __construct(Director $director, string $endpoint = '/api') 
     {
+        $this->director =  $director;
         $this->endpoint = $endpoint;
     }
 
     /**
-     * Return all registered actors
-     * 
-     * @return array
-     */
-    function getActors(): array 
-    {
-        return $this->actors;
-    }
-
-    /**
-     * Register an actor
-     * 
-     * @param string $actorClass
-     */
-    function about(string $actorClass): void
-    {
-        $this->actors[$actorClass::getType()] = $actorClass;
-    }
-
-    /**
-     * Check if actor with type is registered
-     * 
-     * @param string $type
-     * @return bool
-     */
-    function hasActor(string $type): bool 
-    {
-        return isset($this->actors[$type]);
-    }
-
-    /**
-     * Build an actor from a given type
-     * 
-     * @param string $type
-     * @return Actor
-     */
-    function buildActor(string $type): Actor 
-    {
-        if(!$this->hasActor($type)) {
-            throw new NotFoundException("Actor $type not available");
-        }
-
-        return new $this->actors[$type]($this);
-    }
-
-    /**
-     * Resolve request and send json response to output
+     * Resolve request and send json response to output.
      * 
      * @param Request $request
      */
@@ -128,9 +85,7 @@ class Story
             throw new BadRequestException('Invalid method used');
         }
 
-        $director = Director::get();
-
-        $director->eachWorkerWithInterface(
+        $this->director->eachWorkerWithInterface(
             RequestHandler::class, 
             function(RequestHandler $worker) use($request) {
                 $worker->handleRequest($request);
@@ -143,6 +98,8 @@ class Story
             throw new BadRequestException('Invalid query data. Please provide valid json format');
         }
 
+        
+
         return $this->parseQuery($data);
     }
 
@@ -152,7 +109,7 @@ class Story
      * @param array $data
      * @return mixed
      */
-    function parseQuery(array $data) 
+    protected function parseQuery(array $data) 
     {
         if(isset($data[0])) {
             // Parse multiple actions
@@ -168,9 +125,17 @@ class Story
         if(!isset($data['action'])) {
             throw new BadRequestException('No action defined');
         }
+        
+        $actors = $this->director->accessWorker(
+            ActorWorker::Accessor
+        );
 
-        /** @var Actor $actor */
-        $actor = $this->buildActor($data['type']);
+        try {
+            /** @var Actor $actor */
+            $actor = $actors->access($data['type']);
+        } catch(Exception $e) {
+            throw new NotFoundException('Actor `' . $data['type'] . '` not registered');
+        }
 
         return $actor->prepareAction(
             $data['action'], 
@@ -188,15 +153,5 @@ class Story
     {
         $rawBody = $request->getContent();
         return $rawBody ? json_decode($rawBody, true) : [];
-    }
-
-    /**
-     * Create a new story helper
-     * 
-     * @return Story
-     */
-    static function new(...$args): self 
-    {
-        return new static(...$args);
     }
 }
