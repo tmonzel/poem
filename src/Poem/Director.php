@@ -19,7 +19,7 @@ class Director
      * 
      * @var array
      */
-    protected $hiredWorkers = [];
+    protected $registry = [];
     
     /**
      * Initialized worker instances
@@ -29,7 +29,7 @@ class Director
     protected $workers = [];
 
     /**
-     * Returns the assigned director instance
+     * Returns or creates the assigned director instance
      * 
      * @static
      * @return Director
@@ -44,7 +44,7 @@ class Director
     }
 
     /**
-     * Provide a worker by accessor
+     * Access a worker with the given key.
      * 
      * @static
      * @param string $accessor
@@ -56,12 +56,13 @@ class Director
     }
 
     /**
-     * Walk each worker with a given interface
+     * Walk each worker with a given interface.
      * 
      * @param string $interface
      * @param callable $onEach
+     * @return void
      */
-    function eachWorkerWithInterface(string $interface, callable $onEach) 
+    function eachWorkerWithInterface(string $interface, callable $onEach): void 
     {
         foreach($this->getWorkerWithInterface($interface) as $worker) {
             $onEach($worker);
@@ -69,14 +70,14 @@ class Director
     }
 
     /**
-     * Returns all worker interfaces with a given interface
+     * Returns all worker interfaces with a given interface.
      * 
      * @param string $interface
      * @return array
      */
     function getWorkerWithInterface(string $interface): array
     {
-        $services = array_filter($this->hiredWorkers, function($definition) use($interface) {
+        $services = array_filter($this->registry, function($definition) use($interface) {
             $interfaces = class_implements($definition['workerClass']);
             return $interfaces ? isset($interfaces[$interface]) : false;
         });
@@ -87,17 +88,24 @@ class Director
     }
 
     /**
-     * Hire a worker by class
+     * Hire a worker with the given class.
      * 
      * @param string $workerClass
      * @param callable $initializer
+     * @return void
      */
-    function add(string $workerClass, callable $initializer = null) 
+    function add(string $workerClass, callable $initializer = null): void
     {
-        $this->hiredWorkers[$workerClass::Accessor] = compact('workerClass', 'initializer');
+        $this->registry[$workerClass::Accessor] = compact('workerClass', 'initializer');
     }
 
-    function newStory() {
+    /**
+     * Creates a new story from this director.
+     * 
+     * @return Story
+     */
+    function newStory(): Story 
+    {
         return new Story($this);
     }
     
@@ -113,11 +121,11 @@ class Director
             return $this->workers[$name];
         }
 
-        if(!isset($this->hiredWorkers[$name])) {
+        if(!isset($this->registry[$name])) {
             throw new Exception("Worker with name $name not registered");
         }
 
-        extract($this->hiredWorkers[$name]);
+        extract($this->registry[$name]);
 
         if(!class_exists($workerClass)) {
             throw new Exception("Worker class " . $workerClass . " does not exist");
