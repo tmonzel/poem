@@ -2,12 +2,8 @@
 
 namespace Poem\Model;
 
-use Poem\Data\Accessor as DataAccessor;
-
 class Worker
 {
-    use DataAccessor;
-    
     /**
      * Worker accessor key 
      */
@@ -67,11 +63,6 @@ class Worker
             $collectionClass = $this->registry[$type];
         }
 
-        $connection = static::Data()->resolveConnection('default');
-
-        return $this->collections[$type] = new $collectionClass(
-            $type,
-            $connection->getCollectionAdapter($type)
-        );
+        return $this->collections[$type] = new $collectionClass($type);
     }
 }

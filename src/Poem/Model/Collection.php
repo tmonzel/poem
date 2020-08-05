@@ -38,7 +38,7 @@ class Collection
      * @static
      * @var string
      */
-    static $clientKey = 'default';
+    static $connection = 'default';
 
     /**
      * Primary key column
@@ -59,12 +59,13 @@ class Collection
      * Create a new model instance
      * 
      * @param string $type
-     * @param CollectionAdapter $adapter
      */
-    function __construct(string $type, CollectionAdapter $adapter)
+    function __construct(string $type)
     {
         $this->type = $type;
-        $this->adapter = $adapter;
+        $this->adapter = static::Data()
+            ->resolveConnection(static::$connection)
+            ->getCollectionAdapter($type);
 
         // Initialize behaviors once per class
         static::initializeBehaviors();
