@@ -5,6 +5,7 @@ An **experimental** action based micro api framework which uses a single json en
 @TODO:
 * Add authorization based on user roles
 * Create/Update relationships
+* Define actor type as Array for plural and singular name Actor::Type[]
 
 ## Single Action Request/Response
 ``POST http://your.host/api``
