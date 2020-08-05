@@ -1,16 +1,22 @@
 <?php
 
-namespace Product  {
+namespace Product;
+use Poem\Actor\Actions\FindAction;
+class Actor extends \Poem\Actor 
+{
+    /**
+     * Product actor type definition
+     * 
+     * @var string
+     */
+    const Type = 'products';
 
-    use Poem\Actor\BehaveAsResource;
-    use Poem\Auth\BehaveAsGuard;
-
-    class Actor extends \Poem\Actor {
-        const Behaviors = [
-            BehaveAsResource::class,
-            BehaveAsGuard::class => [
-                'except' => ['find']
-            ]
-        ];
-    }
+    /**
+     * Available actions for this actor
+     * 
+     * @var array
+     */
+    const Actions = [
+        FindAction::class
+    ];
 }

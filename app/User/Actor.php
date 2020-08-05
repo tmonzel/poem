@@ -15,7 +15,14 @@ class Actor extends \Poem\Actor
     use AuthAccessor;
 
     /**
-     * Initializes with all the resource actions
+     * User actor type definition
+     * 
+     * @var string
+     */
+    const Type = 'users';
+
+    /**
+     * Registered action behaviors
      * 
      * @var array
      */
@@ -29,16 +36,18 @@ class Actor extends \Poem\Actor
     /**
      * Prepare or add additional actions
      * 
+     * @param string $actionType
+     * @param array $payload
      */
-    function initialize(string $actionType, array $payload = [])
+    function initialize(string $actionType, array $payload = []) 
     {
         $this->registerAction(LoginAction::class);
         $this->registerAction('me', function($payload) {
-            if(!static::Auth()->authorized()) {
+            if(!$this->Auth()->authorized()) {
                 throw new UnauthorizedException('No authorized user found');
             }
 
-            return static::Auth()->user();
+            return $this->Auth()->user();
         });
     }
 }
