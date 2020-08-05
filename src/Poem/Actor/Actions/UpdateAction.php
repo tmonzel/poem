@@ -6,7 +6,6 @@ use Poem\Actor\Action;
 use Poem\Actor\AttributeMapper;
 use Poem\Actor\Exceptions\BadRequestException;
 use Poem\Actor\Exceptions\NotFoundException;
-use Poem\Model;
 
 class UpdateAction extends Action 
 {
@@ -21,39 +20,36 @@ class UpdateAction extends Action
     static $type = 'update';
 
     /**
-     * Prepare action data
+     * Prepare data for execution
      * 
      * @return mixed
      */
     function prepareData() 
     {
-        if(!isset($this->payload['id'])) {
+        if($this->payload->missing('id')) {
             throw new BadRequestException('id must be provided in payload');
         }
 
-        $id = $this->payload['id'];
-        
-        /** @var Model $document */
-        $document = $this->subject::pick($id);
+        $document = $this->collection->pick($this->payload->id);
 
-        if(isset($this->payload['relationships'])) {
+        /*if(isset($this->payload['relationships'])) {
             foreach($this->payload['relationships'] as $name => $data) {
                 $relationship = $document->getConnectedRelationship($name);
             }
-        }
+        }*/
         
         if(!$document) {
-            throw new NotFoundException("Document with #$id not found");
+            throw new NotFoundException('Document#' . $this->payload->id . ' not found');
         }
         
-        if(isset($this->payload['attributes'])) {
-            $document->writeAttributes(
-                $this->map($this->payload['attributes'])
+        if($this->payload->present('attributes')) {
+            $document->fill(
+                $this->map($this->payload->attributes)
             );
         }
 
-        $document->save();
+        $this->collection->save($document);
         
-        return $document->toData($this->payload);
+        return $document;
     }
 }

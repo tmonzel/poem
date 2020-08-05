@@ -2,6 +2,7 @@
 
 namespace Poem\Actor;
 
+use Poem\Bag;
 use Poem\Model\Collection;
 
 abstract class Action 
@@ -15,28 +16,30 @@ abstract class Action
      * @var string
      */
     static $type;
-    
-    /**
-     * Action subject
-     * Typically a model collection
-     * 
-     * @var mixed
-     */
-    protected $subject;
 
     /**
      * Action payload
      * 
-     * @var array 
+     * @var Bag 
      */
-    protected $payload = [];
+    protected $payload;
 
 
     /**
+     * Applied collection instance
      * 
      * @var Collection
      */
     protected $collection;
+
+    /**
+     * Creates a new action.
+     * 
+     */
+    function __construct()
+    {
+        $this->payload = new Bag();
+    }
 
     /**
      * Provide the action type definition
@@ -50,16 +53,12 @@ abstract class Action
     }
 
     /**
-     * Set the action subject
+     * Apply a collection for this action
      * 
-     * @param mixed subject
+     * @param Collection $collection
+     * @return void
      */
-    function setSubject($subject) 
-    {
-        $this->subject = $subject;
-    }
-
-    function setCollection(Collection $collection) 
+    function setCollection(Collection $collection): void 
     {
         $this->collection = $collection;
     }
@@ -67,21 +66,12 @@ abstract class Action
     /**
      * Set the action payload
      * 
-     * @param array $payload
+     * @param array $data
+     * @return void
      */
-    function setPayload(array $payload) 
+    function setPayload(array $data): void 
     {
-        $this->payload = $payload;
-    }
-
-    /**
-     * Return the action payload
-     * 
-     * @return array
-     */
-    function getPayload(): array 
-    {
-        return $this->payload;
+        $this->payload = new Bag($data);
     }
 
     /**

@@ -6,11 +6,12 @@ use Poem\Actor\Action;
 use Poem\Actor\AttributeMapper;
 use Poem\Actor\Exceptions\BadRequestException;
 
-class CreateAction extends Action {
+class CreateAction extends Action 
+{
     use AttributeMapper;
 
     /**
-     * Create action type (required)
+     * Create action type
      * 
      * @static
      * @var string
@@ -24,12 +25,12 @@ class CreateAction extends Action {
      */
     function prepareData() 
     {
-        if(!isset($this->payload['attributes'])) {
+        if($this->payload->missing('attributes')) {
             throw new BadRequestException('No attributes found for create action');
         }
 
-        $attributes = $this->payload['attributes'];
-        $document = $this->collection->buildDocument($this->map($attributes));
+        $attributes = $this->map($this->payload->attributes);
+        $document = $this->collection->new($attributes);
 
         /*if(method_exists($document, 'valid')) {
             if(!$document->valid()) {

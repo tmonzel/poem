@@ -19,13 +19,15 @@ class FindAction extends Action {
     static $type = 'find';
 
     /**
-     * Data preparation
+     * Prepare data for execution
+     * 
+     * @return mixed
      */
     function prepareData() 
     {
-        if(isset($this->payload['id'])) {
+        if($this->payload->has('id')) {
             // Return a single document
-            $document = $this->collection->pick((int)$this->payload['id']);
+            $document = $this->collection->pick((int)$this->payload->id);
 
             if(!$document) {
                 throw new NotFoundException('Document not found');
@@ -36,12 +38,12 @@ class FindAction extends Action {
 
         $query = $this->collection->find();
 
-        if(isset($this->payload['filter'])) {
-            $query->filter($this->payload['filter']);
+        if($this->payload->has('filter')) {
+            $query->filter($this->payload->filter);
         }
 
-        if(isset($this->payload['format'])) {
-            $query->format($this->payload['format']);
+        if($this->payload->has('format')) {
+            $query->format($this->payload->format);
         }
 
         return $query;
