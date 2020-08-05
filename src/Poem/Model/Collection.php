@@ -16,7 +16,12 @@ class Collection
         Relationships,
         Actable;
 
-    const BEFORE_SAVE_EVENT = 'model_before_save';
+    /**
+     * Before save event key
+     * 
+     * @var string
+     */
+    const BEFORE_SAVE_EVENT = 'collection.before_save';
 
     /**
      * Applied adapter
@@ -119,6 +124,17 @@ class Collection
     }
 
     /**
+     * Shorthand for buildDocument
+     * 
+     * @param array $attributes
+     * @return Document
+     */
+    function new(array $attributes): Document
+    {
+        return $this->buildDocument($attributes);
+    }
+
+    /**
      * Update document if exists, 
      * otherwise create a new one
      * 
@@ -131,9 +147,9 @@ class Collection
         
         if($document->exists()) {
             // Update existing document
-            return $this->update(
-                $document->toArray(), 
-                [static::$primaryKey => $document->id]
+            return $this->adapter->update(
+                [static::$primaryKey => $document->id],
+                $document->toArray()
             );
 
         } else {
@@ -242,18 +258,6 @@ class Collection
     }
 
     /**
-     * Update many documents
-     * 
-     * @param array $filter
-     * @param array $attributes
-     * @return int affected rows or throw error (TODO)
-     */
-    function update(array $filter, array $attributes) 
-    {
-        return $this->adapter->update($filter, $attributes);
-    }
-
-    /**
      * Removes a single document
      * 
      * @param Document $document
@@ -265,18 +269,7 @@ class Collection
             return false;
         }
 
-        return $this->delete([static::$primaryKey => $document->id], ['limit' => 1]);
-    }
-
-    /**
-     * Delete many documents
-     * 
-     * @param array $filter
-     * @return int affected rows or throw error (TODO)
-     */
-    function delete(array $filter, array $options = []) 
-    {
-        return $this->adapter->delete($filter, $options);
+        return $this->adapter->delete([static::$primaryKey => $document->id], ['limit' => 1]);
     }
 
     /**
