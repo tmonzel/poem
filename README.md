@@ -4,7 +4,7 @@ An **experimental** action based micro api framework which uses a single json en
 
 @TODO:
 * Add authorization based on user roles
-* Format json output via action parameter e.g. "format"
+* Create/Update relationships
 
 ## Single Action Request/Response
 ``POST http://your.host/api``
