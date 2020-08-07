@@ -5,6 +5,7 @@ namespace Poem\Data\MySql;
 use PDO;
 use Poem\Data\CollectionAdapter;
 use Poem\Data\Cursor;
+use Poem\Data\Statement;
 use Poem\Set;
 
 class Table implements CollectionAdapter 
@@ -116,12 +117,21 @@ class Table implements CollectionAdapter
     /**
      * Find many entries
      * 
-     * @param mixed $conditions
-     * @return Set
+     * @param array $filter
+     * @param array $options
+     * @return Statement
      */
-    function find(array $filter = [], array $options = []): Cursor 
+    function find(array $filter = [], array $options = []): Statement 
     {
         $sql = "SELECT * FROM $this->name";
+
+        if(isset($options['join'])) {
+            $join = $options['join'];
+
+            if($join['type'] === 'left') {
+                $sql .= " LEFT JOIN " . $join['target'] . " ON (" . $join['on'] . ")";
+            }
+        }
         
         if(count($filter) > 0) {
             $where = $this->buildWhere($filter);
@@ -130,7 +140,7 @@ class Table implements CollectionAdapter
 
         $stmt = $this->client->query($sql, $filter);
         
-        return new FindResult($stmt);
+        return new FindResult($this, $stmt, $options);
     }
 
     function findFirst(array $conditions = []) 

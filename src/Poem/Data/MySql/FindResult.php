@@ -4,9 +4,9 @@ namespace Poem\Data\MySql;
 
 use PDO;
 use PDOStatement;
-use Poem\Data\Cursor;
+use Poem\Data\Statement;
 
-class FindResult implements Cursor 
+class FindResult implements Statement 
 {
     /**
      * Current iterator index
@@ -23,6 +23,13 @@ class FindResult implements Cursor
     protected $_current;
 
     /**
+     * Related table
+     * 
+     * @var Table
+     */
+    protected $table;
+
+    /**
      * Query statement
      * 
      * @var PDOStatement
@@ -30,23 +37,49 @@ class FindResult implements Cursor
     protected $statement;
 
     /**
-     * Mapper callback
+     * All applied mapper callables
      * 
-     * @var callable
+     * @var array
      */
-    protected $mapper;
+    protected $mappers = [];
+
+    /**
+     * Columns meta data
+     * 
+     * @var array
+     */
+    protected $columns = [];
+
+    /**
+     * Options
+     * 
+     * @var array
+     */
+    protected $options = [];
+
+    protected $join;
 
     /**
      * Creates a new find result.
      * 
      * @param PDOStatement $statement
      */
-    function __construct(PDOStatement $statement)
+    function __construct(Table $table, PDOStatement $statement, array $options = [])
     {
+        $this->table = $table;
         $this->statement = $statement;
+        $this->options = $options;
         $this->mapper = function($props) {
             return $props;
         };
+
+        foreach(range(0, $statement->columnCount() - 1) as $columnIndex) {
+            $this->columns[] = $statement->getColumnMeta($columnIndex);
+        }
+
+        if(isset($options['join'])) {
+            $this->join = $options['join'];
+        }
     }
 
     /**
@@ -70,14 +103,14 @@ class FindResult implements Cursor
     }
 
     /**
-     * Set a mapper which gets called every iteration
+     * Add a mapper which gets called every iteration
      * 
      * @param callable $mapper
      * @return void
      */
-    function map(callable $mapper): void 
+    function addMapper(callable $mapper): void 
     {
-        $this->mapper = $mapper;
+        $this->mappers[] = $mapper;
     }
 
     /**
@@ -93,7 +126,11 @@ class FindResult implements Cursor
             return false;
         }
 
-        return call_user_func($this->mapper, $record);
+        foreach($this->mappers as $mapper) {
+            $record = $mapper($record);
+        }
+
+        return $record;
     }
 
     /**

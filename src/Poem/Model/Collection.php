@@ -5,7 +5,7 @@ namespace Poem\Model;
 use Exception;
 use Poem\Data\Accessor as DataAccessor;
 use Poem\Data\CollectionAdapter;
-use Poem\Data\Cursor;
+use Poem\Data\Statement;
 use Poem\Module;
 use Poem\Mutable;
 
@@ -257,21 +257,36 @@ class Collection
      * Execute a direct find query by conditions
      * 
      * @param array $conditions
-     * @return Cursor
+     * @return Statement
      */
-    function findWith(array $conditions): Cursor 
+    function findWith(array $conditions): Statement 
     {
-        $result = $this->adapter->find($conditions['filter']);
-        $format = isset($conditions['format']) ? $conditions['format'] : null;
+        extract($conditions);
 
-        $result->map(function($attributes) use($format) {
+        $statement = $this->adapter->find($filter);
+
+        if(isset($include) && is_array($include)) {
+            // Find relationships
+            foreach($include as $accessor => $target) {
+                if(is_numeric($accessor)) {
+                    $accessor = $target;
+                }
+
+                if($this->hasRelationship($accessor)) {
+                    $relationship = $this->getRelationship($accessor);
+                    $relationship->attachTo($this, $statement);
+                }
+            }
+        }
+
+        $statement->addMapper(function($attributes) use($format) {
             $document = $this->buildDocument($attributes);
             $document->setFormat($format);
             
             return $document;
         });
 
-        return $result;
+        return $statement;
     }
 
     /**
