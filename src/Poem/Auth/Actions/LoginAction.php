@@ -28,7 +28,10 @@ class LoginAction extends Action
             throw new BadRequestException('Missing `password` parameter in payload');
         }
 
-        $user = $this->collection->first([
+        // Access the related model
+        $model = $this->actor->accessModel();
+
+        $user = $model->first([
             'name' => $this->payload->username,
         ]);
 

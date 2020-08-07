@@ -30,7 +30,10 @@ class UpdateAction extends Action
             throw new BadRequestException('id must be provided in payload');
         }
 
-        $document = $this->collection->pick($this->payload->id);
+        // Access the related model
+        $model = $this->actor->accessModel();
+
+        $document = $model->pick($this->payload->id);
 
         /*if(isset($this->payload['relationships'])) {
             foreach($this->payload['relationships'] as $name => $data) {
@@ -48,7 +51,7 @@ class UpdateAction extends Action
             );
         }
 
-        $this->collection->save($document);
+        $model->save($document);
         
         return $document;
     }

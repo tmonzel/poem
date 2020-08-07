@@ -27,13 +27,16 @@ class DestroyAction extends Action
             throw new BadRequestException('id must be provided in payload');
         }
 
-        $document = $this->collection->pick($this->payload->id);
+        // Access the related model
+        $model = $this->actor->accessModel();
+
+        $document = $model->pick($this->payload->id);
 
         if(!$document) {
             throw new NotFoundException('Document not found');
         }
 
-        $this->collection->destroy($document);
+        $model->destroy($document);
 
         return $document;
     }

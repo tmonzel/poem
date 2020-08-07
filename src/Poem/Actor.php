@@ -136,10 +136,6 @@ class Actor
             $action = new $actionClass($this);
             $action->setPayload($payload);
 
-            $model = $this->accessModel();
-            
-            $action->setCollection($model);
-
             if(isset($initializer)) {
                 $initializer($action);
             }

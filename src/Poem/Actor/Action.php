@@ -33,13 +33,6 @@ abstract class Action
     protected $payload;
 
     /**
-     * Applied collection instance
-     * 
-     * @var Collection
-     */
-    protected $collection;
-
-    /**
      * Creates a new action.
      * 
      * @param Actor $actor
@@ -59,17 +52,6 @@ abstract class Action
     static function getType(): string 
     {
         return static::$type;
-    }
-
-    /**
-     * Apply a collection for this action
-     * 
-     * @param Collection $collection
-     * @return void
-     */
-    function setCollection(Collection $collection): void 
-    {
-        $this->collection = $collection;
     }
 
     /**

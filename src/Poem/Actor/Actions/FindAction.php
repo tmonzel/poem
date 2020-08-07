@@ -25,9 +25,12 @@ class FindAction extends Action {
      */
     function prepareData() 
     {
+        // Access the related model
+        $model = $this->actor->accessModel();
+        
         if($this->payload->has('id')) {
             // Return a single document
-            $document = $this->collection->pick((int)$this->payload->id);
+            $document = $model->pick((int)$this->payload->id);
 
             if(!$document) {
                 throw new NotFoundException('Document not found');
@@ -36,7 +39,7 @@ class FindAction extends Action {
             return $document;
         }
 
-        $query = $this->collection->find();
+        $query = $model->find();
 
         if($this->payload->has('filter')) {
             $query->filter($this->payload->filter);

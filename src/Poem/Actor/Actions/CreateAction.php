@@ -29,10 +29,14 @@ class CreateAction extends Action
             throw new BadRequestException('No attributes found for create action');
         }
 
-        $attributes = $this->map($this->payload->attributes);
-        $document = $this->collection->new($attributes);
+        // Access the related model
+        $model = $this->actor->accessModel();
+
+        $document = $model->new(
+            $this->map($this->payload->attributes)
+        );
         
-        if(!$this->collection->save($document)) {
+        if(!$model->save($document)) {
             if($document->hasErrors()) {
                 throw new BadRequestException(
                     'Validation errors', 
