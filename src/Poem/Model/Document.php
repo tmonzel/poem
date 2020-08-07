@@ -254,7 +254,7 @@ class Document implements JsonSerializable
         $relationships = [];
 
         foreach($attributes as $n => $v) {
-            if(is_array($v) || $v instanceof self) {
+            if(is_array($v) || is_object($v)) {
                 $relationships[$n] = $v;
                 unset($attributes[$n]);
             }
