@@ -133,7 +133,7 @@ class Actor
             $type = $actionClass::getType();
 
             /** @var Action $action */
-            $action = new $actionClass;
+            $action = new $actionClass($this);
             $action->setPayload($payload);
 
             $model = $this->accessModel();

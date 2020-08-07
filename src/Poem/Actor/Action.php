@@ -2,6 +2,7 @@
 
 namespace Poem\Actor;
 
+use Poem\Actor;
 use Poem\Bag;
 use Poem\Model\Collection;
 
@@ -18,12 +19,18 @@ abstract class Action
     static $type;
 
     /**
+     * Executing actor instance
+     * 
+     * @var Actor
+     */
+    protected $actor;
+
+    /**
      * Action payload
      * 
      * @var Bag 
      */
     protected $payload;
-
 
     /**
      * Applied collection instance
@@ -35,9 +42,11 @@ abstract class Action
     /**
      * Creates a new action.
      * 
+     * @param Actor $actor
      */
-    function __construct()
+    function __construct(Actor $actor)
     {
+        $this->actor = $actor;
         $this->payload = new Bag();
     }
 
