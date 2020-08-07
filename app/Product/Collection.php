@@ -1,7 +1,6 @@
 <?php
 
 namespace Product;
-use Poem\Model\Validateable;
 
 class Collection extends \Poem\Model\Collection 
 {
