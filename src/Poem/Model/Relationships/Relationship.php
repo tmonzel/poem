@@ -25,6 +25,10 @@ abstract class Relationship
         return $this->getTargetCollection()->find();
     }
 
+    function getForeignKey(): string {
+        return $this->getTargetCollection()->foreignKey();
+    }
+
     function attachTo(Collection $collection, Statement $statement) {
         
     }
