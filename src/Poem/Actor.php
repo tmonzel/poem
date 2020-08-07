@@ -54,8 +54,8 @@ class Actor
      */
     static function register(Worker $worker): void
     {
-        static::withNamespaceClass('Collection', function($collectionClass) {
-            static::Model()->register(static::getType(), $collectionClass, [
+        static::withNamespaceClass('Model', function($modelClass) {
+            static::Model()->register(static::getType(), $modelClass, [
                 'name' => static::getName()
             ]);
         });
@@ -81,6 +81,16 @@ class Actor
     static function getName(): string 
     {
         return strtolower(substr(static::class, 0, strrpos(static::class, '\\')));
+    }
+
+    /**
+     * Access the namespace related model for this actor.
+     * 
+     * @return Model
+     */
+    function accessModel(): Model 
+    {
+        return static::Model()->access(static::getType());
     }
 
     /**
@@ -121,16 +131,14 @@ class Actor
 
         if(isset($actionClass)) {
             $type = $actionClass::getType();
-            $calledClass = get_called_class();
 
             /** @var Action $action */
             $action = new $actionClass;
-            // $action->setSubject($subject);
             $action->setPayload($payload);
 
-            $collection = $this->Model()->access($calledClass::Type);
+            $model = $this->accessModel();
             
-            $action->setCollection($collection);
+            $action->setCollection($model);
 
             if(isset($initializer)) {
                 $initializer($action);

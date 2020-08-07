@@ -1,9 +1,9 @@
 <?php
 
-namespace Order;
+namespace Retailer;
 
-class Collection extends \Poem\Model\Collection 
-{
+class Model extends \Poem\Model
+{    
     /**
      * Database schema needed for migrations
      * 
@@ -11,15 +11,17 @@ class Collection extends \Poem\Model\Collection
      */
     const Schema = [
         'id' => 'pk',
-        'state' => 'string'
+        'name' => 'string',
+        'created_at' => 'date',
+        'updated_at' => 'date'
     ];
-
+    
     /**
-     * Order has many items
+     * A retailer has many markets
      * 
      * @var array
      */
     const HasMany = [
-        'items' => 'order_items'
+        'markets'
     ];
 }

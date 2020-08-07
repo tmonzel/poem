@@ -4,7 +4,7 @@ namespace User;
 
 use Poem\Auth\User;
 
-class Collection extends \Poem\Model\Collection 
+class Model extends \Poem\Model 
 {
     /**
      * Database schema needed for migrations

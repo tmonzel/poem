@@ -2,7 +2,7 @@
 
 namespace Market;
 
-class Collection extends \Poem\Model\Collection 
+class Model extends \Poem\Model 
 {
     /**
      * Market belongs to retailer

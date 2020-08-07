@@ -2,7 +2,7 @@
 
 namespace Product;
 
-class Collection extends \Poem\Model\Collection 
+class Model extends \Poem\Model
 {
     /**
      * Database schema needed for migrations
