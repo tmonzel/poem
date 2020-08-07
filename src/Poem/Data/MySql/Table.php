@@ -42,12 +42,6 @@ class Table implements CollectionAdapter
         $this->client = $client;
     }
 
-
-    function getType(): string
-    {
-        return $this->name;
-    }
-
     /**
      * Ensure this table exists
      */
@@ -89,9 +83,17 @@ class Table implements CollectionAdapter
         return $schema;
     }
 
-    function sync(array $schema) {
+    /**
+     * Migrate this table based on the given schema
+     * 
+     * @param array $schema
+     * @return void
+     */
+    function migrate(array $schema): void 
+    {
         if(!$this->exists()) {
-            // Do nothing if table does not exist
+            // Create new
+            $this->client->createTable($this->name, $schema);
             return;
         }
 

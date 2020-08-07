@@ -30,11 +30,11 @@ class Client implements Connection {
     protected $settings = [];
 
     /**
-     * Stored collection instances
+     * Stored table instances
      * 
      * @var array
      */
-    private $collections = [];
+    private $tables = [];
 
     function connect(array $config) 
     {
@@ -75,12 +75,12 @@ class Client implements Connection {
         return $this->connection->lastInsertId();
     }
 
-    function truncateCollection($name) 
+    function truncate($name) 
     {
         return $this->query("TRUNCATE $name");
     }
 
-    function createCollection($name, array $schema = null) 
+    function createTable($name, array $schema = null) 
     {
         $sql = "CREATE TABLE `" . $name . "`(%s)";
         $fields = [];
@@ -94,13 +94,13 @@ class Client implements Connection {
         $this->query(sprintf($sql, implode(',', $fields)));
     }
 
-    function getCollectionAdapter(string $name): CollectionAdapter
+    function accessAdapter(string $type): CollectionAdapter
     {
-        if(isset($this->collections[$name])) {
-            return $this->collections[$name];
+        if(isset($this->tables[$type])) {
+            return $this->tables[$type];
         }
 
-        return $this->collections[$name] = new Table($name, $this);
+        return $this->tables[$type] = new Table($type, $this);
     }
 
     function translateFieldType(string $type) {

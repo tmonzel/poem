@@ -77,7 +77,7 @@ class Collection
         $this->type = $options['type'];
         $this->adapter = static::Data()
             ->resolveConnection(static::$connection)
-            ->getCollectionAdapter($this->type);
+            ->accessAdapter($this->type);
 
         if(isset($options['name'])) {
             $this->name = $options['name'];
@@ -231,29 +231,6 @@ class Collection
     }
 
     /**
-     * Prepare schema for migration
-     * 
-     * @return array
-     */
-    static function prepareSchema(): array 
-    {
-        $calledClass = get_called_class();
-        $schema = [];
-
-        if(defined($calledClass . '::Schema')) {
-            foreach($calledClass::Schema as $name => $type) {
-                if(class_exists($type)) {
-                    $schema[$type::foreignKey()] = 'fk';
-                } else {
-                    $schema[$name] = $type;
-                }
-            }
-        }
-
-        return $schema;
-    }
-
-    /**
      * Picks a single document
      * 
      * @return Document
@@ -356,8 +333,10 @@ class Collection
 
     /**
      * Syncronize the schema for this model
+     * 
+     * @return void
      */
-    function sync() 
+    function migrate(): void 
     {
         $calledClass = get_called_class();
 
@@ -365,13 +344,12 @@ class Collection
             throw new Exception('No schema defined for ' . static::class);
         }
 
-        /*$collection = static::collection();
-        
-        if($collection->exists()) {
-            // sync
-            $collection->sync(static::prepareSchema());
-        } else {
-            static::connection()->createCollection($calledClass::Type, static::prepareSchema());
-        }*/
+        $schema = [];
+
+        foreach($calledClass::Schema as $name => $type) {
+            $schema[$name] = $type;
+        }
+
+        $this->adapter->migrate($schema);
     }
 }

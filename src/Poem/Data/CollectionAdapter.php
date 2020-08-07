@@ -8,4 +8,5 @@ interface CollectionAdapter
     function insert(array $data, array $options = []);
     function delete(array $filter, array $options = []);
     function update(array $filter, array $data, array $options = []);
+    function migrate(array $schema): void;
 }

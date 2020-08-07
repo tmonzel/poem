@@ -2,7 +2,8 @@
 
 namespace Poem\Data;
 
-interface Connection {
+interface Connection 
+{
     function connect(array $config);
-    function getCollectionAdapter(string $name): CollectionAdapter;
+    function accessAdapter(string $type): CollectionAdapter;
 }
