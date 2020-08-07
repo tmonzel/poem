@@ -46,6 +46,10 @@ class FindAction extends Action {
             $query->format($this->payload->format);
         }
 
+        if($this->payload->has('include')) {
+            $query->include($this->payload->include);
+        }
+
         return $query;
     }
 }

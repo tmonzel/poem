@@ -32,6 +32,7 @@ class FindQuery implements IteratorAggregate, JsonSerializable
      */
     protected $conditions = [
         'filter' => [],
+        'include' => null,
         'limit' => null,
         'sort' => null,
         'format' => null
@@ -54,6 +55,7 @@ class FindQuery implements IteratorAggregate, JsonSerializable
      */
     function include($include) 
     {
+        $this->conditions['include'] = $include;
         return $this;
     }
 
