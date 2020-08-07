@@ -23,6 +23,8 @@ class HasManyRelationship extends Relationship
                 $resultMap[$foreignId] = [];
             }
 
+            $document->setFormat(['id', 'type']);
+
             $resultMap[$foreignId][] = $document;
         }
 
