@@ -249,13 +249,26 @@ class Document implements JsonSerializable
         
         $type = $this->_type;
         $id = $this->id;
+        $data = [];
         $attributes = $this->collectVisibleAttributes();
+        $relationships = [];
+
+        foreach($attributes as $n => $v) {
+            if(is_array($v)) {
+                $relationships[$n] = $v;
+                unset($attributes[$n]);
+            }
+        }
 
         if(isset($attributes['id'])) {
             unset($attributes['id']);
         }
 
-        return compact('type', 'id', 'attributes');
+        if(count($relationships) > 0) {
+            $data['relationships'] = $relationships;
+        }
+
+        return compact('type', 'id', 'attributes') + $data;
     }
 
     /**
@@ -267,7 +280,7 @@ class Document implements JsonSerializable
     function translateWithFormat(array $format): array
     {
         $attributes = [];
-        $visibleAttributes = $this->collectVisibleAttributes();
+        $visibleAttributes = $this->collectVisibleAttributes() + ['type' => $this->_type];
 
         foreach($format as $n) {
             if(isset($visibleAttributes[$n])) {
