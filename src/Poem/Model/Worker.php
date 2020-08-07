@@ -5,7 +5,9 @@ namespace Poem\Model;
 class Worker
 {
     /**
-     * Worker accessor key 
+     * Worker accessor key
+     * 
+     * @var string
      */
     const Accessor = 'model';
     
@@ -40,9 +42,9 @@ class Worker
      * @param string $type
      * @param string $collectionClass
      */
-    function register(string $type, string $collectionClass): void
+    function register(string $type, string $collectionClass, array $options = []): void
     {
-        $this->registry[$type] = $collectionClass;
+        $this->registry[$type] = compact('collectionClass', 'options');
     }
 
     /**
@@ -58,11 +60,13 @@ class Worker
         }
 
         $collectionClass = Collection::class;
+        $options = [];
         
         if(isset($this->registry[$type])) {
-            $collectionClass = $this->registry[$type];
+            $collectionClass = $this->registry[$type]['collectionClass'];
+            $options = $this->registry[$type]['options'] + compact('type');
         }
 
-        return $this->collections[$type] = new $collectionClass($type);
+        return $this->collections[$type] = new $collectionClass($options);
     }
 }

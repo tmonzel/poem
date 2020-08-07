@@ -54,11 +54,33 @@ class Actor
      */
     static function register(Worker $worker): void
     {
-        $actorClass = get_called_class();
-
-        static::withNamespaceClass('Collection', function($collectionClass) use($actorClass) {
-            static::Model()->register($actorClass::Type, $collectionClass);
+        static::withNamespaceClass('Collection', function($collectionClass) {
+            static::Model()->register(static::getType(), $collectionClass, [
+                'name' => static::getName()
+            ]);
         });
+    }
+
+    /**
+     * Returns the static actor type
+     * 
+     * @static
+     * @return string
+     */
+    static function getType(): string 
+    {
+        return (static::class)::Type;
+    }
+
+    /**
+     * Returns the actor name (singular of type)
+     * 
+     * @static
+     * @return string
+     */
+    static function getName(): string 
+    {
+        return strtolower(substr(static::class, 0, strrpos(static::class, '\\')));
     }
 
     /**

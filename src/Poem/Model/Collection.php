@@ -38,6 +38,13 @@ class Collection
     protected $type;
 
     /**
+     * Singularized version of the collection type
+     * 
+     * @var string
+     */
+    protected $name;
+
+    /**
      * Client connection name
      * 
      * @static
@@ -65,12 +72,16 @@ class Collection
      * 
      * @param string $type
      */
-    function __construct(string $type)
+    function __construct(array $options = [])
     {
-        $this->type = $type;
+        $this->type = $options['type'];
         $this->adapter = static::Data()
             ->resolveConnection(static::$connection)
-            ->getCollectionAdapter($type);
+            ->getCollectionAdapter($this->type);
+
+        if(isset($options['name'])) {
+            $this->name = $options['name'];
+        }
 
         // Initialize behaviors once per class
         static::initializeBehaviors();
@@ -80,15 +91,24 @@ class Collection
     }
 
     /**
-     * Return the foreign key for this collection
+     * Returns the collection name which is the singularized
+     * version of the type
      * 
-     * @static
      * @return string
      */
-    static function foreignKey(): string 
+    function getName(): string
     {
-        $className = get_called_class();
-        return strtolower(substr($className, 0, strrpos($className, '\\'))) . "_" . static::$primaryKey;
+        return $this->name;
+    }
+
+    /**
+     * Return the foreign key for this collection
+     * 
+     * @return string
+     */
+    function foreignKey(): string 
+    {
+        return $this->name . "_" . static::$primaryKey;
     }
 
     /**

@@ -35,7 +35,7 @@ class Worker
      */
     function register(string $actorClass): void
     {
-        $this->registry[$actorClass::Type] = $actorClass;
+        $this->registry[$actorClass::getType()] = $actorClass;
         $actorClass::register($this);
     }
 
