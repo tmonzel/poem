@@ -2,24 +2,29 @@
 
 namespace Poem\Model\Relationships;
 
-use Poem\Model;
+use Poem\Data\Statement;
+use Poem\Model\Collection;
 
 /**
  * Proxy for belongs to relations
  */
-class BelongsToRelationship extends Relationship {
-    function connect(Model $model) {
-        $fk = $this->subject::foreignKey();
-        $relatedId = (int)$model->{$fk};
+class BelongsToRelationship extends Relationship 
+{
+    function attachTo(Collection $collection, Statement $statement) 
+    {
+        $query = $this->find();
+        $foreignKey = $this->getForeignKey();
+        $resultMap = [];
+        $target = $this->options['target'];
 
-        if($relatedId) {
-            $result = $this->subject::pick($relatedId);
-
-            if($result) {
-                $model->setRelation($this->relationName, $result);
-            }
+        foreach($query as $document) {
+            $document->setFormat(['id', 'type']);
+            $resultMap[$document->id] = $document;
         }
 
-        return $result;
+        $statement->addMapper(function($row) use($target, $resultMap, $foreignKey) {
+            $row[$target] = $resultMap[$row[$foreignKey]];
+            return $row;
+        });
     }
 }
