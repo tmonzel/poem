@@ -2,18 +2,30 @@
 
 namespace Poem\Model\Relationships;
 
-use Poem\Model;
+use Poem\Data\Statement;
+use Poem\Model\Accessor as ModelAccessor;
+use Poem\Model\Collection;
+use Poem\Model\FindQuery;
 
-abstract class Relationship {
-    protected $subject;
-    protected $relationName;
+abstract class Relationship 
+{
+    use ModelAccessor;
 
-    function __construct($subject, $relationName) {
-        $this->subject = $subject;
-        $this->relationName = $relationName;
+    protected $options;
+
+    function __construct($options) {
+        $this->options = $options;
     }
 
-    function connect(Model $model) {
+    function getTargetCollection(): Collection {
+        return static::Model()->access($this->options['target']);
+    }
+
+    function find(): FindQuery {
+        return $this->getTargetCollection()->find();
+    }
+
+    function attachTo(Collection $collection, Statement $statement) {
         
     }
 }

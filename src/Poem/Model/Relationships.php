@@ -7,7 +7,8 @@ use Poem\Model\Relationships\HasManyRelationship;
 use Poem\Model\Relationships\HasOneRelationship;
 use Poem\Model\Relationships\Relationship;
 
-trait Relationships {
+trait Relationships 
+{
     static $relationships = [];
     static $relationshipTypes = [
         'HasMany' => HasManyRelationship::class,
@@ -17,7 +18,8 @@ trait Relationships {
 
     protected $relations = [];
 
-    static function initializeRelationships() {
+    static function initializeRelationships() 
+    {
         $calledClass = get_called_class();
 
         // Do not initialize twice for this model
@@ -33,44 +35,29 @@ trait Relationships {
             if(defined($relationshipDef)) {
                 $relConfig = constant($relationshipDef);
 
-                foreach($relConfig as $name => $subject) {
-                    static::$relationships[$calledClass][$name] = new $relationshipClass($subject, $name);
+                foreach($relConfig as $accessor => $config) {
+                    if(is_numeric($accessor)) {
+                        $accessor = $config;
+                        $config = ['target' => $accessor];
+                    }
+
+                    static::$relationships[$calledClass][$accessor] = new $relationshipClass($config);
                 }
             }
         }
     }
 
-    function getRelationship($name): ?Relationship {
-        $calledClass = get_called_class();
-    
-        if(isset(static::$relationships[$calledClass][$name])) {
-            return static::$relationships[$calledClass][$name];
+    function hasRelationship($name) 
+    {
+        return isset(static::$relationships[static::class][$name]);
+    }
+
+    function getRelationship($name): ?Relationship 
+    {
+        if($this->hasRelationship($name)) {
+            return static::$relationships[static::class][$name];
         }
 
         return null;
-    }
-
-    function getConnectedRelationship($name) {
-        $relationship = $this->getRelationship($name);
-
-        if($relationship) {
-            $relationship->connect($this);
-        }
-
-        return $relationship;
-    }
-
-    function hasRelation($name) {
-        return isset($this->relations[$name]);
-    }
-
-    function setRelation($name, $relation) {
-        $this->relations[$name] = $relation;
-    }
-
-    function toRelatedData() {
-        $calledClass = get_called_class();
-
-        return ['id' => (int)$this->id, 'type' => $calledClass::Type];
     }
 }
