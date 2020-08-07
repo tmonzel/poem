@@ -15,7 +15,7 @@ class BelongsToRelationship extends Relationship
         $query = $this->find();
         $foreignKey = $this->getForeignKey();
         $resultMap = [];
-        $target = $this->options['target'];
+        $target = $this->getTargetCollection()->getName();
 
         foreach($query as $document) {
             $document->setFormat(['id', 'type']);
@@ -24,6 +24,7 @@ class BelongsToRelationship extends Relationship
 
         $statement->addMapper(function($row) use($target, $resultMap, $foreignKey) {
             $row[$target] = $resultMap[$row[$foreignKey]];
+            unset($row[$foreignKey]);
             return $row;
         });
     }
