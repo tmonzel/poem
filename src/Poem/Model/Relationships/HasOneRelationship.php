@@ -15,7 +15,7 @@ class HasOneRelationship extends Relationship
     {
         $query = $this->find();
         $foreignKey = $collection->foreignKey();
-        $target = $this->getTargetCollection()->getName();
+        $target = $this->getTargetModel()->getName();
         $resultMap = [];
 
         foreach($query as $document) {

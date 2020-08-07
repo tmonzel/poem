@@ -15,7 +15,7 @@ class BelongsToRelationship extends Relationship
         $query = $this->find();
         $foreignKey = $this->getForeignKey();
         $resultMap = [];
-        $target = $this->getTargetCollection()->getName();
+        $target = $this->getTargetModel()->getName();
 
         foreach($query as $document) {
             $document->setFormat(['id', 'type']);

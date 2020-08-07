@@ -3,6 +3,7 @@
 namespace Poem\Model\Relationships;
 
 use Poem\Data\Statement;
+use Poem\Model;
 use Poem\Model\Accessor as ModelAccessor;
 use Poem\Model\Collection;
 use Poem\Model\FindQuery;
@@ -17,16 +18,16 @@ abstract class Relationship
         $this->options = $options;
     }
 
-    function getTargetCollection(): Collection {
+    function getTargetModel(): Model {
         return static::Model()->access($this->options['target']);
     }
 
     function find(): FindQuery {
-        return $this->getTargetCollection()->find();
+        return $this->getTargetModel()->find();
     }
 
     function getForeignKey(): string {
-        return $this->getTargetCollection()->foreignKey();
+        return $this->getTargetModel()->foreignKey();
     }
 
     function attachTo(Collection $collection, Statement $statement) {
