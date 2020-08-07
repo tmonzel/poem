@@ -2,8 +2,7 @@
 
 namespace User;
 
-use Poem\Auth\BehaveAsUser;
-use Poem\Model\Validateable;
+use Poem\Auth\User;
 
 class Collection extends \Poem\Model\Collection 
 {
@@ -12,19 +11,14 @@ class Collection extends \Poem\Model\Collection
      * 
      * @var array
      */
-    const Schema = [
-        'name' => 'string',
-        'password' => 'string'
-    ];
+    const Schema = User::Schema;
 
     /**
      * Registered model behaviors
      * 
      * @var array
      */
-    const Behaviors = [
-        BehaveAsUser::class
-    ];
+    const Behaviors = User::Behaviors;
 
     /**
      * User validations
