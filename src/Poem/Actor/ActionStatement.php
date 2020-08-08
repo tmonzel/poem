@@ -5,7 +5,8 @@ namespace Poem\Actor;
 use JsonSerializable;
 use Poem\Actor;
 
-class ActionStatement implements JsonSerializable {
+class ActionStatement implements JsonSerializable 
+{
     protected $actor;
     protected $actionType;
     protected $payload = [];

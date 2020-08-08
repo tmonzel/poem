@@ -183,8 +183,9 @@ class Actor
      * 
      * @param string $actionType
      * @param array $payload
+     * @return void
      */
-    function initialize(string $actionType, array $payload = []) 
+    function initialize(string $actionType, array $payload = []): void 
     {
         // Override for initialization
     }

@@ -36,8 +36,9 @@ class Actor extends \Poem\Actor
      * 
      * @param string $actionType
      * @param array $payload
+     * @return void
      */
-    function initialize(string $actionType, array $payload = []) 
+    function initialize(string $actionType, array $payload = []): void
     {
         $this->registerAction(LoginAction::class);
         $this->registerAction('me', function($payload) {

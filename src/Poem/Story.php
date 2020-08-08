@@ -42,6 +42,7 @@ class Story
      * Resolve request and send json response to output.
      * 
      * @param Request $request
+     * @return void
      */
     function tell(Request $request = null): void
     {
@@ -149,7 +150,7 @@ class Story
      * @param Request $request
      * @return mixed
      */
-    private function parseQueryData(Request $request)
+    protected function parseQueryData(Request $request)
     {
         $rawBody = $request->getContent();
         return $rawBody ? json_decode($rawBody, true) : [];

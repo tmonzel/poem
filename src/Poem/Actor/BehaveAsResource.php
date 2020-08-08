@@ -11,15 +11,20 @@ use Poem\Behavior;
 
 /**
  * Actor behaves as a Resource
- * Adds default CRUD actions
+ * adding default CRUD actions
  */
-class BehaveAsResource extends Behavior {
+class BehaveAsResource extends Behavior 
+{
     function initialize()
     {
-        $this->shouldActOn(Actor::PREPARE_ACTION_EVENT, [$this, 'prepareAction']);
+        $this->shouldActOn(
+            Actor::PREPARE_ACTION_EVENT, 
+            [$this, 'prepareAction']
+        );
     }
 
-    function prepareAction(Actor $actor, array $payload = []) {
+    function prepareAction(Actor $actor, array $payload = []) 
+    {
         $actor->registerAction(FindAction::class);
         $actor->registerAction(DestroyAction::class);
         $actor->registerAction(UpdateAction::class);

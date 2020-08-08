@@ -2,14 +2,35 @@
 
 namespace Poem\Actor;
 
-trait AttributeMapper {
+trait AttributeMapper 
+{
+    /**
+     * Holds the mapper callables by attribute
+     * 
+     * @var array
+     */
     protected $mappersByAttribute = [];
 
-    function mapAttribute($name, callable $mapper) {
+    /**
+     * Maps a given attribute
+     * 
+     * @param string $name
+     * @param callable $mapper
+     * @return void
+     */
+    function mapAttribute(string $name, callable $mapper): void 
+    {
         $this->mappersByAttribute[$name] = $mapper;
     }
 
-    function map(array $attributes) {
+    /**
+     * Apply all mappers on the given attributes
+     * 
+     * @param array $attributes
+     * @return array
+     */
+    function map(array $attributes): array 
+    {
         $result = [];
 
         foreach($attributes as $name => $value) {
