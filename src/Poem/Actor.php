@@ -3,7 +3,7 @@
 namespace Poem;
 
 use Poem\Actor\Action;
-use Poem\Actor\ActionStatement;
+use Poem\Actor\ActionQuery;
 use Poem\Actor\Exceptions\NotFoundException;
 use Poem\Actor\Worker;
 use Poem\Model\Accessor as ModelAccessor;
@@ -44,6 +44,9 @@ class Actor
                 $this->registerAction($actionClass);
             }
         });
+
+        // Initialize user defined stuff
+        $this->initialize();
     }
 
     /**
@@ -166,26 +169,37 @@ class Actor
             'payload' => $payload
         ]);
 
-        $this->initialize($actionType, $payload);
-
         $calledClass = get_called_class();
 
         if(!$this->hasAction($actionType)) {
             throw new NotFoundException("Action " . $actionType . " is not registered on " . $calledClass::Type);
         }
 
-        return new ActionStatement($this, $actionType, $payload);
+        $query = new ActionQuery($this, $actionType, $payload);
+
+        $this->beforeAction($query);
+
+        return $query;
 
     }
 
     /**
      * Initialize the action before execution
      * 
-     * @param string $actionType
-     * @param array $payload
+     * @param ActionQuery $query 
      * @return void
      */
-    function initialize(string $actionType, array $payload = []): void 
+    function beforeAction(ActionQuery $query): void 
+    {
+        // Override for initialization
+    }
+
+    /**
+     * Called after construction
+     * 
+     * @return void
+     */
+    function initialize(): void
     {
         // Override for initialization
     }
