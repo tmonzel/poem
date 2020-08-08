@@ -42,13 +42,33 @@ class ActionQuery implements JsonSerializable
     }
 
     /**
+     * Returns the action type.
+     * 
+     * @return string
+     */
+    function getType(): string
+    {
+        return $this->actionType;
+    }
+
+    /**
+     * Returns the action payload.
+     * 
+     * @return array
+     */
+    function getPayload(): array
+    {
+        return $this->payload;
+    }
+
+    /**
      * Execute this action
      * 
      * @return mixed
      */
     function execute() 
     {
-        return $this->actor->executeAction($this->actionType, $this->payload);
+        return $this->actor->execute($this);
     }
 
     /**

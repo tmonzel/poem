@@ -122,45 +122,51 @@ class Actor
     }
 
     /**
-     * Executes a given action.
+     * Executes a given action query.
      * 
      * @param string $actionType
      * @param array $payload
      * @return mixed
      */
-    function executeAction(string $actionType, array $payload = []) 
+    function execute(ActionQuery $query) 
     {
+        $actionType = $query->getType();
+        
         extract($this->actions[$actionType]);
+
+        if(isset($initializer)) {
+            return $initializer($query->getPayload());
+        }
 
         if(isset($actionClass)) {
             $type = $actionClass::getType();
 
             /** @var Action $action */
             $action = new $actionClass($this);
-            $action->setPayload($payload);
+            $action->setPayload($query->getPayload());
 
             if(isset($initializer)) {
                 $initializer($action);
             }
+
+            $this->beforeAction($action);
     
             if(method_exists($this, $type)) {
                 $this->{$type}($action);
             }
 
-            return $action->execute();
-        }
-
-        if(isset($initializer)) {
-            return $initializer($payload);
+            return $this->afterAction(
+                $action->execute()
+            );
         }
     }
 
     /**
-     * Build and return a action statement
+     * Build and return a action query
      * 
      * @param string $actionType
      * @param array $payload
-     * @return ActionStatement
+     * @return ActionQuery
      */
     function prepareAction(string $actionType, array $payload = []) 
     {
@@ -177,21 +183,32 @@ class Actor
 
         $query = new ActionQuery($this, $actionType, $payload);
 
-        $this->beforeAction($query);
+       
 
         return $query;
 
     }
 
     /**
-     * Initialize the action before execution
+     * Do stuff before the given action executes
      * 
-     * @param ActionQuery $query 
+     * @param Action $action 
      * @return void
      */
-    function beforeAction(ActionQuery $query): void 
+    function beforeAction(Action $action): void 
     {
-        // Override for initialization
+        // Override
+    }
+
+    /**
+     * Modify the action result
+     * 
+     * @param mixed $result 
+     * @return void
+     */
+    function afterAction($result) 
+    {
+        return $result;
     }
 
     /**
