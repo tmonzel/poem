@@ -10,6 +10,6 @@ class Model extends \Poem\Model
      * @var array
      */
     const BelongsTo = [
-        'retailers'
+        'retailer' => 'retailers'
     ];
 }
