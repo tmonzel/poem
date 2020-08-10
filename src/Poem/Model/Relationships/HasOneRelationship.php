@@ -4,6 +4,7 @@ namespace Poem\Model\Relationships;
 
 use Poem\Data\Statement;
 use Poem\Model\Collection;
+use Poem\Model\Document;
 use stdClass;
 
 /**
@@ -25,8 +26,6 @@ class HasOneRelationship extends Relationship
                 continue;
             }
 
-            $document->setFormat(['id', 'type']);
-
             $resultMap[$foreignId] = $document;
         }
 
@@ -39,5 +38,9 @@ class HasOneRelationship extends Relationship
 
             return $row;
         });
+    }
+
+    function saveTo(Document $document) {
+
     }
 }
