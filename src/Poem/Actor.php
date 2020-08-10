@@ -124,8 +124,7 @@ class Actor
     /**
      * Executes a given action query.
      * 
-     * @param string $actionType
-     * @param array $payload
+     * @param ActionQuery $query
      * @return mixed
      */
     function execute(ActionQuery $query) 
@@ -175,18 +174,11 @@ class Actor
             'payload' => $payload
         ]);
 
-        $calledClass = get_called_class();
-
         if(!$this->hasAction($actionType)) {
-            throw new NotFoundException("Action " . $actionType . " is not registered on " . $calledClass::Type);
+            throw new NotFoundException("Action " . $actionType . " is not registered on " . static::getType());
         }
 
-        $query = new ActionQuery($this, $actionType, $payload);
-
-       
-
-        return $query;
-
+        return new ActionQuery($this, $actionType, $payload);
     }
 
     /**
