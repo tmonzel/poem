@@ -5,6 +5,7 @@ namespace Poem\Model;
 use Exception;
 use Poem\Data\Accessor as DataAccessor;
 use Poem\Data\CollectionAdapter;
+use Poem\Data\Connection;
 use Poem\Data\Statement;
 use Poem\Module;
 use Poem\Mutable;
@@ -22,13 +23,6 @@ class Collection
      * @var string
      */
     const BEFORE_SAVE_EVENT = 'collection.before_save';
-
-    /**
-     * Applied adapter
-     * 
-     * @var CollectionAdapter
-     */
-    protected $adapter;
 
     /**
      * Collection type
@@ -68,16 +62,13 @@ class Collection
     protected $documentClass;
 
     /**
-     * Create a new model instance
+     * Creates a new collection instance.
      * 
      * @param string $type
      */
     function __construct(array $options = [])
     {
         $this->type = $options['type'];
-        $this->adapter = static::Data()
-            ->resolveConnection(static::$connection)
-            ->accessAdapter($this->type);
 
         if(isset($options['name'])) {
             $this->name = $options['name'];
@@ -86,8 +77,18 @@ class Collection
         // Initialize behaviors once per class
         static::initializeBehaviors();
         
-        // Initialize relationships once per class 
-        static::initializeRelationships();
+        // Initialize relationships from defined constants
+        $this->initializeRelationships();
+    }
+
+    /**
+     * Returns the collection type
+     * 
+     * @return string
+     */
+    function getType(): string
+    {
+        return $this->type;
     }
 
     /**
@@ -99,6 +100,24 @@ class Collection
     function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * 
+     * @return Connection
+     */
+    static function connection(): Connection
+    {
+        return static::Data()->resolveConnection(static::$connection);
+    }
+
+    /**
+     * 
+     * @return CollectionAdapter
+     */
+    function accessAdapter(): CollectionAdapter 
+    {
+        return static::connection()->accessAdapter($this->type);
     }
 
     /**
@@ -155,35 +174,57 @@ class Collection
     }
 
     /**
-     * Updates or creates a given document.
+     * Validates and mutates the given document.
      * 
      * @param Document $document
      * @return mixed
      */
-    function save(Document $document) 
+    function save(Document $document, bool $includeRelated = true) 
     {
         if(!$this->validate($document)) {
             return false;
         }
         
         $this->dispatchEvent(self::BEFORE_SAVE_EVENT, [$document]);
+
+        $result = null;
+        $data = $document->toArray();
+
+        // Remove all relationship fields before persist
+        $data = array_filter($data, function($name) {
+            return !$this->hasRelationship($name);
+        }, ARRAY_FILTER_USE_KEY);
         
         if($document->exists()) {
             // Update existing document
-            return $this->adapter->update(
-                [static::$primaryKey => $document->id],
-                $document->toArray()
-            );
+            $dirtyAttributes = array_filter($data, function($name) use($document) {
+                return $document->isDirty($name);
+            }, ARRAY_FILTER_USE_KEY);
+
+            if(empty($dirtyAttributes)) {
+                $result = true;
+            } else {
+                $result = $this->accessAdapter()->update(
+                    [static::$primaryKey => $document->id],
+                    $dirtyAttributes
+                );
+            }
 
         } else {
             // Create new document
-            $insertId = $this->adapter->insert(
-                $document->toArray()
-            );
+            $insertId = $this->accessAdapter()->insert($data);
 
             $document->id = $insertId;
-            return true;
+            $result = true;
         }
+
+        if($includeRelated) {
+            foreach($this->relationships as $relationship) {
+                $relationship->saveTo($document);
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -233,11 +274,22 @@ class Collection
     /**
      * Picks a single document
      * 
+     * @param int $id
+     * @param array $options
      * @return Document
      */
-    function pick(int $id) 
+    function pick(int $id, array $options = []): Document 
     {
-        return $this->first(compact('id'));
+        return $this->first(compact('id'), $options);
+    }
+
+    /**
+     * 
+     * @return FindQuery
+     */
+    function pickMany(array $ids): FindQuery 
+    {
+        return $this->find()->filter(['id' => $ids]);
     }
 
     /**
@@ -260,7 +312,18 @@ class Collection
     {
         extract($conditions);
 
-        $statement = $this->adapter->find($filter);
+        $statement = $this->accessAdapter()->find($filter);
+        $hiddenAttributes = [];
+
+        foreach($this->relationships as $relationship) {
+            // Hide all related foreign keys from document attributes
+            $hiddenAttributes[] = $relationship->getForeignKey();
+        }
+
+        if(isset($include) && $include === '*') {
+            // Include all relationships
+            $include = array_keys($this->relationships);
+        }
 
         if(isset($include) && is_array($include)) {
             // Find relationships
@@ -276,9 +339,10 @@ class Collection
             }
         }
 
-        $statement->addMapper(function($attributes) use($format) {
+        $statement->addMapper(function($attributes) use($format, $hiddenAttributes) {
             $document = $this->buildDocument($attributes);
             $document->setFormat($format);
+            $document->hide($hiddenAttributes);
             
             return $document;
         });
@@ -290,13 +354,18 @@ class Collection
      * Find the first occurrent document
      * 
      * @param array $filter
+     * @param array $options
      * @return Document|null
      */
-    function first(array $filter = []): ?Document
+    function first(array $filter = [], array $options = []): ?Document
     {
         $query = $this->find();
         $query->filter($filter);
         $query->limit(1);
+
+        if(isset($options['include'])) {
+            $query->include($options['include']);
+        }
 
         return $query->first();
     }   
@@ -309,7 +378,7 @@ class Collection
      */
     function create(array $attributes): Document 
     {
-        $insertId = $this->adapter->insert(
+        $insertId = $this->accessAdapter()->insert(
             $attributes
         );
 
@@ -328,7 +397,7 @@ class Collection
             return false;
         }
 
-        return $this->adapter->delete([static::$primaryKey => $document->id], ['limit' => 1]);
+        return $this->accessAdapter()->delete([static::$primaryKey => $document->id], ['limit' => 1]);
     }
 
     /**
@@ -350,6 +419,6 @@ class Collection
             $schema[$name] = $type;
         }
 
-        $this->adapter->migrate($schema);
+        $this->accessAdapter()->migrate($schema);
     }
 }

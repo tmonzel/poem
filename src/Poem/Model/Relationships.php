@@ -9,39 +9,37 @@ use Poem\Model\Relationships\Relationship;
 
 trait Relationships 
 {
-    static $relationships = [];
     static $relationshipTypes = [
         'HasMany' => HasManyRelationship::class,
         'HasOne' => HasOneRelationship::class,
         'BelongsTo' => BelongsToRelationship::class
     ];
 
-    protected $relations = [];
+    /**
+     * 
+     * @var Relationship[]
+     */
+    protected $relationships = [];
 
-    static function initializeRelationships() 
+    function initializeRelationships() 
     {
         $calledClass = get_called_class();
 
-        // Do not initialize twice for this model
-        if(isset(static::$relationships[$calledClass])) {
-            return;
-        }
-
-        static::$relationships[$calledClass] = [];
-
         foreach(static::$relationshipTypes as $type => $relationshipClass) {
-            $relationshipDef = $calledClass . '::' . $type;
+            $relationshipConstant = $calledClass . '::' . $type;
 
-            if(defined($relationshipDef)) {
-                $relConfig = constant($relationshipDef);
+            if(defined($relationshipConstant)) {
+                $relConfig = constant($relationshipConstant);
 
                 foreach($relConfig as $accessor => $config) {
                     if(is_numeric($accessor)) {
                         $accessor = $config;
                         $config = ['target' => $accessor];
+                    } elseif(is_string($config)) {
+                        $config = ['target' => $config];
                     }
 
-                    static::$relationships[$calledClass][$accessor] = new $relationshipClass($config);
+                    $this->relationships[$accessor] = new $relationshipClass($this, $config);
                 }
             }
         }
@@ -49,13 +47,13 @@ trait Relationships
 
     function hasRelationship($name) 
     {
-        return isset(static::$relationships[static::class][$name]);
+        return isset($this->relationships[$name]);
     }
 
     function getRelationship($name): ?Relationship 
     {
         if($this->hasRelationship($name)) {
-            return static::$relationships[static::class][$name];
+            return $this->relationships[$name];
         }
 
         return null;
