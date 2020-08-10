@@ -4,9 +4,7 @@ namespace Poem\Data\MySql;
 
 use PDO;
 use Poem\Data\CollectionAdapter;
-use Poem\Data\Cursor;
 use Poem\Data\Statement;
-use Poem\Set;
 
 class Table implements CollectionAdapter 
 {
@@ -126,49 +124,34 @@ class Table implements CollectionAdapter
     function find(array $filter = [], array $options = []): Statement 
     {
         $sql = "SELECT * FROM $this->name";
+        $params = [];
+        $limit = null;
 
-        if(isset($options['join'])) {
-            $join = $options['join'];
+        extract($options);
 
+        if(isset($join)) {
             if($join['type'] === 'left') {
                 $sql .= " LEFT JOIN " . $join['target'] . " ON (" . $join['on'] . ")";
             }
         }
-        
-        if(count($filter) > 0) {
-            $where = $this->buildWhere($filter);
-            $sql .= " WHERE $where";
-        }
 
-        $stmt = $this->client->query($sql, $filter);
+        $this->appendWhereClause($sql, $params, $filter);
+        $this->appendLimitClause($sql, $params, $limit);
+
+        $stmt = $this->client->query($sql, $params);
         
         return new FindResult($this, $stmt, $options);
     }
 
-    function findFirst(array $conditions = []) 
+    function insert(array $data, array $options = []) 
     {
-        $sql = "SELECT * FROM $this->name";
-
-        if(count($conditions) > 0) {
-            $where = $this->buildWhere($conditions);
-            $sql .= " WHERE $where";
-        }
-        
-        $sql .= " LIMIT 1";
-        $stmt = $this->client->query($sql, $conditions);
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    function insert(array $document, array $options = []) 
-    {
-        $fields = array_keys($document);
-        $values = array_values($document);
+        $fields = array_keys($data);
+        $values = array_values($data);
         $placeholder = array_fill(0, count($values), '?');
 
         $sql = "INSERT INTO `$this->name` (" . implode(',', $fields). ") VALUES (" . implode(',', $placeholder). ")";
 
-        $stmt = $this->client->query($sql, $values);
+        $this->client->query($sql, $values);
 
         return $this->client->lastInsertId();
     }
@@ -176,44 +159,64 @@ class Table implements CollectionAdapter
     function update(array $filter, array $data, array $options = []) 
     {
         $sql = "UPDATE $this->name";
-        $params = $filter;
+        $params = [];
+        $limit = null;
 
         if(count($data) > 0) {
             $mappedSetClause = array_map(function ($key) { 
-                return "`" . $key . "` = :data_" . $key; 
+                return "`" . $key . "` = ?"; 
             }, array_keys($data));
             
             $sql .= " SET " . implode(', ', $mappedSetClause);
-            
-            foreach($data as $k => $v) {
-                $params['data_' . $k] = $v;
-                
-            }
+            $params = array_values($data);
         }
 
-        if(count($filter) > 0) {
-            $where = $this->buildWhere($filter);
-            $sql .= " WHERE $where";
-        }
+        extract($options);
 
+        $this->appendWhereClause($sql, $params, $filter);
+        $this->appendLimitClause($sql, $params, $limit);
+        
         return $this->client->query($sql, $params);
     }
 
     function delete(array $filter, array $options = []) 
     {
-        $where = $this->buildWhere($filter);
-        $sql = "DELETE FROM $this->name WHERE $where";  
+        $sql = "DELETE FROM $this->name";
+        $params = [];
+        $limit = null;
 
-        $stmt = $this->client->query($sql, $filter);
-        return $stmt;
+        extract($options);
+
+        $this->appendWhereClause($sql, $params, $filter);
+        $this->appendLimitClause($sql, $params, $limit);
+
+        return $this->client->query($sql, $params);
     }
 
-    private function buildWhere(array $conditions) 
+    private function appendLimitClause(&$sql, &$params, $limit) 
     {
-        $mappedConditions = array_map(function ($key) { 
-            return "`". $key . "`= :" . $key; 
-        }, array_keys($conditions));
+        if(isset($limit)) {
+            $sql .= " LIMIT $limit";
+        }
+    }
 
-        return implode(' AND ', $mappedConditions);
+    private function appendWhereClause(&$sql, &$params, $where) 
+    {
+        if(is_array($where) && count($where) > 0) {
+            $conditions = [];
+
+            foreach($where as $key => $value) {
+                if(is_array($value)) {
+                    $placeholder = array_fill(0, count($value), '?');
+                    $conditions[] = "`". $key . "` IN (" . implode(',', $placeholder) . ")";
+                    array_push($params, ...$value);
+                } else {
+                    $conditions[] = "`". $key . "`= ?";
+                    $params[] = $value;
+                }
+            }
+
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
     }
 }
