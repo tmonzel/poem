@@ -146,12 +146,22 @@ class FindQuery implements IteratorAggregate, JsonSerializable
     }
 
     /**
+     * Get all documents as array
+     * 
+     * @return array
+     */
+    function all(): array
+    {
+        return iterator_to_array($this);
+    }
+
+    /**
      * Serializes to json.
      * 
      * @return Traversable
      */
     function jsonSerialize()
     {
-        return $this->execute();
+        return $this->all();
     }
 }
