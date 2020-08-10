@@ -3,9 +3,18 @@
 namespace Poem\Model;
 
 use JsonSerializable;
+use stdClass;
 
 class Document implements JsonSerializable 
 {
+    /**
+     * Document type
+     * Always plural e.g. users, products...
+     * 
+     * @var string
+     */
+    protected $_type;
+    
     /**
      * Document attributes
      * Represents all fields of a table row
@@ -15,12 +24,10 @@ class Document implements JsonSerializable
     protected $_attributes = [];
 
     /**
-     * Document type
-     * Always plural e.g. users, products...
      * 
-     * @var string
+     * @var array
      */
-    protected $_type;
+    protected $_originalAttributes = [];
 
     /**
      * Hide this attributes from serialization
@@ -76,6 +83,11 @@ class Document implements JsonSerializable
         }
     }
 
+    function getType(): string
+    {
+        return $this->_type;
+    }
+
     /**
      * Read attribute via property
      * 
@@ -106,7 +118,7 @@ class Document implements JsonSerializable
      */
     function __isset($name) 
     {
-        return $this->has($name);
+        return isset($name);
     }
 
     /**
@@ -130,8 +142,25 @@ class Document implements JsonSerializable
      */
     function writeAttribute(string $name, $value): void
     {
+        if($this->has($name) && !$this->isDirty($name)) {
+            $this->_originalAttributes[$name] = $this->_attributes[$name];
+        }
+        
         $this->_dirtyAttributes[$name] = true;
         $this->_attributes[$name] = $value;
+    }
+
+    /**
+     * 
+     * @param string $name
+     * @return mixed
+     */
+    function wasOriginally(string $name) {
+        if(array_key_exists($name, $this->_originalAttributes)) {
+            return $this->_originalAttributes[$name];
+        }
+
+        return $this->readAttribute($name);
     }
 
     /**
@@ -142,7 +171,18 @@ class Document implements JsonSerializable
      */
     function has(string $name): bool
     {
-        return isset($this->_attributes[$name]);
+        return array_key_exists($name, $this->_attributes);
+    }
+
+    /**
+     * Check if an attribute isset and not empty
+     * 
+     * @param string $name
+     * @return bool
+     */
+    function present(string $name): bool
+    {
+        return !empty($this->_attributes[$name]);
     }
 
     /**
@@ -227,6 +267,20 @@ class Document implements JsonSerializable
     }
 
     /**
+     * 
+     */
+    function hide($names) 
+    {
+        if(is_string($names)) {
+            $names = [$names];
+        }
+
+        foreach($names as $attr) {
+            $this->_hiddenAttributes[] = $attr;
+        }
+    }
+
+    /**
      * Interface implementation for json_encode
      * 
      * @return array
@@ -251,24 +305,57 @@ class Document implements JsonSerializable
         $id = $this->id;
         $data = [];
         $attributes = $this->collectVisibleAttributes();
-        $relationships = [];
+        $related = $this->prepareRelatedAttributes();
 
-        foreach($attributes as $n => $v) {
-            if(is_array($v) || is_object($v)) {
-                $relationships[$n] = $v;
-                unset($attributes[$n]);
-            }
+        // Remove related attributes from the source attributes property
+        foreach($related as $n => $v) {
+            unset($attributes[$n]);
         }
 
+        // Remove the id from the source attributes property
         if(isset($attributes['id'])) {
             unset($attributes['id']);
         }
 
-        if(count($relationships) > 0) {
-            $data['relationships'] = $relationships;
+        if(count($related) > 0) {
+            $data['relationships'] = $related;
         }
 
         return compact('type', 'id', 'attributes') + $data;
+    }
+
+    /**
+     * Returns all dirty attributes
+     * 
+     * @return array
+     */
+    function getDirty(): array
+    {
+        return array_filter($this->_attributes, function($name) {
+            return $this->isDirty($name);
+        }, ARRAY_FILTER_USE_KEY);
+    }
+
+    /**
+     * Returns all array or object attributes
+     * 
+     * @return array
+     */
+    function prepareRelatedAttributes(): array 
+    {
+        $associated = [];
+
+        foreach($this->_attributes as $n => $v) {
+            if(is_array($v) || is_object($v)) {
+                if($v instanceof self) {
+                    $v->setFormat(['id', 'type']);
+                }
+
+                $associated[$n] = $v instanceof stdClass ? null : $v;
+            }
+        }
+
+        return $associated;
     }
 
     /**
