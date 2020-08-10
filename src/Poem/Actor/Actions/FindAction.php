@@ -30,7 +30,7 @@ class FindAction extends Action {
         
         if($this->payload->has('id')) {
             // Return a single document
-            $document = $model->pick((int)$this->payload->id);
+            $document = $model->pick($this->payload->id);
 
             if(!$document) {
                 throw new NotFoundException('Document not found');
@@ -41,7 +41,9 @@ class FindAction extends Action {
 
         $query = $model->find();
 
-        if($this->payload->has('filter')) {
+        if($this->payload->has('ids')) {
+            $query->filter(['id' => $this->payload->ids]);
+        } else if($this->payload->has('filter')) {
             $query->filter($this->payload->filter);
         }
 
