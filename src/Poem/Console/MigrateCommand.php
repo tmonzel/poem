@@ -2,12 +2,15 @@
 
 namespace Poem\Console;
 
+use Poem\Actor\Accessor as ActorAccessor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class MigrateCommand extends Command 
 {
+    use ActorAccessor;
+    
     protected static $defaultName = 'migrate';
 
     protected function configure()
@@ -20,30 +23,20 @@ class MigrateCommand extends Command
             // the "--help" option
             ->setHelp('This command allows you to migrate a model.')
 
-            ->addArgument('type', true, 'The subject name')
+            ->addArgument('type', true, 'The collection type')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $type = $input->getArgument('type');
-        $subject = null;
+        $actor = static::Actor()->access($type);
+        $model = $actor->accessModel();
 
-        if(strpos($type, '.') !== false) {
-            $subject = str_replace('.', '\\', $type) . "\\Model";
-        } else {
-            $subject = $type . '\\Model';
-        }
-        
-        if(!$subject || !class_exists($subject)) {
-            $output->writeln("Subject not found for $type");
-            return Command::FAILURE;
-        }
+        // Migrating the model based on the given schema
+        $model->migrate();
 
-        // Syncronize subject
-        $subject::sync();
-
-        $output->writeln('Migrated ' . $subject::Type . ' schema');
+        $output->writeln('Migrated ' . $actor->getType() . ' schema');
 
         return Command::SUCCESS;
     }
