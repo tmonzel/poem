@@ -28,7 +28,7 @@ class Actor extends \Poem\Actor
             ],
 
             'except' => [
-                'create', 'find'
+                'create', 'find', 'update'
             ]
         ]
     ];
