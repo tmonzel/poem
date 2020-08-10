@@ -33,16 +33,22 @@ class UpdateAction extends Action
         // Access the related model
         $model = $this->actor->accessModel();
 
-        $document = $model->pick($this->payload->id);
-
-        /*if(isset($this->payload['relationships'])) {
-            foreach($this->payload['relationships'] as $name => $data) {
-                $relationship = $document->getConnectedRelationship($name);
-            }
-        }*/
+        $document = $model->pick($this->payload->id, ['include' => '*']);
         
         if(!$document) {
             throw new NotFoundException('Document#' . $this->payload->id . ' not found');
+        }
+
+        // Apply all relationships data to the document
+        if($this->payload->present('relationships')) {
+            foreach($this->payload->relationships as $name => $data) {
+                if(!$model->hasRelationship($name)) {
+                    continue;
+                }
+
+                $relationship = $model->getRelationship($name);
+                $relationship->applyTo($document, $data);
+            }
         }
         
         if($this->payload->present('attributes')) {
