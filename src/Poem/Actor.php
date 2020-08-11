@@ -57,11 +57,24 @@ class Actor
      */
     static function register(Worker $worker): void
     {
-        static::withNamespaceClass('Model', function($modelClass) {
-            static::Model()->register(static::getType(), $modelClass, [
-                'name' => static::getName()
-            ]);
-        });
+        $modelClass = static::getNamespaceClass('Model');
+        $documentClass = static::getNamespaceClass('Document');
+        
+        static::Model()->register(static::getType(), $modelClass ?? Model::class, [
+            'name' => static::getName(),
+            'relationships' => static::getRelationships(),
+            'documentClass' => $documentClass
+        ]);
+    }
+
+    static function getRelationships(): array {
+        $calledClass = get_called_class();
+
+        if(defined($calledClass . '::Relationships')) {
+            return (static::class)::Relationships;
+        }
+
+        return [];
     }
 
     /**
