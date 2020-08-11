@@ -22,6 +22,13 @@ class Actor
     const PREPARE_ACTION_EVENT = 'actor_prepare_action';
     
     /**
+     * Custom model class used by this actor
+     * 
+     * @var string
+     */
+    static $modelClass;
+    
+    /**
      * Registered actions
      * 
      * @var array
@@ -57,7 +64,7 @@ class Actor
      */
     static function register(Worker $worker): void
     {
-        $modelClass = static::getNamespaceClass('Model');
+        $modelClass = static::$modelClass ?? static::getNamespaceClass('Model');
         $documentClass = static::getNamespaceClass('Document');
         
         static::Model()->register(static::getType(), $modelClass ?? Model::class, [
@@ -67,7 +74,15 @@ class Actor
         ]);
     }
 
-    static function getRelationships(): array {
+    /**
+     * Returns all relationships used by the
+     * related model.
+     * 
+     * @static
+     * @return array
+     */
+    static function getRelationships(): array 
+    {
         $calledClass = get_called_class();
 
         if(defined($calledClass . '::Relationships')) {
