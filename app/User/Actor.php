@@ -2,49 +2,15 @@
 
 namespace User;
 
-use Poem\Auth\Actions\LoginAction;
 use Poem\Actor\BehaveAsResource;
-use Poem\Actor\Exceptions\UnauthorizedException;
 use Poem\Auth\BehaveAsGuard;
-use Poem\Auth\Accessor as AuthAccessor;
 
-class Actor extends \Poem\Actor 
+class Actor extends \Poem\Auth\Actor 
 {
-    use AuthAccessor;
-
-    /**
-     * User actor type definition
-     * 
-     * @var string
-     */
-    const Type = 'users';
-
-    /**
-     * Registered action behaviors
-     * 
-     * @var array
-     */
     const Behaviors = [
         BehaveAsResource::class,
         BehaveAsGuard::class => [
-            'except' => ['login', 'create', 'destroy', 'me']
+            'except' => ['login', 'create', 'destroy']
         ]
     ];
-
-    /**
-     * Register additional actions
-     * 
-     * @return void
-     */
-    function initialize(): void
-    {
-        $this->registerAction(LoginAction::class);
-        $this->registerAction('me', function($payload) {
-            if(!static::Auth()->authorized()) {
-                throw new UnauthorizedException('No authorized user found');
-            }
-
-            return static::Auth()->user();
-        });
-    }
 }
