@@ -2,24 +2,8 @@
 
 namespace User;
 
-use Poem\Auth\User;
-
-class Model extends \Poem\Model 
+class Model extends \Poem\Auth\User 
 {
-    /**
-     * Database schema needed for migrations
-     * 
-     * @var array
-     */
-    const Schema = User::Schema;
-
-    /**
-     * Registered model behaviors
-     * 
-     * @var array
-     */
-    const Behaviors = User::Behaviors;
-
     /**
      * User validations
      * 
