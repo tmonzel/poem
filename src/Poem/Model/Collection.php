@@ -427,6 +427,15 @@ class Collection
     }
 
     /**
+     * 
+     * @return void
+     */
+    function truncate(): void
+    {
+        $this->accessAdapter()->truncate();
+    }
+
+    /**
      * Syncronize the schema for this model
      * 
      * @return void

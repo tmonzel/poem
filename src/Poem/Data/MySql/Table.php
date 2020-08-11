@@ -42,6 +42,8 @@ class Table implements CollectionAdapter
 
     /**
      * Ensure this table exists
+     * 
+     * @return bool
      */
     function exists(): bool 
     {
@@ -50,6 +52,12 @@ class Table implements CollectionAdapter
         )->rowCount() > 0;
     }
 
+    /**
+     * Drop table field
+     * 
+     * @param string $name
+     * @return PDOStatement
+     */
     function dropField(string $name) 
     {
         return $this->client->query(
@@ -57,6 +65,13 @@ class Table implements CollectionAdapter
         );
     }
 
+    /**
+     * Add a new table field
+     * 
+     * @param string $name
+     * @param string $type
+     * @return PDOStatement
+     */
     function addField(string $name, string $type) 
     {
         return $this->client->query(
@@ -191,6 +206,11 @@ class Table implements CollectionAdapter
         $this->appendLimitClause($sql, $params, $limit);
 
         return $this->client->query($sql, $params);
+    }
+
+    function truncate(): void 
+    {
+        $this->client->truncate($this->name);
     }
 
     private function appendLimitClause(&$sql, &$params, $limit) 
