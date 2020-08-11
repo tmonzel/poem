@@ -15,13 +15,6 @@ class Worker implements RequestHandler
 
     const Accessor = 'auth';
 
-    /**
-     * Create authorized user from this class
-     * 
-     * @var string
-     */
-    protected $userSubject = 'User\\Collection';
-
     protected $token;
     protected $user;
 
@@ -33,11 +26,6 @@ class Worker implements RequestHandler
             $this->setToken($token);
             
         }
-    }
-
-    function setUserSubject(string $userSubject) 
-    {
-        $this->userSubject = $userSubject;
     }
 
     function setToken(string $token) 
@@ -95,7 +83,7 @@ class Worker implements RequestHandler
             $data = $this->decodePayload($payload);
             
             if(isset($data['userId'])) {
-                $collection = $this->Model()->users;
+                $collection = $this->Model()->access('users');
 
                 $user = $collection->pick($data['userId']);
                 
