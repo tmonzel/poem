@@ -2,6 +2,7 @@
 
 namespace Poem;
 
+use Exception;
 use Poem\Actor\Action;
 use Poem\Actor\ActionQuery;
 use Poem\Actor\Exceptions\NotFoundException;
@@ -119,9 +120,19 @@ class Actor
      * 
      * @return Model
      */
-    function accessModel(): Model 
+    static function accessModel(): Model 
     {
         return static::Model()->access(static::getType());
+    }
+
+    static function migrate(): void {
+        $calledClass = get_called_class();
+
+        if(!defined($calledClass . '::Schema')) {
+            throw new Exception('No schema defined for ' . $calledClass);
+        }
+        
+        static::accessModel()->accessAdapter()->migrate($calledClass::Schema);
     }
 
     /**
