@@ -2,9 +2,13 @@
 
 namespace Poem\Auth;
 
-use Poem\Model\Collection;
+use Poem\Model;
 
-class User extends Collection {
+/**
+ * Predefined user model
+ */
+class User extends Model 
+{
     const Schema = [
         'name' => 'string',
         'password' => 'string'
