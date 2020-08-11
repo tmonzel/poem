@@ -31,10 +31,7 @@ class MigrateCommand extends Command
     {
         $type = $input->getArgument('type');
         $actor = static::Actor()->access($type);
-        $model = $actor->accessModel();
-
-        // Migrating the model based on the given schema
-        $model->migrate();
+        $actor->migrate();
 
         $output->writeln('Migrated ' . $actor->getType() . ' schema');
 

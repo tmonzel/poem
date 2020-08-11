@@ -3,12 +3,16 @@
 namespace Poem\Console;
 
 use Poem\Data\Connection;
+use Poem\Actor\Accessor as ActorAccessor;
+use ReflectionClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SeedCommand extends Command 
 {
+    use ActorAccessor;
+    
     protected static $defaultName = 'seed';
 
     protected function configure()
@@ -28,25 +32,27 @@ class SeedCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $type = $input->getArgument('type');
-        $subject = $subjectDir = null;
+        $subjectDir = null;
+        $actor = static::Actor()->access($type);
 
-        if(strpos($type, '.') !== false) {
-            $subject = str_replace('.', '\\', $type) . "\\Model";
+        if(!$actor) {
+            $output->writeln("Actor not found for $type");
+            return Command::FAILURE;
+        }
+        
+        $actorReflection = new ReflectionClass($actor);
+        $subjectDir = dirname($actorReflection->getFilename());
+
+        /*if(strpos($type, '.') !== false) {
             $subjectDir = APP_DIR . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $type);
         } else {
-            $subject = $type . '\\Model';
             $subjectDir = APP_DIR . DIRECTORY_SEPARATOR . $type;
-        }
+        }*/
 
         $fixturesFile = $subjectDir . "/Fixtures.json";
 
         if(!file_exists($fixturesFile)) {
             $output->writeln("Fixtures not found for $type");
-            return Command::FAILURE;
-        }
-        
-        if(!$subject || !class_exists($subject)) {
-            $output->writeln("Model not found for $type");
             return Command::FAILURE;
         }
 
@@ -59,12 +65,12 @@ class SeedCommand extends Command
             return Command::FAILURE;
         }
 
-        /** @var Connection */
-        $connection = $subject::connection();
-        $connection->truncateCollection($subject::Type);
+        /** @var Model $model */
+        $model = $actor->accessModel();
+        $model->truncate();
 
         foreach($data as $attrs) {
-            $subject::create($attrs);
+            $model->create($attrs);
         }
 
         $output->writeln("Fixtures seeded for $type");
