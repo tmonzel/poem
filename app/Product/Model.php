@@ -15,14 +15,12 @@ class Model extends \Poem\Model
     ];
 
     /**
-     * Product validations forced by Validateable
+     * Initialize product model
      * 
-     * @return array
+     * @return void
      */
-    function validations(): array 
+    function initialize(): void
     {
-        return [
-            'name' => ['required']
-        ];
+        $this->addValidation('name', 'reqired');
     }
 }

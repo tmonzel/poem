@@ -62,6 +62,12 @@ class Collection
     protected $documentClass;
 
     /**
+     * 
+     * @var array
+     */
+    protected $validations = [];
+
+    /**
      * Creates a new collection instance.
      * 
      * @param string $type
@@ -78,9 +84,9 @@ class Collection
             $this->documentClass = $options['documentClass'];
         }
 
-        // Initialize behaviors once per class
-        static::initializeBehaviors();
-        
+        if(isset($options['validations'])) {
+            $this->validations = $options['validations'];
+        }
 
         if(isset($options['relationships'])) {
             foreach($options['relationships'] as $type => $config) {
@@ -90,6 +96,11 @@ class Collection
             // Initialize relationships from defined constants
             $this->initializeRelationships();
         }
+
+        // Initialize behaviors once per class
+        static::initializeBehaviors();
+
+        $this->initialize();
     }
 
     /**
@@ -246,10 +257,9 @@ class Collection
      */
     function validate(Document $document): bool 
     {
-        $validations = $this->validations();
         $errors = [];
 
-        foreach($validations as $name => $config) {
+        foreach($this->validations as $name => $config) {
             if(!is_array($config)) {
                 $config = [$config];   
             }
@@ -272,14 +282,19 @@ class Collection
         return !$document->hasErrors();
     }
 
-    /**
-     * Override this to specify validations
-     * 
-     * @return array
-     */
-    function validations(): array
+    function addValidation($field, $validators) 
     {
-        return [];
+        $this->validations[$field] = $validators;
+    }
+
+    /**
+     * Override this for initialization
+     * 
+     * @return void
+     */
+    function initialize(): void
+    {
+        
     }
 
     /**

@@ -9,11 +9,9 @@ class Model extends \Poem\Auth\User
      * 
      * @return array
      */
-    function validations(): array
+    function initialize(): void
     {
-        return [
-            'name' => 'required',
-            'password' => 'required'
-        ];
+        $this->addValidation('name', 'required');
+        $this->addValidation('password', 'required');
     }
 }
