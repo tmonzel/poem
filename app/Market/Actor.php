@@ -21,4 +21,13 @@ class Actor extends \Poem\Actor
     const Behaviors = [
         BehaveAsResource::class,
     ];
+
+    /**
+     * Market belongs to retailer
+     * 
+     * @var array
+     */
+    const BelongsTo = [
+        'retailer' => 'retailers'
+    ];
 }
