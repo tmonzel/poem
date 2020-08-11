@@ -5,6 +5,9 @@ namespace Retailer;
 use Poem\Actor\BehaveAsResource;
 use Poem\Auth\BehaveAsGuard;
 
+/**
+ * Retailer endpoint actor
+ */
 class Actor extends \Poem\Actor 
 {
     /**
@@ -31,6 +34,27 @@ class Actor extends \Poem\Actor
                 'create', 'find', 'update'
             ]
         ]
+    ];
+
+    /**
+     * Relationships which will be added to the model class
+     * 
+     * @var array
+     */
+    const Relationships = [
+        'HasMany' => 'markets'
+    ];
+
+    /**
+     * Database schema needed for migrations
+     * 
+     * @var array
+     */
+    const Schema = [
+        'id' => 'pk',
+        'name' => 'string',
+        'created_at' => 'date',
+        'updated_at' => 'date'
     ];
 
     function create($action) {
