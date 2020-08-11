@@ -2,6 +2,8 @@
 
 namespace Poem\Model;
 
+use Poem\Model;
+
 class Worker
 {
     /**
@@ -59,7 +61,7 @@ class Worker
             return $this->collections[$type];
         }
 
-        $collectionClass = Collection::class;
+        $collectionClass = Model::class;
         $options = [];
         
         if(isset($this->registry[$type])) {
