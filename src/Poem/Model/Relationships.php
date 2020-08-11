@@ -29,19 +29,32 @@ trait Relationships
             $relationshipConstant = $calledClass . '::' . $type;
 
             if(defined($relationshipConstant)) {
-                $relConfig = constant($relationshipConstant);
-
-                foreach($relConfig as $accessor => $config) {
-                    if(is_numeric($accessor)) {
-                        $accessor = $config;
-                        $config = ['target' => $accessor];
-                    } elseif(is_string($config)) {
-                        $config = ['target' => $config];
-                    }
-
-                    $this->relationships[$accessor] = new $relationshipClass($this, $config);
-                }
+                $this->addRelationship($type, constant($relationshipConstant));
             }
+        }
+    }
+
+    function addRelationship($type, $config) 
+    {
+        if(!isset(static::$relationshipTypes[$type])) {
+            return false;
+        }
+
+        if(is_string($config)) {
+            $config = [$config];
+        }
+
+        $relationshipClass = static::$relationshipTypes[$type];
+
+        foreach($config as $accessor => $rel) {
+            if(is_numeric($accessor)) {
+                $accessor = $rel;
+                $rel = ['target' => $accessor];
+            } elseif(is_string($rel)) {
+                $rel = ['target' => $rel];
+            }
+
+            $this->relationships[$accessor] = new $relationshipClass($this, $rel);
         }
     }
 

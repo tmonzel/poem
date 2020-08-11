@@ -74,11 +74,22 @@ class Collection
             $this->name = $options['name'];
         }
 
+        if(isset($options['documentClass'])) {
+            $this->documentClass = $options['documentClass'];
+        }
+
         // Initialize behaviors once per class
         static::initializeBehaviors();
         
-        // Initialize relationships from defined constants
-        $this->initializeRelationships();
+
+        if(isset($options['relationships'])) {
+            foreach($options['relationships'] as $type => $config) {
+                $this->addRelationship($type, $config);
+            }
+        } else {
+            // Initialize relationships from defined constants
+            $this->initializeRelationships();
+        }
     }
 
     /**
