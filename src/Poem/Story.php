@@ -51,7 +51,7 @@ class Story
 
         try {
             $data = $this->resolveQuery($request);
-            $response->setData($data);
+            $response->setData(['data' => $data]);
         } catch(ActionException $e) {
             $response->setStatusCode($e->getCode());
             $errors = $e->getErrors();
