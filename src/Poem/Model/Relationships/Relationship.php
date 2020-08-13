@@ -13,6 +13,27 @@ abstract class Relationship
 {
     use ModelAccessor;
 
+    /**
+     * BelongsTo relationship class shorthand
+     * 
+     * @var string
+     */
+    const BELONGS_TO = BelongsToRelationship::class;
+
+    /**
+     * HasMany relationship class shorthand
+     * 
+     * @var string
+     */
+    const HAS_MANY = HasManyRelationship::class;
+
+    /**
+     * HasOne relationship class shorthand
+     * 
+     * @var string
+     */
+    const HAS_ONE = HasOneRelationship::class;
+    
     protected $options;
     protected $model;
 

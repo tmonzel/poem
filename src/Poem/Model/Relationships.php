@@ -9,10 +9,10 @@ use Poem\Model\Relationships\Relationship;
 
 trait Relationships 
 {
-    static $relationshipTypes = [
-        'HasMany' => HasManyRelationship::class,
-        'HasOne' => HasOneRelationship::class,
-        'BelongsTo' => BelongsToRelationship::class
+    static $availableRelationships = [
+        Relationship::BELONGS_TO,
+        Relationship::HAS_MANY,
+        Relationship::HAS_ONE
     ];
 
     /**
@@ -21,30 +21,15 @@ trait Relationships
      */
     protected $relationships = [];
 
-    function initializeRelationships() 
+    function addRelationship(string $relationshipClass, $config) 
     {
-        $calledClass = get_called_class();
-
-        foreach(static::$relationshipTypes as $type => $relationshipClass) {
-            $relationshipConstant = $calledClass . '::' . $type;
-
-            if(defined($relationshipConstant)) {
-                $this->addRelationship($type, constant($relationshipConstant));
-            }
-        }
-    }
-
-    function addRelationship($type, $config) 
-    {
-        if(!isset(static::$relationshipTypes[$type])) {
+        if(array_search($relationshipClass, static::$availableRelationships) === false) {
             return false;
         }
 
         if(is_string($config)) {
             $config = [$config];
         }
-
-        $relationshipClass = static::$relationshipTypes[$type];
 
         foreach($config as $accessor => $rel) {
             if(is_numeric($accessor)) {
