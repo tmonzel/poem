@@ -115,7 +115,7 @@ class Client implements Connection {
                 return "VARCHAR(180) NOT NULL";
             break;
             case 'date':
-                return "DATETIME()";
+                return "DATETIME NOT NULL";
         }
 
         return $type;
