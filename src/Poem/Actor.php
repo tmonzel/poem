@@ -9,7 +9,15 @@ use Poem\Actor\Exceptions\NotFoundException;
 use Poem\Actor\Worker;
 use Poem\Model\Accessor as ModelAccessor;
 
-class Actor 
+/**
+ * Concrete actors must/can define the following
+ * - Type (required)
+ * - Schema (optional)
+ * - Relationships (optional)
+ * - Behaviors (optional)
+ * - Actions (optional)
+ */
+abstract class Actor 
 {
     use Module,
         Mutable,
@@ -73,6 +81,16 @@ class Actor
             'relationships' => static::getRelationships(),
             'documentClass' => $documentClass
         ]);
+
+        static::Model()->addInitializer(
+            static::getType(), 
+            get_called_class() . '::withModel'
+        );
+    }
+
+    static function withModel(Model $model)
+    {
+
     }
 
     /**
@@ -112,7 +130,8 @@ class Actor
      */
     static function getName(): string 
     {
-        return strtolower(substr(static::class, 0, strrpos(static::class, '\\')));
+        $namespace = static::getNamespace();
+        return strtolower(substr($namespace, strrpos($namespace, '\\') + 1));
     }
 
     /**
