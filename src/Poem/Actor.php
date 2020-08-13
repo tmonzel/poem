@@ -21,7 +21,7 @@ use Poem\Model\Accessor as ModelAccessor;
  * - Behaviors (optional)
  * - Actions (optional)
  */
-abstract class Actor 
+class Actor 
 {
     use ModuleHelper,
         Mutable,
@@ -54,6 +54,8 @@ abstract class Actor
      * @var array
      */
     protected $actions = [];
+
+    protected $model;
 
     /**
      * Create a new actor instance.
@@ -150,19 +152,14 @@ abstract class Actor
      * 
      * @return Model
      */
-    static function accessModel(): Model 
+    function getModel(): Model 
     {
-        return static::Model()->access(static::getType());
+        return $this->model;
     }
 
-    static function migrate(): void {
-        $calledClass = get_called_class();
-
-        if(!defined($calledClass . '::Schema')) {
-            throw new Exception('No schema defined for ' . $calledClass);
-        }
-        
-        static::accessModel()->accessAdapter()->migrate($calledClass::Schema);
+    function setModel(Model $model)
+    {
+        $this->model = $model;
     }
 
     /**

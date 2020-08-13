@@ -2,25 +2,22 @@
 
 namespace Modules\Order;
 
-use Poem\Actor\BehaveAsResource;
+use Poem\Module\Actable;
+use Poem\Module\Storable;
 
-class Actor extends \Poem\Actor 
+class Module extends \Poem\Module 
 {
-    /**
-     * Order actor type definition
-     * 
-     * @var string
-     */
-    const Type = 'orders';
+    use Actable, Storable;
 
-    /**
-     * Registered order actor behaviors
-     * 
-     * @var array
-     */
-    const Behaviors = [
-        BehaveAsResource::class
-    ];
+    static function getType(): string
+    {
+        return 'orders';
+    }
+
+    function withActor(Actor $actor) 
+    {
+        $actor->bind(Actor::RESOURCE_ACTIONS);
+    }
 
     /**
      * @TODO: React on events

@@ -5,6 +5,7 @@ use Poem\Model;
 use Poem\Actor;
 use Poem\Data\MySql\Client as MySqlClient;
 use Poem\Director;
+use Poem\Module;
 
 const PROJECT_DIR = __DIR__;
 const APP_DIR = __DIR__ . '/app';
@@ -29,14 +30,15 @@ $director->add(Data\Worker::class, function(Data\Worker $worker) {
 
 });
 
-$director->add(Actor\Worker::class, function(Actor\Worker $worker) {
+$director->add(Module\Worker::class, function(Module\Worker $worker) {
     
     // Register application actors
-    $worker->register(Modules\User\Actor::class);
-    $worker->register(Modules\Retailer\Actor::class);
-    $worker->register(Modules\Product\Actor::class);
-    $worker->register(Modules\Market\Actor::class);
-    $worker->register(Modules\Order\Actor::class);
+    $worker->register(Modules\User\Module::class);
+    $worker->register(Modules\Retailer\Module::class);
+    $worker->register(Modules\Product\Module::class);
+    $worker->register(Modules\Market\Module::class);
+    $worker->register(Modules\Order\Module::class);
+    $worker->register(Modules\Info\Module::class);
 
 });
 

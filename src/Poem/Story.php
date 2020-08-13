@@ -6,7 +6,7 @@ use Exception;
 use Poem\Actor\Exceptions\ActionException;
 use Poem\Actor\Exceptions\BadRequestException;
 use Poem\Actor\Exceptions\NotFoundException;
-use Poem\Actor\Worker as ActorWorker;
+use Poem\Module\Worker as ModuleWorker;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -119,24 +119,31 @@ class Story
             }, $data);
         }
         
-        if(!isset($data['type'])) {
-            throw new BadRequestException('No type defined');
+        if(!isset($data['module'])) {
+            throw new BadRequestException('No module defined. Please provide a `module` member');
         }
 
         if(!isset($data['action'])) {
-            throw new BadRequestException('No action defined');
+            throw new BadRequestException('No action defined. Please provide a `action` member');
         }
         
-        $actors = $this->director->accessWorker(
-            ActorWorker::Accessor
+        $modules = $this->director->accessWorker(
+            ModuleWorker::Accessor
         );
 
         try {
             /** @var Actor $actor */
-            $actor = $actors->access($data['type']);
+            $module = $modules->access($data['module']);
         } catch(Exception $e) {
-            throw new NotFoundException('Actor `' . $data['type'] . '` not registered');
+            throw new NotFoundException('Module `' . $data['module'] . '` not registered');
         }
+
+        // Check if the module can build actors
+        if(!method_exists($module, 'buildActor')) {
+            throw new BadRequestException('Module `' . $data['module'] . '` cannot process actions');
+        }
+
+        $actor = $module->buildActor();
 
         return $actor->prepareAction(
             $data['action'], 
