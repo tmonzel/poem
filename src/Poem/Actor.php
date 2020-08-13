@@ -5,6 +5,10 @@ namespace Poem;
 use Exception;
 use Poem\Actor\Action;
 use Poem\Actor\ActionQuery;
+use Poem\Actor\Actions\CreateAction;
+use Poem\Actor\Actions\DestroyAction;
+use Poem\Actor\Actions\FindAction;
+use Poem\Actor\Actions\UpdateAction;
 use Poem\Actor\Exceptions\NotFoundException;
 use Poem\Actor\Worker;
 use Poem\Model\Accessor as ModelAccessor;
@@ -19,7 +23,7 @@ use Poem\Model\Accessor as ModelAccessor;
  */
 abstract class Actor 
 {
-    use Module,
+    use ModuleHelper,
         Mutable,
         ModelAccessor;
 
@@ -29,6 +33,13 @@ abstract class Actor
      * @var string
      */
     const PREPARE_ACTION_EVENT = 'actor_prepare_action';
+
+    const RESOURCE_ACTIONS = [
+        FindAction::class,
+        CreateAction::class,
+        UpdateAction::class,
+        DestroyAction::class
+    ];
     
     /**
      * Custom model class used by this actor
@@ -166,6 +177,17 @@ abstract class Actor
             $this->actions[$actionClass::getType()] = compact('actionClass', 'initializer');
         } else {
             $this->actions[$actionClass] = compact('initializer');
+        }
+    }
+
+    function bind($actions) 
+    {
+        if(is_string($actions)) {
+            $actions = [$actions];
+        }
+
+        foreach($actions as $actionClass) {
+            $this->registerAction($actionClass);
         }
     }
 

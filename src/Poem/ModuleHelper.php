@@ -2,7 +2,7 @@
 
 namespace Poem;
 
-trait Module 
+trait ModuleHelper 
 {
     static function getNamespace(): string 
     {
