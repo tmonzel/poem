@@ -63,10 +63,10 @@ class Worker
     /**
      * Register a collection by type and class
      * 
-     * @param string $type
+     * @param mixed $type
      * @param string $collectionClass
      */
-    function register(string $type, string $collectionClass, array $options = []): void
+    function register(string $type, $collectionClass, array $options = []): void
     {
         $this->registry[$type] = compact('collectionClass', 'options');
     }
@@ -91,7 +91,12 @@ class Worker
             $options = $this->registry[$type]['options'] + compact('type');
         }
 
-        $collection = new $collectionClass($options);
+        if(is_callable($collectionClass)) {
+            $collection = $collectionClass();
+        } else {
+            $collection = new $collectionClass($options);
+        }
+        
 
         if(isset($this->initializers[$type])) {
             foreach($this->initializers[$type] as $initializer) {
