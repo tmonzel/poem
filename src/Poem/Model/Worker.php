@@ -28,6 +28,13 @@ class Worker
     protected $collections = [];
 
     /**
+     * Added initializer callables
+     * 
+     * @var array
+     */
+    protected $initializers = [];
+
+    /**
      * Access collection instance via property
      * 
      * @param string $name
@@ -36,6 +43,21 @@ class Worker
     function __get(string $name) 
     {
         return $this->access($name);
+    }
+
+    /**
+     * 
+     * 
+     * @param string $type
+     * @param callable $initializer
+     */
+    function addInitializer(string $type, callable $initializer) 
+    {
+        if(!isset($this->initializers[$type])) {
+            $this->initializers[$type] = [];
+        }
+
+        $this->initializers[$type][] = $initializer;
     }
 
     /**
@@ -69,6 +91,14 @@ class Worker
             $options = $this->registry[$type]['options'] + compact('type');
         }
 
-        return $this->collections[$type] = new $collectionClass($options);
+        $collection = new $collectionClass($options);
+
+        if(isset($this->initializers[$type])) {
+            foreach($this->initializers[$type] as $initializer) {
+                $initializer($collection);
+            }
+        }
+
+        return $this->collections[$type] = $collection;
     }
 }
