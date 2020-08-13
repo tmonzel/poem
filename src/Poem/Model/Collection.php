@@ -7,13 +7,11 @@ use Poem\Data\Accessor as DataAccessor;
 use Poem\Data\CollectionAdapter;
 use Poem\Data\Connection;
 use Poem\Data\Statement;
-use Poem\Module;
 use Poem\Mutable;
 
 class Collection
 {
-    use Module,
-        DataAccessor,
+    use DataAccessor,
         Relationships,
         Mutable;
 
@@ -92,9 +90,6 @@ class Collection
             foreach($options['relationships'] as $type => $config) {
                 $this->addRelationship($type, $config);
             }
-        } else {
-            // Initialize relationships from defined constants
-            $this->initializeRelationships();
         }
 
         // Initialize behaviors once per class
@@ -165,9 +160,9 @@ class Collection
 
         $this->documentClass = Document::class;
 
-        static::withNamespaceClass('Document', function($documentClass) {
+        /*static::withNamespaceClass('Document', function($documentClass) {
             $this->documentClass = $documentClass;
-        });
+        });*/
 
         return $this->documentClass;
     }
