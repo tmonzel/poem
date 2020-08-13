@@ -30,7 +30,7 @@ class CreateAction extends Action
         }
 
         // Access the related model
-        $model = $this->actor->accessModel();
+        $model = $this->actor->getModel();
 
         $document = $model->new(
             $this->map($this->payload->attributes)

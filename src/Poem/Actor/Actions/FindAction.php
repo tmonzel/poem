@@ -26,7 +26,7 @@ class FindAction extends Action {
     function prepareData() 
     {
         // Access the related model
-        $model = $this->actor->accessModel();
+        $model = $this->actor->getModel();
         
         if($this->payload->has('id')) {
             // Return a single document

@@ -31,7 +31,7 @@ class UpdateAction extends Action
         }
 
         // Access the related model
-        $model = $this->actor->accessModel();
+        $model = $this->actor->getModel();
 
         $document = $model->pick($this->payload->id, ['include' => '*']);
         
