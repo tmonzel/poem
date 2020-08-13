@@ -43,12 +43,6 @@ class SeedCommand extends Command
         $actorReflection = new ReflectionClass($actor);
         $subjectDir = dirname($actorReflection->getFilename());
 
-        /*if(strpos($type, '.') !== false) {
-            $subjectDir = APP_DIR . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $type);
-        } else {
-            $subjectDir = APP_DIR . DIRECTORY_SEPARATOR . $type;
-        }*/
-
         $fixturesFile = $subjectDir . "/Fixtures.json";
 
         if(!file_exists($fixturesFile)) {
@@ -66,7 +60,7 @@ class SeedCommand extends Command
         }
 
         /** @var Model $model */
-        $model = $actor->accessModel();
+        $model = $actor->getModel();
         $model->truncate();
 
         foreach($data as $attrs) {

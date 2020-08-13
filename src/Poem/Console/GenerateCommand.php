@@ -26,7 +26,7 @@ class GenerateCommand extends Command
         $name = $input->getArgument('name');
         $type = $input->getArgument('type');
 
-        $moduleDir = APP_DIR . "/$name";
+        $moduleDir = APP_DIR . "/Modules/$name";
 
         if(!is_dir($moduleDir)) {
             mkdir($moduleDir);
