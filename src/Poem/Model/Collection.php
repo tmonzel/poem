@@ -431,6 +431,15 @@ class Collection
     }
 
     /**
+     * 
+     * @return int
+     */
+    function count(): int
+    {
+        return $this->accessAdapter()->count();
+    }
+
+    /**
      * Syncronize the schema for this model
      * 
      * @return void

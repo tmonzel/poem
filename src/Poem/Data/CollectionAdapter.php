@@ -10,4 +10,5 @@ interface CollectionAdapter
     function update(array $filter, array $data, array $options = []);
     function migrate(array $schema): void;
     function truncate(): void;
+    function count(): int;
 }

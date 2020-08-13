@@ -130,6 +130,15 @@ class Table implements CollectionAdapter
     }
 
     /**
+     * 
+     * @return int
+     */
+    function count(): int
+    {
+        return (int)$this->client->query('SELECT count(*) FROM ' . $this->name)->fetchColumn();
+    }
+
+    /**
      * Find many entries
      * 
      * @param array $filter
