@@ -2,6 +2,8 @@
 
 namespace Modules\Order;
 
+use Actions\CountAction;
+use Poem\Actor;
 use Poem\Module\Actable;
 use Poem\Module\Storable;
 
@@ -17,6 +19,7 @@ class Module extends \Poem\Module
     function withActor(Actor $actor) 
     {
         $actor->bind(Actor::RESOURCE_ACTIONS);
+        $actor->bind(CountAction::class);
     }
 
     /**

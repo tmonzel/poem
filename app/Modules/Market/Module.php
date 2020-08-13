@@ -2,6 +2,7 @@
 
 namespace Modules\Market;
 
+use Actions\CountAction;
 use Poem\Actor;
 use Poem\Model;
 use Poem\Model\Relationships\Relationship;
@@ -28,5 +29,6 @@ class Module extends \Poem\Module
     function withActor(Actor $actor)
     {
         $actor->bind(Actor::RESOURCE_ACTIONS);
+        $actor->bind(CountAction::class);
     }
 }
