@@ -1,6 +1,6 @@
 <?php
 
-namespace Order;
+namespace Modules\Order;
 
 class Model extends \Poem\Model 
 {

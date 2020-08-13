@@ -1,6 +1,6 @@
 <?php
 
-namespace User;
+namespace Modules\User;
 
 class Model extends \Poem\Auth\User 
 {

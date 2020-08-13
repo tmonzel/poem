@@ -32,11 +32,11 @@ $director->add(Data\Worker::class, function(Data\Worker $worker) {
 $director->add(Actor\Worker::class, function(Actor\Worker $worker) {
     
     // Register application actors
-    $worker->register(User\Actor::class);
-    $worker->register(Retailer\Actor::class);
-    $worker->register(Product\Actor::class);
-    $worker->register(Market\Actor::class);
-    $worker->register(Order\Actor::class);
+    $worker->register(Modules\User\Actor::class);
+    $worker->register(Modules\Retailer\Actor::class);
+    $worker->register(Modules\Product\Actor::class);
+    $worker->register(Modules\Market\Actor::class);
+    $worker->register(Modules\Order\Actor::class);
 
 });
 

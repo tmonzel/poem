@@ -1,6 +1,6 @@
 <?php
 
-namespace User;
+namespace Modules\User;
 
 class Document extends \Poem\Model\Document 
 {        

@@ -1,7 +1,8 @@
 <?php
 
-namespace Product;
+namespace Modules\Product;
 use Poem\Actor\Actions\FindAction;
+
 class Actor extends \Poem\Actor 
 {
     /**

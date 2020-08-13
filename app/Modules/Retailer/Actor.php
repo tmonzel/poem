@@ -1,6 +1,6 @@
 <?php
 
-namespace Retailer;
+namespace Modules\Retailer;
 
 use Poem\Actor\BehaveAsResource;
 use Poem\Auth\BehaveAsGuard;
@@ -37,7 +37,7 @@ class Actor extends \Poem\Actor
     ];
 
     /**
-     * Relationships which will be added to the model class
+     * Relationships which will be added to the model instance
      * 
      * @var array
      */

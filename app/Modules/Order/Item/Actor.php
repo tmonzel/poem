@@ -1,6 +1,6 @@
 <?php
 
-namespace Order\Item;
+namespace Modules\Order\Item;
 
 class Actor extends \Poem\Actor 
 {

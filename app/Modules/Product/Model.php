@@ -1,6 +1,6 @@
 <?php
 
-namespace Product;
+namespace Modules\Product;
 
 class Model extends \Poem\Model
 {
