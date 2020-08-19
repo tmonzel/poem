@@ -52,7 +52,9 @@ trait Storable
     static function getModelClass(): string
     {
         $calledClass = get_called_class();
-        return isset($calledClass::$modelClass) ? $calledClass::$modelClass : Model::class;
+        $modelClass = static::getNamespaceClass('Model') ?? Model::class;
+
+        return isset($calledClass::$modelClass) ? $calledClass::$modelClass : $modelClass;
     }
 
     abstract static function getType(): string;
