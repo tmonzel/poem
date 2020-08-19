@@ -3,6 +3,8 @@
 namespace Modules\User;
 
 use Actor;
+use Poem\Auth\Actions\LoginAction;
+use Poem\Auth\Actions\MeAction;
 use Poem\Module\Actable;
 use Poem\Module\Storable;
 
@@ -17,7 +19,14 @@ class Module extends \Module
 
     function withActor(Actor $actor)
     {
+        // Binding actions
         $actor->bind(Actor::RESOURCE_ACTIONS);
-        $actor->guardActions(['create']);
+        $actor->bind(LoginAction::class);
+        $actor->bind(MeAction::class);
+
+        // Guarding actions with exceptions
+        $actor->guardActions([
+            'find'
+        ]);
     }
 }
