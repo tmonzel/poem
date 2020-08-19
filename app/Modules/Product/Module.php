@@ -8,7 +8,7 @@ use Poem\Actor\Actions\FindAction;
 use Poem\Module\Actable;
 use Poem\Module\Storable;
 
-class Module extends \Poem\Module 
+class Module extends \Module 
 {
     use Actable, Storable;
 
