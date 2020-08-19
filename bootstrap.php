@@ -1,11 +1,17 @@
 <?php
 
 use Poem\Data;
-use Poem\Model;
-use Poem\Actor;
 use Poem\Data\MySql\Client as MySqlClient;
 use Poem\Director;
 use Poem\Module;
+use Modules\{ 
+    Retailer,
+    User,
+    Product,
+    Info,
+    Market,
+    Order
+};
 
 const PROJECT_DIR = __DIR__;
 const APP_DIR = __DIR__ . '/app';
@@ -22,10 +28,10 @@ $director->add(Data\Worker::class, function(Data\Worker $worker) {
     
     // Register mysql client to data worker
     $worker->registerConnection(MySqlClient::class, [
-        "host" => getenv('DB_HOST'),
-        "database" => getenv('DB_NAME'),
-        "username" => getenv('DB_USER'),
-        "password" => getenv('DB_PASSWORD') 
+        'host' => getenv('DB_HOST'),
+        'database' => getenv('DB_NAME'),
+        'username' => getenv('DB_USER'),
+        'password' => getenv('DB_PASSWORD') 
     ]);
 
 });
@@ -33,15 +39,13 @@ $director->add(Data\Worker::class, function(Data\Worker $worker) {
 $director->add(Module\Worker::class, function(Module\Worker $worker) {
     
     // Register application actors
-    $worker->register(Modules\User\Module::class);
-    $worker->register(Modules\Retailer\Module::class);
-    $worker->register(Modules\Product\Module::class);
-    $worker->register(Modules\Market\Module::class);
-    $worker->register(Modules\Order\Module::class);
-    $worker->register(Modules\Info\Module::class);
+    $worker->register(User\Module::class);
+    $worker->register(Retailer\Module::class);
+    $worker->register(Product\Module::class);
+    $worker->register(Market\Module::class);
+    $worker->register(Order\Module::class);
+    $worker->register(Info\Module::class);
 
 });
-
-$director->add(Model\Worker::class);
 
 return $director;
