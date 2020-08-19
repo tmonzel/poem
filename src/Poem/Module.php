@@ -4,7 +4,7 @@ namespace Poem;
 
 class Module
 {
-    use ModuleHelper;
+    use Module\Helpers;
 
     /**
      * Returns the module name

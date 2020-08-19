@@ -1,8 +1,8 @@
 <?php
 
-namespace Poem;
+namespace Poem\Module;
 
-trait ModuleHelper 
+trait Helpers 
 {
     static function getNamespace(): string 
     {

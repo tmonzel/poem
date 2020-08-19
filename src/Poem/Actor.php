@@ -2,7 +2,6 @@
 
 namespace Poem;
 
-use Exception;
 use Poem\Actor\Action;
 use Poem\Actor\ActionQuery;
 use Poem\Actor\Actions\CreateAction;
@@ -11,7 +10,8 @@ use Poem\Actor\Actions\FindAction;
 use Poem\Actor\Actions\UpdateAction;
 use Poem\Actor\Exceptions\NotFoundException;
 use Poem\Actor\Exceptions\UnauthorizedException;
-use Poem\Model\Accessor as ModelAccessor;
+use Poem\Model;
+use Poem\Module;
 
 /**
  * Concrete actors must/can define the following
@@ -23,16 +23,16 @@ use Poem\Model\Accessor as ModelAccessor;
  */
 class Actor 
 {
-    use ModuleHelper,
-        EventDispatcher,
-        ModelAccessor;
+    use EventDispatcher,
+        Module\Helpers,
+        Model\Accessor;
 
     /**
      * Prepare action event key
      * 
      * @var string
      */
-    const PREPARE_ACTION_EVENT = 'actor_prepare_action';
+    const PREPARE_ACTION_EVENT = 'actor.prepare_action';
 
     /**
      * Composed resource actions
