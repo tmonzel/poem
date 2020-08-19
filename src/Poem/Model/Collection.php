@@ -2,7 +2,6 @@
 
 namespace Poem\Model;
 
-use Exception;
 use Poem\Data\Accessor as DataAccessor;
 use Poem\Data\CollectionAdapter;
 use Poem\Data\Connection;
@@ -12,8 +11,7 @@ use Poem\Mutable;
 class Collection
 {
     use DataAccessor,
-        Relationships,
-        Mutable;
+        Relationships;
 
     /**
      * Before save event key
@@ -66,9 +64,23 @@ class Collection
     protected $validations = [];
 
     /**
+     * Applied collection schema
+     * 
+     * @var array
+     */
+    protected $schema;
+
+    /**
+     * Attribute mutators
+     * 
+     * @var array
+     */
+    protected $_mutators = [];
+
+    /**
      * Creates a new collection instance.
      * 
-     * @param string $type
+     * @param array $options
      */
     function __construct(array $options = [])
     {
@@ -91,10 +103,7 @@ class Collection
                 $this->addRelationship($type, $config);
             }
         }
-
-        // Initialize behaviors once per class
-        static::initializeBehaviors();
-
+        
         $this->initialize();
     }
 
@@ -120,6 +129,41 @@ class Collection
     }
 
     /**
+     * Sets the collection schema
+     * 
+     * @param array $schema
+     * @return void
+     */
+    function setSchema(array $schema): void
+    {
+        $this->schema = $schema;
+    }
+
+    /**
+     * Returns the collection schema
+     * 
+     * @return array
+     */
+    function getSchema(): array
+    {
+        return $this->schema;
+    }
+
+    /**
+     * Apply a mutator for a given attribute which will be
+     * used before save actions
+     * 
+     * @param string $name
+     * @param callable $mutator
+     * @return void
+     */
+    function mutateAttribute(string $name, callable $mutator): void
+    {
+        $this->_mutators[$name] = $mutator;
+    }
+
+    /**
+     * Returns the selected connection.
      * 
      * @return Connection
      */
@@ -129,6 +173,7 @@ class Collection
     }
 
     /**
+     * Returns the selected collection adapter
      * 
      * @return CollectionAdapter
      */
@@ -158,13 +203,7 @@ class Collection
             return $this->documentClass;
         }
 
-        $this->documentClass = Document::class;
-
-        /*static::withNamespaceClass('Document', function($documentClass) {
-            $this->documentClass = $documentClass;
-        });*/
-
-        return $this->documentClass;
+        return $this->documentClass = Document::class;
     }
 
     /**
@@ -201,8 +240,6 @@ class Collection
         if(!$this->validate($document)) {
             return false;
         }
-        
-        $this->dispatchEvent(self::BEFORE_SAVE_EVENT, [$document]);
 
         $result = null;
         $data = $document->toArray();
@@ -223,13 +260,15 @@ class Collection
             } else {
                 $result = $this->accessAdapter()->update(
                     [static::$primaryKey => $document->id],
-                    $dirtyAttributes
+                    $this->applyMutators($dirtyAttributes)
                 );
             }
 
         } else {
             // Create new document
-            $insertId = $this->accessAdapter()->insert($data);
+            $insertId = $this->accessAdapter()->insert(
+                $this->applyMutators($data)
+            );
 
             $document->id = $insertId;
             $result = true;
@@ -242,6 +281,23 @@ class Collection
         }
 
         return $result;
+    }
+
+    /**
+     * Helper which applies all mutator to every given attribute
+     * 
+     * @param array $attributes
+     * @return array
+     */
+    protected function applyMutators(array $attributes): array
+    {
+        foreach($attributes as $name => $value) {
+            if(isset($this->_mutators[$name])) {
+                $attributes[$name] = call_user_func($this->_mutators[$name], $value);
+            }
+        }
+
+        return $attributes;
     }
 
     /**
@@ -277,7 +333,7 @@ class Collection
         return !$document->hasErrors();
     }
 
-    function addValidation($field, $validators) 
+    function addValidation(string $field, $validators) 
     {
         $this->validations[$field] = $validators;
     }
@@ -446,18 +502,6 @@ class Collection
      */
     function migrate(): void 
     {
-        $calledClass = get_called_class();
-
-        if(!defined($calledClass . '::Schema')) {
-            throw new Exception('No schema defined for ' . static::class);
-        }
-
-        $schema = [];
-
-        foreach($calledClass::Schema as $name => $type) {
-            $schema[$name] = $type;
-        }
-
-        $this->accessAdapter()->migrate($schema);
+        $this->accessAdapter()->migrate($this->schema);
     }
 }
