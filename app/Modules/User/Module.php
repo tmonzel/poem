@@ -2,11 +2,11 @@
 
 namespace Modules\User;
 
-use Poem\Actor;
+use Actor;
 use Poem\Module\Actable;
 use Poem\Module\Storable;
 
-class Module extends \Poem\Module 
+class Module extends \Module 
 {
     use Actable, Storable;
 
@@ -18,7 +18,6 @@ class Module extends \Poem\Module
     function withActor(Actor $actor)
     {
         $actor->bind(Actor::RESOURCE_ACTIONS);
-
-        // TODO: Add guard behaviors
+        $actor->guardActions(['create']);
     }
 }
