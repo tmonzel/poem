@@ -47,8 +47,6 @@ class Worker
                 $moduleClass::getModelBuilder()
             );
         }
-
-        //$moduleClass::register($this);
     }
 
     /**
