@@ -2,7 +2,7 @@
 
 namespace Modules\Order\Item;
 
-class Module extends \Poem\Module 
+class Module extends \Module 
 {
     
 }
