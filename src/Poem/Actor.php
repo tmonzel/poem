@@ -10,7 +10,7 @@ use Poem\Actor\Actions\DestroyAction;
 use Poem\Actor\Actions\FindAction;
 use Poem\Actor\Actions\UpdateAction;
 use Poem\Actor\Exceptions\NotFoundException;
-use Poem\Actor\Worker;
+use Poem\Actor\Exceptions\UnauthorizedException;
 use Poem\Model\Accessor as ModelAccessor;
 
 /**
@@ -24,7 +24,7 @@ use Poem\Model\Accessor as ModelAccessor;
 class Actor 
 {
     use ModuleHelper,
-        Mutable,
+        EventDispatcher,
         ModelAccessor;
 
     /**
@@ -34,6 +34,11 @@ class Actor
      */
     const PREPARE_ACTION_EVENT = 'actor_prepare_action';
 
+    /**
+     * Composed resource actions
+     * 
+     * @var array
+     */
     const RESOURCE_ACTIONS = [
         FindAction::class,
         CreateAction::class,
@@ -42,19 +47,17 @@ class Actor
     ];
     
     /**
-     * Custom model class used by this actor
-     * 
-     * @var string
-     */
-    static $modelClass;
-    
-    /**
      * Registered actions
      * 
      * @var array
      */
     protected $actions = [];
 
+    /**
+     * Applied model instance
+     * 
+     * @var Model $model
+     */
     protected $model;
 
     /**
@@ -64,9 +67,6 @@ class Actor
      */
     function __construct() 
     {
-        // Initialize behaviors if defined
-        static::initializeBehaviors();
-
         // Collect actions from constant
         static::withDefinedConstant('Actions', function($actionClasses) {
             foreach($actionClasses as $actionClass) {
@@ -79,75 +79,6 @@ class Actor
     }
 
     /**
-     * Initializes this actor on configuration layer
-     * Also called on Actor\Worker::register()
-     * 
-     * @param Worker $worker
-     */
-    static function register(Worker $worker): void
-    {
-        $modelClass = static::$modelClass ?? static::getNamespaceClass('Model');
-        $documentClass = static::getNamespaceClass('Document');
-        
-        static::Model()->register(static::getType(), $modelClass ?? Model::class, [
-            'name' => static::getName(),
-            'relationships' => static::getRelationships(),
-            'documentClass' => $documentClass
-        ]);
-
-        static::Model()->addInitializer(
-            static::getType(), 
-            get_called_class() . '::withModel'
-        );
-    }
-
-    static function withModel(Model $model)
-    {
-
-    }
-
-    /**
-     * Returns all relationships used by the
-     * related model.
-     * 
-     * @static
-     * @return array
-     */
-    static function getRelationships(): array 
-    {
-        $calledClass = get_called_class();
-
-        if(defined($calledClass . '::Relationships')) {
-            return (static::class)::Relationships;
-        }
-
-        return [];
-    }
-
-    /**
-     * Returns the static actor type
-     * 
-     * @static
-     * @return string
-     */
-    static function getType(): string 
-    {
-        return (static::class)::Type;
-    }
-
-    /**
-     * Returns the actor name (singular of type)
-     * 
-     * @static
-     * @return string
-     */
-    static function getName(): string 
-    {
-        $namespace = static::getNamespace();
-        return strtolower(substr($namespace, strrpos($namespace, '\\') + 1));
-    }
-
-    /**
      * Access the namespace related model for this actor.
      * 
      * @return Model
@@ -157,7 +88,13 @@ class Actor
         return $this->model;
     }
 
-    function setModel(Model $model)
+    /**
+     * Sets the given model
+     * 
+     * @param Model $model
+     * @return void
+     */
+    function setModel(Model $model): void
     {
         $this->model = $model;
     }
@@ -177,7 +114,14 @@ class Actor
         }
     }
 
-    function bind($actions) 
+    /**
+     * Bind one or many actions
+     * Shorthand for registerAction()
+     * 
+     * @param mixed $actions
+     * @return void
+     */
+    function bind($actions): void 
     {
         if(is_string($actions)) {
             $actions = [$actions];
@@ -246,16 +190,27 @@ class Actor
      */
     function prepareAction(string $actionType, array $payload = []) 
     {
-        $this->dispatchEvent(self::PREPARE_ACTION_EVENT, [
-            'actionType' => $actionType, 
-            'payload' => $payload
-        ]);
+        $query = new ActionQuery($this, $actionType, $payload);
+        
+        $this->dispatchEvent(self::PREPARE_ACTION_EVENT, $query);
 
         if(!$this->hasAction($actionType)) {
-            throw new NotFoundException("Action " . $actionType . " is not registered on " . static::getType());
+            throw new NotFoundException("Action `$actionType` is not registered");
         }
 
-        return new ActionQuery($this, $actionType, $payload);
+        return $query;
+    }
+
+
+    function canActivate(callable $test)
+    {
+        $this->addEventListener(self::PREPARE_ACTION_EVENT, function(ActionQuery $query) use($test) {
+            $type = $query->getType();
+
+            if(call_user_func($test, $query) === false) {
+                throw new UnauthorizedException("Action `$type` not allowed");
+            }
+        });
     }
 
     /**
