@@ -6,6 +6,7 @@ use Closure;
 use Exception;
 use Poem\Model;
 use Poem\Model\Accessor as ModelAccessor;
+use Poem\Model\Document;
 
 trait Storable 
 {
@@ -29,7 +30,8 @@ trait Storable
 
         $model = new $modelClass([
             'type' => static::getType(),
-            'name' => static::getName()
+            'name' => static::getName(),
+            'documentClass' => static::getDocumentClass()
         ]);
 
         if(method_exists(get_called_class(), 'withModel')) {
@@ -55,6 +57,14 @@ trait Storable
         $modelClass = static::getNamespaceClass('Model') ?? Model::class;
 
         return isset($calledClass::$modelClass) ? $calledClass::$modelClass : $modelClass;
+    }
+
+    static function getDocumentClass(): string
+    {
+        $calledClass = get_called_class();
+        $documentClass = static::getNamespaceClass('Document') ?? Document::class;
+
+        return isset($calledClass::$documentClass) ? $calledClass::$documentClass : $documentClass;
     }
 
     abstract static function getType(): string;
