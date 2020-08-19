@@ -2,7 +2,6 @@
 
 namespace Modules\Retailer;
 
-use Poem\Actor;
 use Poem\Model;
 use Poem\Model\Relationships\Relationship;
 use Poem\Module\Actable;
@@ -11,7 +10,7 @@ use Poem\Module\Storable;
 /**
  * Retailer module
  */
-class Module extends \Poem\Module 
+class Module extends \Module 
 {
     use Actable, Storable;
     
@@ -26,24 +25,20 @@ class Module extends \Poem\Module
             Relationship::HAS_MANY,
             'markets'
         );
+
+        // Set the data schema
+        // Only needed for migrations
+        $retailers->setSchema([
+            'id' => 'pk',
+            'name' => 'string',
+            'created_at' => 'date',
+            'updated_at' => 'date'
+        ]);
     }
 
-    function withActor(Actor $actor)
+    function withActor(\Actor $actor) 
     {
-        $actor->bind(Actor::RESOURCE_ACTIONS);
-        
-        // TODO: Add guard behavior
+        $actor->bind(\Actor::RESOURCE_ACTIONS);
+        $actor->guardActions();
     }
-
-    /**
-     * Database schema needed for migrations
-     * 
-     * @var array
-     */
-    const Schema = [
-        'id' => 'pk',
-        'name' => 'string',
-        'created_at' => 'date',
-        'updated_at' => 'date'
-    ];
 }
