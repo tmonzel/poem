@@ -2,24 +2,25 @@
 
 namespace Modules\Order;
 
+use Poem\Model\Relationships\Relationship;
+
 class Model extends \Poem\Model 
 {
     /**
-     * Database schema needed for migrations
+     * Initializes the order model
      * 
-     * @var array
+     * @return void
      */
-    const Schema = [
-        'id' => 'pk',
-        'state' => 'string'
-    ];
+    function initialize(): void
+    {
+        $this->setSchema([
+            'id' => 'pk',
+            'state' => 'string'
+        ]);
 
-    /**
-     * Order has many items
-     * 
-     * @var array
-     */
-    const HasMany = [
-        'items' => 'order_items'
-    ];
+        $this->addRelationship(
+            Relationship::HAS_MANY,
+            ['items' => 'order_items']
+        );
+    }
 }
