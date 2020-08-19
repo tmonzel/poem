@@ -11,8 +11,8 @@ class Model extends \Poem\Model
      */
     function initialize(): void
     {
-        $this->addValidation('name', 'required');
-        $this->addValidation('password', 'required');
+        $this->validateAttribute('name', 'required');
+        $this->validateAttribute('password', 'required');
 
         // Add mutator for password attribute
         $this->mutateAttribute('password', function($value) {

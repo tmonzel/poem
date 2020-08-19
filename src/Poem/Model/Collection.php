@@ -333,9 +333,16 @@ class Collection
         return !$document->hasErrors();
     }
 
-    function addValidation(string $field, $validators) 
+    /**
+     * Adds new attribute validators.
+     * 
+     * @param string $name
+     * @param mixed $validators
+     * @return void
+     */
+    function validateAttribute(string $name, $validators): void
     {
-        $this->validations[$field] = $validators;
+        $this->validations[$name] = $validators;
     }
 
     /**
