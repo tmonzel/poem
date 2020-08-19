@@ -8,7 +8,8 @@ trait Actable
 {
     function buildActor(): Actor 
     {
-        $actor = new Actor();
+        $actorClass = static::getActorClass();
+        $actor = new $actorClass;
 
         if(method_exists($this, 'accessModel')) {
             $actor->setModel($this->accessModel());
@@ -19,5 +20,13 @@ trait Actable
         }
 
         return $actor;
+    }
+
+    static function getActorClass(): string
+    {
+        $calledClass = get_called_class();
+        $actorClass = static::getNamespaceClass('Actor') ?? Actor::class;
+
+        return isset($calledClass::$actorClass) ? $calledClass::$actorClass : $actorClass;
     }
 }
