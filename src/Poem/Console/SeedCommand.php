@@ -2,8 +2,7 @@
 
 namespace Poem\Console;
 
-use Poem\Data\Connection;
-use Poem\Actor\Accessor as ActorAccessor;
+use Poem\Module\Accessor as ModuleAccessor;
 use ReflectionClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SeedCommand extends Command 
 {
-    use ActorAccessor;
+    use ModuleAccessor;
     
     protected static $defaultName = 'seed';
 
@@ -33,14 +32,16 @@ class SeedCommand extends Command
     {
         $type = $input->getArgument('type');
         $subjectDir = null;
-        $actor = static::Actor()->access($type);
 
-        if(!$actor) {
-            $output->writeln("Actor not found for $type");
+        /** @var mixed $module */
+        $module = static::Module()->access($type);
+
+        if(!$module) {
+            $output->writeln("Module not found for $type");
             return Command::FAILURE;
         }
         
-        $actorReflection = new ReflectionClass($actor);
+        $actorReflection = new ReflectionClass($module);
         $subjectDir = dirname($actorReflection->getFilename());
 
         $fixturesFile = $subjectDir . "/Fixtures.json";
@@ -58,9 +59,8 @@ class SeedCommand extends Command
             $output->writeln("Error in fixtures for $type");
             return Command::FAILURE;
         }
-
-        /** @var Model $model */
-        $model = $actor->getModel();
+        
+        $model = $module->accessModel();
         $model->truncate();
 
         foreach($data as $attrs) {

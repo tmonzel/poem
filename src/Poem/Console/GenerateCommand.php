@@ -2,15 +2,12 @@
 
 namespace Poem\Console;
 
-use Poem\Actor\Accessor as ActorAccessor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class GenerateCommand extends Command 
 {
-    use ActorAccessor;
-    
     protected static $defaultName = 'generate';
 
     protected function configure()
@@ -32,16 +29,16 @@ class GenerateCommand extends Command
             mkdir($moduleDir);
         }
 
-        $actorFile = $moduleDir . "/Actor.php";
+        $actorFile = $moduleDir . "/Module.php";
         
         if(!file_exists($actorFile)) {
             file_put_contents($actorFile, $this->generateContent($input));
         } else {
-            $output->writeln("Actor `$name` already exists");
+            $output->writeln("Module `$name` already exists");
             return Command::FAILURE;
         }
         
-        $output->writeln('Generated actor `' . $name . '` with type `' . $type . '`');
+        $output->writeln('Generated module `' . $name . '` with type `' . $type . '`');
 
         return Command::SUCCESS;
     }
@@ -56,14 +53,9 @@ class GenerateCommand extends Command
 
 namespace $name;
 
-class Actor extends \Poem\Actor
+class Module extends \Poem\Module
 {
-    /**
-     * $name actor type
-     * 
-     * @var string
-     */
-    const Type = '$type';
+
 }
 
 TPL;
