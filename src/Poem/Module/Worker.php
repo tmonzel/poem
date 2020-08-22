@@ -4,12 +4,9 @@ namespace Poem\Module;
 
 use Exception;
 use Poem\Module;
-use Poem\Model\Accessor as ModelAccessor;
 
 class Worker 
 {
-    use ModelAccessor;
-
     /**
      * Worker accessor key
      * 
@@ -32,21 +29,17 @@ class Worker
     protected $modules = [];
 
     /**
-     * Register an actor by class.
+     * Registers and boots a module.
      * 
-     * @param string $actorClass
+     * @param string $moduleClass
+     * @return void
      */
     function register(string $moduleClass): void
     {
         $this->registry[$moduleClass::getName()] = $moduleClass;
 
-        // Check if module is storable register model type
-        if(method_exists($moduleClass, 'getType')) {
-            static::Model()->register(
-                $moduleClass::getType(), 
-                $moduleClass::getModelBuilder()
-            );
-        }
+        // Booting
+        $moduleClass::boot($this);
     }
 
     /**
