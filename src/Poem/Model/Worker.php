@@ -25,14 +25,7 @@ class Worker
      * 
      * @var array
      */
-    protected $collections = [];
-
-    /**
-     * Added initializer callables
-     * 
-     * @var array
-     */
-    protected $initializers = [];
+    protected $models = [];
 
     /**
      * Access collection instance via property
@@ -46,64 +39,44 @@ class Worker
     }
 
     /**
-     * 
-     * 
-     * @param string $type
-     * @param callable $initializer
-     */
-    function addInitializer(string $type, callable $initializer) 
-    {
-        if(!isset($this->initializers[$type])) {
-            $this->initializers[$type] = [];
-        }
-
-        $this->initializers[$type][] = $initializer;
-    }
-
-    /**
      * Register a collection by type and class
      * 
      * @param mixed $type
-     * @param string $collectionClass
+     * @param string $modelClass
      */
-    function register(string $type, $collectionClass, array $options = []): void
+    function register(string $type, $modelClass, array $options = []): void
     {
-        $this->registry[$type] = compact('collectionClass', 'options');
+        $this->registry[$type] = compact('modelClass', 'options');
     }
 
     /**
      * Access a collection instance from the given type
      * 
      * @param string $type
-     * @return Collection
+     * @return Model
      */
-    function access(string $type): Collection 
+    function access(string $type): Model 
     {
-        if(isset($this->collections[$type])) {
-            return $this->collections[$type];
+        if(isset($this->models[$type])) {
+            return $this->models[$type];
         }
 
-        $collectionClass = Model::class;
+        $modelClass = Model::class;
         $options = [];
         
         if(isset($this->registry[$type])) {
-            $collectionClass = $this->registry[$type]['collectionClass'];
+            $modelClass = $this->registry[$type]['modelClass'];
             $options = $this->registry[$type]['options'] + compact('type');
-        }
-
-        if(is_callable($collectionClass)) {
-            $collection = $collectionClass();
         } else {
-            $collection = new $collectionClass($options);
-        }
-        
-
-        if(isset($this->initializers[$type])) {
-            foreach($this->initializers[$type] as $initializer) {
-                $initializer($collection);
-            }
+            $options['type'] = $type;
         }
 
-        return $this->collections[$type] = $collection;
+        if(is_callable($modelClass)) {
+            $model = $modelClass();
+        } else {
+            $model = new $modelClass($options);
+        }
+
+        return $this->models[$type] = $model;
     }
 }
