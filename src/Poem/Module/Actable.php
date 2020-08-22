@@ -6,10 +6,15 @@ use Poem\Actor;
 
 trait Actable 
 {
-    function buildActor(): Actor 
+    private $_actorInstance;
+
+    function accessActor(): Actor
     {
-        $actorClass = static::getActorClass();
-        $actor = new $actorClass;
+        if(isset($this->_actorInstance)) {
+            return $this->_actorInstance;
+        }
+
+        $actor = $this->buildActor();
 
         if(method_exists($this, 'accessModel')) {
             $actor->setModel($this->accessModel());
@@ -19,14 +24,16 @@ trait Actable
             $this->withActor($actor);
         }
 
-        return $actor;
+        return $this->_actorInstance = $actor;
     }
 
-    static function getActorClass(): string
+    function buildActor(): Actor 
     {
         $calledClass = get_called_class();
-        $actorClass = static::getNamespaceClass('Actor') ?? Actor::class;
+        $actorClass = isset($calledClass::$actorClass) 
+            ? $calledClass::$actorClass 
+            : static::getNamespaceClass('Actor') ?? Actor::class;
 
-        return isset($calledClass::$actorClass) ? $calledClass::$actorClass : $actorClass;
+        return new $actorClass;
     }
 }

@@ -139,11 +139,11 @@ class Story
         }
 
         // Check if the module can build actors
-        if(!method_exists($module, 'buildActor')) {
-            throw new BadRequestException('Module `' . $data['module'] . '` cannot process actions');
+        if(!method_exists($module, 'accessActor')) {
+            throw new BadRequestException('Module `' . $data['module'] . '` cannot handle actions');
         }
 
-        $actor = $module->buildActor();
+        $actor = $module->accessActor();
 
         return $actor->prepareAction(
             $data['action'], 
