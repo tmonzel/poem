@@ -2,13 +2,16 @@
 
 namespace Poem\Model;
 
-use Poem\Model\Relationships\BelongsToRelationship;
-use Poem\Model\Relationships\HasManyRelationship;
-use Poem\Model\Relationships\HasOneRelationship;
 use Poem\Model\Relationships\Relationship;
 
 trait Relationships 
 {
+    /**
+     * Lookup list with all available relationships classes
+     * 
+     * @static
+     * @var array
+     */
     static $availableRelationships = [
         Relationship::BELONGS_TO,
         Relationship::HAS_MANY,
@@ -16,15 +19,23 @@ trait Relationships
     ];
 
     /**
+     * Created relationship instances
      * 
      * @var Relationship[]
      */
     protected $relationships = [];
 
-    function addRelationship(string $relationshipClass, $config) 
+    /**
+     * Adds a new relationship
+     * 
+     * @param string $relationshipClass
+     * @param mixed $config
+     * @return void
+     */
+    function addRelationship(string $relationshipClass, $config): void
     {
         if(array_search($relationshipClass, static::$availableRelationships) === false) {
-            return false;
+            return;
         }
 
         if(is_string($config)) {
@@ -55,5 +66,27 @@ trait Relationships
         }
 
         return null;
+    }
+
+    /**
+     * Setting up a BelongsTo relationship
+     * 
+     * @param mixed $config
+     * @return void
+     */
+    function belongsTo($config): void
+    {
+        $this->addRelationship(Relationship::BELONGS_TO, $config);
+    }
+
+    /**
+     * Setting up a HasMany relationship
+     * 
+     * @param mixed $config
+     * @return void
+     */
+    function hasMany($config): void
+    {
+        $this->addRelationship(Relationship::HAS_MANY, $config);
     }
 }
