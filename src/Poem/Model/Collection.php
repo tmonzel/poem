@@ -6,11 +6,12 @@ use Poem\Data\Accessor as DataAccessor;
 use Poem\Data\CollectionAdapter;
 use Poem\Data\Connection;
 use Poem\Data\Statement;
-use Poem\Mutable;
+use Poem\EventDispatcher;
 
 class Collection
 {
     use DataAccessor,
+        EventDispatcher,
         Relationships;
 
     /**
