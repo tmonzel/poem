@@ -1,17 +1,11 @@
 <?php
 
+use Poem\Actor;
 use Poem\Data;
 use Poem\Data\MySql\Client as MySqlClient;
 use Poem\Director;
+use Poem\Model;
 use Poem\Module;
-use Modules\{ 
-    Retailer,
-    User,
-    Product,
-    Info,
-    Market,
-    Order
-};
 
 const PROJECT_DIR = __DIR__;
 const APP_DIR = __DIR__ . '/app';
@@ -36,16 +30,11 @@ $director->add(Data\Worker::class, function(Data\Worker $worker) {
 
 });
 
-$director->add(Module\Worker::class, function(Module\Worker $worker) {
-    
-    // Register application actors
-    $worker->register(User\Module::class);
-    $worker->register(Retailer\Module::class);
-    $worker->register(Product\Module::class);
-    $worker->register(Market\Module::class);
-    $worker->register(Order\Module::class);
-    $worker->register(Info\Module::class);
+$director->add(Model\Worker::class);
+$director->add(Actor\Worker::class);
+$director->add(Services\Mail\Service::class);
 
-});
+$loader = require(APP_DIR . '/Modules/loader.php');
+$loader($director);
 
 return $director;
