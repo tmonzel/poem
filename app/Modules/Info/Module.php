@@ -2,17 +2,22 @@
 
 namespace Modules\Info;
 
-use Actor;
-use Poem\Module\Actable;
+use Poem\Actor;
 
-class Module extends \Module
+class Module extends \Poem\Module
 {
-    use Actable;
-
-    function withActor(Actor $actor) 
+    /**
+     * Preparing the actor instance for this module
+     * 
+     * @param Actor $actor
+     * @return void
+     */
+    static function prepareActor(Actor $actor): void 
     {
         $actor->registerAction('stats', function($payload) {
             return ['test' => 'foo'];
         });
+        
+        $actor->guardActions();
     }
 }

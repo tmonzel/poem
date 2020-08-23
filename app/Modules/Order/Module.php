@@ -2,34 +2,34 @@
 
 namespace Modules\Order;
 
-use Actions\CountAction;
-use Poem\Actor;
-use Poem\Module\Actable;
-use Poem\Module\Storable;
+use Poem\Model\Document;
 
-class Module extends \Module 
+class Module extends \Poem\Module 
 {
-    use Actable, Storable;
-
-    static function getType(): string
-    {
-        return 'orders';
-    }
-
-    function withActor(Actor $actor) 
-    {
-        $actor->bind(Actor::RESOURCE_ACTIONS);
-        $actor->bind(CountAction::class);
-    }
+    /**
+     * Uses orders model
+     * 
+     * @static
+     * @var string
+     */
+    static $type = 'orders';
 
     /**
-     * @TODO: React on events
-     * Maybe this is more model related and must be moved to collection or document
+     * Prepares the orders model
+     * 
+     * @static
+     * @param Model $orders
      */
-    function prepareEvents($events) {
-        $events->change('state', function() {
-            // Do something if state is changed from cart to ordered
-            // can be dispatched by patch/put methods
+    static function prepareModel(Model $orders)
+    {
+        $orders->addEventListener('document.updated', function(Document $order) {
+            $originalState = $order->wasOriginally('state');
+
+            if($originalState === 'cart' && $order->state === 'ordered') {
+                // React on state changes to ordered.. 
+                // Send email to owner
+                
+            }
         });
     }
 }

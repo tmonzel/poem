@@ -2,10 +2,21 @@
 
 namespace Modules\Order;
 
-use Poem\Model\Relationships\Relationship;
+use Poem\Data\Field;
 
 class Model extends \Poem\Model 
 {
+    /**
+     * Migration schema
+     * 
+     * @var array
+     */
+    const SCHEMA = [
+        'id' => Field::PRIMARY_KEY,
+        'state' => 'string',
+        'user_id' => Field::FOREIGN_KEY
+    ];
+    
     /**
      * Initializes the order model
      * 
@@ -13,14 +24,10 @@ class Model extends \Poem\Model
      */
     function initialize(): void
     {
-        $this->setSchema([
-            'id' => 'pk',
-            'state' => 'string'
-        ]);
-
-        $this->addRelationship(
-            Relationship::HAS_MANY,
-            ['items' => 'order_items']
-        );
+        // An order has many items
+        // $this->hasMany(['items' => 'order_items']);
+            
+        // An order belongs to a user
+        // $this->belongsTo(['user' => 'users']);
     }
 }
