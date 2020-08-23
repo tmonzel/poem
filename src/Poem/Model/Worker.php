@@ -7,13 +7,6 @@ use Poem\Model;
 class Worker
 {
     /**
-     * Worker accessor key
-     * 
-     * @var string
-     */
-    const Accessor = 'model';
-    
-    /**
      * Registered collection classes by type
      * 
      * @var array

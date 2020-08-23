@@ -10,6 +10,7 @@ use Poem\Actor\Actions\FindAction;
 use Poem\Actor\Actions\UpdateAction;
 use Poem\Actor\Exceptions\NotFoundException;
 use Poem\Actor\Exceptions\UnauthorizedException;
+use Poem\Auth\Guardable;
 use Poem\Model;
 use Poem\Module;
 
@@ -24,8 +25,8 @@ use Poem\Module;
 class Actor 
 {
     use EventDispatcher,
-        Module\Helpers,
-        Model\Accessor;
+        Guardable,
+        Module\Helpers;
 
     /**
      * Prepare action event key
@@ -54,19 +55,28 @@ class Actor
     protected $actions = [];
 
     /**
-     * Applied model instance
+     * Used model type
      * 
-     * @var Model $model
+     * @var string
      */
-    protected $model;
+    protected $modelType;
+
+    /**
+     * Applied director instance
+     * 
+     * @var Director
+     */
+    protected $director;
 
     /**
      * Create a new actor instance.
      * 
      * @param Module $module
      */
-    function __construct() 
+    function __construct(Director $director) 
     {
+        $this->director = $director;
+        
         // Collect actions from constant
         static::withDefinedConstant('Actions', function($actionClasses) {
             foreach($actionClasses as $actionClass) {
@@ -79,38 +89,48 @@ class Actor
     }
 
     /**
-     * Access the namespace related model for this actor.
+     * Access the related model for this actor.
      * 
      * @return Model
      */
     function getModel(): Model 
     {
-        return $this->model;
+        return $this->director->get(Model\Worker::class)->access($this->modelType);
     }
 
     /**
-     * Sets the given model
+     * Sets the given model type
      * 
-     * @param Model $model
+     * @param string $type
      * @return void
      */
-    function setModel(Model $model): void
+    function useModelType(string $type): void
     {
-        $this->model = $model;
+        $this->modelType = $type;
     }
 
     /**
      * Register an action by class or name and callback
      * 
      * @param string $actionClass
-     * @param callable $initializer
+     * @param mixed $options
      */
-    function registerAction(string $actionClass, callable $initializer = null): void 
+    function registerAction(string $actionClass, $options = null): void 
     {
-        if(class_exists($actionClass)) {
-            $this->actions[$actionClass::getType()] = compact('actionClass', 'initializer');
+        if(is_array($options) && isset($options['alias'])) {
+            $type = $options['alias'];
+        } elseif(class_exists($actionClass)) {
+            $type = $actionClass::getType();
         } else {
-            $this->actions[$actionClass] = compact('initializer');
+            $type = $actionClass;
+        }
+
+        $this->actions[$type] = compact('actionClass', 'options');
+        
+        if(class_exists($actionClass)) {
+            $this->actions[$actionClass::getType()] = compact('actionClass', 'options');
+        } else {
+            $this->actions[$actionClass] = compact('options');
         }
     }
 
@@ -133,13 +153,25 @@ class Actor
     }
 
     /**
-     * Test if this actor has an action with a specific name
+     * Test if this actor has an action with a specific type
      * 
+     * @param string $type
      * @return bool
      */
-    function hasAction(string $name): bool 
+    function hasAction(string $type): bool 
     {
-        return isset($this->actions[$name]);
+        return isset($this->actions[$type]);
+    }
+
+    /**
+     * Test if an action can be triggered by this actor
+     * 
+     * @param string $actionType
+     * @return bool
+     */
+    function canTrigger(string $actionType): bool
+    {
+        return $this->hasAction($actionType) || method_exists($this, $actionType . 'Action');
     }
 
     /**
@@ -151,11 +183,16 @@ class Actor
     function execute(ActionQuery $query) 
     {
         $actionType = $query->getType();
+        $options = [];
         
+        if(method_exists($this, $actionType . 'Action')) {
+            return $this->{$actionType . 'Action'}($query->getPayload());
+        }
+
         extract($this->actions[$actionType]);
 
-        if(isset($initializer)) {
-            return $initializer($query->getPayload());
+        if(is_callable($options)) {
+            return $options($query->getPayload());
         }
 
         if(isset($actionClass)) {
@@ -165,15 +202,11 @@ class Actor
             $action = new $actionClass($this);
             $action->setPayload($query->getPayload());
 
-            if(isset($initializer)) {
+            if(isset($options) && $options['initializer']) {
                 $initializer($action);
             }
 
             $this->beforeAction($action);
-    
-            if(method_exists($this, $type)) {
-                $this->{$type}($action);
-            }
 
             return $this->afterAction(
                 $action->execute()
@@ -188,13 +221,13 @@ class Actor
      * @param array $payload
      * @return ActionQuery
      */
-    function prepareAction(string $actionType, array $payload = []) 
+    function prepareAction(string $actionType, array $payload = []): ActionQuery 
     {
         $query = new ActionQuery($this, $actionType, $payload);
         
         $this->dispatchEvent(self::PREPARE_ACTION_EVENT, $query);
 
-        if(!$this->hasAction($actionType)) {
+        if(!$this->canTrigger($actionType)) {
             throw new NotFoundException("Action `$actionType` is not registered");
         }
 
@@ -202,12 +235,12 @@ class Actor
     }
 
 
-    function canActivate(callable $test)
+    function canActivate(callable $conditional): void
     {
-        $this->addEventListener(self::PREPARE_ACTION_EVENT, function(ActionQuery $query) use($test) {
+        $this->addEventListener(self::PREPARE_ACTION_EVENT, function(ActionQuery $query) use($conditional) {
             $type = $query->getType();
 
-            if(call_user_func($test, $query) === false) {
+            if(call_user_func($conditional, $query) === false) {
                 throw new UnauthorizedException("Action `$type` not allowed");
             }
         });

@@ -6,7 +6,7 @@ use Exception;
 use Poem\Actor\Exceptions\ActionException;
 use Poem\Actor\Exceptions\BadRequestException;
 use Poem\Actor\Exceptions\NotFoundException;
-use Poem\Module\Worker as ModuleWorker;
+use Poem\Actor\Worker as ActorWorker;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -127,23 +127,14 @@ class Story
             throw new BadRequestException('No action defined. Please provide a `action` member');
         }
         
-        $modules = $this->director->accessWorker(
-            ModuleWorker::Accessor
-        );
+        $actors = $this->director->get(ActorWorker::class);
 
         try {
             /** @var Actor $actor */
-            $module = $modules->access($data['module']);
+            $actor = $actors->access($data['module']);
         } catch(Exception $e) {
-            throw new NotFoundException('Module `' . $data['module'] . '` not registered');
+            throw new NotFoundException('Actor `' . $data['module'] . '` not registered');
         }
-
-        // Check if the module can build actors
-        if(!method_exists($module, 'accessActor')) {
-            throw new BadRequestException('Module `' . $data['module'] . '` cannot handle actions');
-        }
-
-        $actor = $module->accessActor();
 
         return $actor->prepareAction(
             $data['action'], 

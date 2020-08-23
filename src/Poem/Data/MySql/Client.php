@@ -6,6 +6,7 @@ use PDO;
 use PDOStatement;
 use Poem\Data\CollectionAdapter;
 use Poem\Data\Connection;
+use Poem\Data\Field;
 
 class Client implements Connection {
     
@@ -105,16 +106,16 @@ class Client implements Connection {
 
     function translateFieldType(string $type) {
         switch($type) {
-            case 'pk':
+            case Field::PRIMARY_KEY:
                 return "INT(11) AUTO_INCREMENT PRIMARY KEY";
             break;
-            case 'fk':
+            case Field::FOREIGN_KEY:
                 return "INT(11)";
             break;
-            case 'string':
+            case Field::STR:
                 return "VARCHAR(180) NOT NULL";
             break;
-            case 'date':
+            case Field::DATE:
                 return "DATETIME NOT NULL";
         }
 

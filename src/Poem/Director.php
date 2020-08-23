@@ -96,7 +96,7 @@ class Director
      */
     function add(string $workerClass, callable $initializer = null): void
     {
-        $this->registry[$workerClass::Accessor] = compact('workerClass', 'initializer');
+        $this->registry[$workerClass] = compact('workerClass', 'initializer');
     }
 
     /**
@@ -107,6 +107,17 @@ class Director
     function newStory(): Story 
     {
         return new Story($this);
+    }
+
+    /**
+     * Shorthand for accessWorker()
+     * 
+     * @param string $className
+     * @return mixed
+     */
+    function get(string $className)
+    {
+        return $this->accessWorker($className);
     }
     
     /**

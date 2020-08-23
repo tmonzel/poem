@@ -6,14 +6,12 @@ use Exception;
 use Poem\Model;
 use Poem\RequestHandler;
 use Symfony\Component\HttpFoundation\Request;
-use Poem\Module\Accessor as ModuleAccessor;
+use Poem\Model\Accessor as ModelAccessor;
 use Poem\Model\Document;
 
 class Worker implements RequestHandler
 {
-    use ModuleAccessor;
-
-    const Accessor = 'auth';
+    use ModelAccessor;
 
     protected $token;
     protected $user;
@@ -84,13 +82,9 @@ class Worker implements RequestHandler
             
             if(isset($data['userId'])) {
                 /** @var mixed $userModule */
-                $userModule = $this->Module()->access('user');
+                $users = $this->Model()->access('users');
 
-                if(!method_exists($userModule, 'accessModel')) {
-                    throw new Exception('User module is not storable');
-                }
-
-                $user = $userModule->accessModel()->pick($data['userId']);
+                $user = $users->pick($data['userId']);
                 
                 if($user) {
                     // User found and set

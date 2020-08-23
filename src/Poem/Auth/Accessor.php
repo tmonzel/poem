@@ -13,6 +13,6 @@ trait Accessor {
      * @return Worker
      */
     static function Auth(): Worker {
-        return Director::provide(Worker::Accessor);
+        return Director::provide(Worker::class);
     }
 }

@@ -7,13 +7,6 @@ use Exception;
 class Worker 
 {
     /**
-     * Every worker needs a unique accessor
-     * 
-     * @var string
-     */
-    const Accessor = 'data';
-
-    /**
      * Registered connections
      * 
      * @static
