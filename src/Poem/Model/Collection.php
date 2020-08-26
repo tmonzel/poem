@@ -363,7 +363,7 @@ class Collection
      * @param array $options
      * @return Document
      */
-    function pick(int $id, array $options = []): Document 
+    function pick(int $id, array $options = []): ?Document 
     {
         return $this->first(compact('id'), $options);
     }

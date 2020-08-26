@@ -116,6 +116,8 @@ class FindQuery implements IteratorAggregate, JsonSerializable
         foreach($this as $document) {
             return $document;
         }
+
+        return null;
     }
 
     /**
