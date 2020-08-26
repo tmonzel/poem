@@ -25,8 +25,7 @@ use Poem\Module;
 class Actor 
 {
     use EventDispatcher,
-        Guardable,
-        Module\Helpers;
+        Guardable;
 
     /**
      * Prepare action event key
@@ -76,13 +75,6 @@ class Actor
     function __construct(Director $director) 
     {
         $this->director = $director;
-        
-        // Collect actions from constant
-        static::withDefinedConstant('Actions', function($actionClasses) {
-            foreach($actionClasses as $actionClass) {
-                $this->registerAction($actionClass);
-            }
-        });
 
         // Initialize user defined stuff
         $this->initialize();

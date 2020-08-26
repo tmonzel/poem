@@ -5,7 +5,6 @@ use Poem\Data;
 use Poem\Data\MySql\Client as MySqlClient;
 use Poem\Director;
 use Poem\Model;
-use Poem\Module;
 
 const PROJECT_DIR = __DIR__;
 const APP_DIR = __DIR__ . '/app';

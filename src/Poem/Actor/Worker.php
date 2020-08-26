@@ -4,7 +4,6 @@ namespace Poem\Actor;
 
 use Exception;
 use Poem\Actor;
-use Poem\Module;
 
 class Worker 
 {
@@ -25,6 +24,7 @@ class Worker
     /**
      * Registers an actor
      * 
+     * @param string $name
      * @param mixed $actorClass
      * @return void
      */
