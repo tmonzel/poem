@@ -21,7 +21,7 @@ class Actor extends \Poem\Actor
 
         // Guarding actions with exceptions
         $this->guardActions([
-            'find'
+            'find', 'login'
         ]);
     }
 
